@@ -1,10 +1,10 @@
-# FATHOM — On-Demand Audit Log Export
+# PulseDB — On-Demand Audit Log Export
 
-FATHOM's audit log is append-only and covers every security-relevant action:
+PulseDB's audit log is append-only and covers every security-relevant action:
 login / logout, role changes, integration mutations, SSO configuration, API
 key issuance, retention edits, plugin installs, and so on.
 
-For SIEM pulls, compliance archival, and ad-hoc investigations, FATHOM exposes
+For SIEM pulls, compliance archival, and ad-hoc investigations, PulseDB exposes
 a streaming export endpoint. Unlike the paginated UI endpoint, the export
 endpoint streams rows straight to the socket with bounded memory and without
 loading the full result set server-side.
@@ -39,7 +39,7 @@ streaming begins. Examples: `format=xml`, `from=not-a-date`, `from >= to`.
 
 ```
 Content-Type:        application/x-ndjson; charset=utf-8   (or text/csv; charset=utf-8)
-Content-Disposition: attachment; filename="fathom-audit-<from>_<to>.<ext>"
+Content-Disposition: attachment; filename="pulsedb-audit-<from>_<to>.<ext>"
 X-Content-Type-Options: nosniff
 Cache-Control:       no-store
 ```
@@ -93,19 +93,19 @@ values are compact `JSON.stringify`-ed.
 ```bash
 # Full export of the last 24h as NDJSON
 curl -fSL \
-  -H "Authorization: Bearer $FATHOM_JWT" \
-  "https://fathom.example.com/api/audit/export?from=2026-04-21T00:00:00Z&to=2026-04-22T00:00:00Z" \
-  -o fathom-audit.ndjson
+  -H "Authorization: Bearer $PULSEDB_JWT" \
+  "https://pulsedb.example.com/api/audit/export?from=2026-04-21T00:00:00Z&to=2026-04-22T00:00:00Z" \
+  -o pulsedb-audit.ndjson
 
 # CSV export of critical events for one user in April
 curl -fSL \
-  -H "Authorization: Bearer $FATHOM_JWT" \
-  "https://fathom.example.com/api/audit/export?format=csv&level=critical&username=ada&from=2026-04-01T00:00:00Z&to=2026-05-01T00:00:00Z" \
+  -H "Authorization: Bearer $PULSEDB_JWT" \
+  "https://pulsedb.example.com/api/audit/export?format=csv&level=critical&username=ada&from=2026-04-01T00:00:00Z&to=2026-05-01T00:00:00Z" \
   -o critical-ada.csv
 
 # Stream to jq for a quick filter
-curl -fsSL -H "Authorization: Bearer $FATHOM_JWT" \
-  "https://fathom.example.com/api/audit/export?action=integration" \
+curl -fsSL -H "Authorization: Bearer $PULSEDB_JWT" \
+  "https://pulsedb.example.com/api/audit/export?action=integration" \
   | jq -c 'select(.level=="critical")'
 ```
 
@@ -147,7 +147,7 @@ and no migration is required before enabling the endpoint.
 
 ## Retention considerations
 
-The export endpoint reads whatever is currently in `audit_log`. FATHOM's
+The export endpoint reads whatever is currently in `audit_log`. PulseDB's
 retention service (`services/retentionService.js`) is responsible for
 periodically trimming rows past their policy horizon — exports pulled after
 retention has run will not include rows that have already been purged. Pair

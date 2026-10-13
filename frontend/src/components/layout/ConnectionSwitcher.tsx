@@ -172,7 +172,7 @@ const ConnectionSwitcher = () => {
                     <button
                         onClick={() => {
                             goToTab('connections');
-                            setTimeout(() => window.dispatchEvent(new CustomEvent('fathom:open-new-connection')), 100);
+                            setTimeout(() => window.dispatchEvent(new CustomEvent('pulsedb:open-new-connection')), 100);
                         }}
                         title="Add new connection"
                         style={{

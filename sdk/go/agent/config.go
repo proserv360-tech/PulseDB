@@ -1,4 +1,4 @@
-// Package agent implements the FATHOM managed agent — a thin binary that
+// Package agent implements the PulseDB managed agent — a thin binary that
 // runs on a host close to the monitored database, samples wait events
 // and pg_stat_statements at a configurable cadence, and forwards the
 // rollups via the existing SDK Transport.
@@ -48,7 +48,7 @@ type Config struct {
 // install. Most operators only need to set APIKey, Endpoint and PostgresDSN.
 func DefaultConfig() Config {
 	return Config{
-		Endpoint:             "https://app.fathom.example.com",
+		Endpoint:             "https://app.pulsedb.example.com",
 		WaitEventIntervalMs:  1000,
 		QueryStatsIntervalMs: 30000,
 		RollupIntervalMs:     300000,
@@ -60,11 +60,11 @@ func DefaultConfig() Config {
 // LoadEnv folds environment variables into c. ENV wins over the YAML
 // defaults but is overridden in turn by CLI flags (handled in cmd).
 func (c *Config) LoadEnv() {
-	if v := os.Getenv("FATHOM_API_KEY");      v != "" { c.APIKey = v }
-	if v := os.Getenv("FATHOM_ENDPOINT");     v != "" { c.Endpoint = v }
-	if v := os.Getenv("FATHOM_CONNECTION_ID"); v != "" { c.ConnectionID = v }
-	if v := os.Getenv("FATHOM_POSTGRES_DSN"); v != "" { c.PostgresDSN = v }
-	if v := os.Getenv("FATHOM_LOG_LEVEL");    v != "" { c.LogLevel = strings.ToLower(v) }
+	if v := os.Getenv("PULSEDB_API_KEY");      v != "" { c.APIKey = v }
+	if v := os.Getenv("PULSEDB_ENDPOINT");     v != "" { c.Endpoint = v }
+	if v := os.Getenv("PULSEDB_CONNECTION_ID"); v != "" { c.ConnectionID = v }
+	if v := os.Getenv("PULSEDB_POSTGRES_DSN"); v != "" { c.PostgresDSN = v }
+	if v := os.Getenv("PULSEDB_LOG_LEVEL");    v != "" { c.LogLevel = strings.ToLower(v) }
 }
 
 // Validate returns nil if c is ready to start an agent run. Errors carry

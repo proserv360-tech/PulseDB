@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Enhanced Alert System Module
+//  PulseDB — Enhanced Alert System Module
 // ==========================================================================
 
 import { v4 as uuid } from 'uuid';
@@ -25,7 +25,7 @@ function log(level, message, meta = {}) {
 }
 
 // Below this many live rows, a dead-tuple ratio is noise rather than bloat.
-const MIN_BLOAT_LIVE_TUPLES = Number(process.env.FATHOM_BLOAT_MIN_ROWS) || 1000;
+const MIN_BLOAT_LIVE_TUPLES = Number(process.env.PULSEDB_BLOAT_MIN_ROWS) || 1000;
 
 /**
  * Pick the part of the metrics snapshot a given rule is actually about.
@@ -535,7 +535,7 @@ class EnhancedAlertEngine {
         this.dedup.set(key, Date.now());
 
         // `data.orgId` is the preferred carrier for per-tenant routing. Falls
-        // back to data.organizationId, then to FATHOM_DEFAULT_ORG_ID.
+        // back to data.organizationId, then to PULSEDB_DEFAULT_ORG_ID.
         //
         // That last fallback matters: none of the three .fire() call sites —
         // the manual-alert route, anomaly detection, or threshold rules — pass
@@ -543,11 +543,11 @@ class EnhancedAlertEngine {
         // fan-out in _fanOutToOrgIntegrations never runs. Slack, PagerDuty and
         // the rest would stay silent no matter how they were configured.
         //
-        // On a single-tenant deployment set FATHOM_DEFAULT_ORG_ID to that org.
+        // On a single-tenant deployment set PULSEDB_DEFAULT_ORG_ID to that org.
         // Leave it unset for multi-tenant, where an alert with no org genuinely
         // should not be routed to any tenant's destinations.
-        const defaultOrgId = process.env.FATHOM_DEFAULT_ORG_ID
-            ? Number(process.env.FATHOM_DEFAULT_ORG_ID)
+        const defaultOrgId = process.env.PULSEDB_DEFAULT_ORG_ID
+            ? Number(process.env.PULSEDB_DEFAULT_ORG_ID)
             : null;
         const orgId =
             data?.orgId ?? data?.organizationId ?? (Number.isFinite(defaultOrgId) ? defaultOrgId : null);
@@ -734,7 +734,7 @@ class EnhancedAlertEngine {
             // as before.
             title: structured ? structured.title : alert.message,
             message: alert.message,
-            source: 'fathom',
+            source: 'pulsedb',
             component: alert.category,
             timestamp: alert.timestamp,
             metadata,
@@ -823,7 +823,7 @@ class EnhancedAlertEngine {
                 severity: 'critical',
                 title: `[ESCALATED] ${alert.message}`,
                 message: `${alert.message}\n\nManually escalated to on-call by @${username}.`,
-                source: 'fathom',
+                source: 'pulsedb',
                 component: alert.category,
                 class: 'escalation',
                 timestamp: new Date().toISOString(),
@@ -1058,14 +1058,14 @@ class EnhancedAlertEngine {
     /**
      * Advisor signals that back the predictive alert rules (vacuum overdue,
      * plan regression, PITR/RPO breach). These are heavier than the base
-     * metric queries, so they are throttled to FATHOM_ADVISOR_INTERVAL_MS
+     * metric queries, so they are throttled to PULSEDB_ADVISOR_INTERVAL_MS
      * (default 5 min) and the last result is reused between runs; the fire()
      * dedup window keeps repeat evaluations from spamming integrations.
      * All queries degrade to empty when their tables are absent.
      */
     async collectAdvisorSignals() {
         const now = Date.now();
-        const interval = Number(process.env.FATHOM_ADVISOR_INTERVAL_MS) || 300_000;
+        const interval = Number(process.env.PULSEDB_ADVISOR_INTERVAL_MS) || 300_000;
         if (this._advisorCache && now - (this._advisorAt || 0) < interval) return this._advisorCache;
 
         const signals = { vacuumForecast: null, planRegressions: [], pitrBreaches: [] };
@@ -1113,7 +1113,7 @@ class EnhancedAlertEngine {
 
         // 3) PITR window vs RPO target — per connection with a base backup.
         try {
-            const rpoHours = Number(process.env.FATHOM_RPO_HOURS) || 24;
+            const rpoHours = Number(process.env.PULSEDB_RPO_HOURS) || 24;
             const conns = await this.pool.query(
                 `SELECT DISTINCT connection_id FROM pgmonitoringtool.base_backups
                   WHERE status = 'succeeded' LIMIT 100`,
@@ -1249,22 +1249,22 @@ class EnhancedAlertEngine {
      * rules above: a metric can be "within threshold" yet still anomalous
      * relative to its own recent baseline (the differentiator vs. fixed limits).
      *
-     * Disabled by default. Enable with FATHOM_ANOMALY_MODE = 'suggest' | 'page'.
+     * Disabled by default. Enable with PULSEDB_ANOMALY_MODE = 'suggest' | 'page'.
      *   • suggest → record a low-severity 'anomaly' alert (informational)
      *   • page    → fire a warning/critical alert that fans out to integrations
      *
-     * Detector type/window are tunable via FATHOM_ANOMALY_TYPE (zscore|ewma|mad)
-     * and FATHOM_ANOMALY_WINDOW. The evaluator keeps per-metric rolling state
+     * Detector type/window are tunable via PULSEDB_ANOMALY_TYPE (zscore|ewma|mad)
+     * and PULSEDB_ANOMALY_WINDOW. The evaluator keeps per-metric rolling state
      * across invocations via the shared anomalyEvaluator singleton.
      */
     async evaluateAnomalies(metrics) {
-        const mode = (process.env.FATHOM_ANOMALY_MODE || 'off').toLowerCase();
+        const mode = (process.env.PULSEDB_ANOMALY_MODE || 'off').toLowerCase();
         if (mode === 'off' || !metrics) return [];
 
         const rule = {
             mode,
-            type: process.env.FATHOM_ANOMALY_TYPE || 'zscore',
-            window: Number(process.env.FATHOM_ANOMALY_WINDOW) || 60,
+            type: process.env.PULSEDB_ANOMALY_TYPE || 'zscore',
+            window: Number(process.env.PULSEDB_ANOMALY_WINDOW) || 60,
         };
 
         // Only scalar, monotonic-ish gauges make sense for baseline detection.
@@ -1315,9 +1315,9 @@ class EnhancedAlertEngine {
      * Evaluate every rule against every database the user has connected.
      *
      * Previously this ran once against this.pool — the ADMIN pool — so all the
-     * threshold rules were describing FATHOM's own control-plane database and
+     * threshold rules were describing PulseDB's own control-plane database and
      * said nothing about the databases anyone actually cares about. That is why
-     * "5 tables with high bloat" named fathom_connections and users.
+     * "5 tables with high bloat" named pulsedb_connections and users.
      *
      * `targetProvider` is injected by server.ts and yields { id, name, pool }
      * per connected database. Without it we fall back to the old single-target

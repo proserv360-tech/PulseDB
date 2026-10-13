@@ -3,7 +3,7 @@
  * comment.mjs
  * ───────────
  * Post (or update) a single consolidated PR comment with the findings from
- * lint.mjs. Idempotent: looks for a previous FATHOM comment (marker in body)
+ * lint.mjs. Idempotent: looks for a previous PulseDB comment (marker in body)
  * and edits it in place so repeated runs don't spam the PR.
  *
  * Requires GH_TOKEN in env (provided by the action).
@@ -33,14 +33,14 @@ if (!findingsPath || !repo || !pr) {
 }
 
 const report = JSON.parse(fs.readFileSync(findingsPath, 'utf8'));
-const MARKER = '<!-- fathom-db-migration-review -->';
+const MARKER = '<!-- pulsedb-db-migration-review -->';
 
 function render() {
     const { counts = {}, findings = [], engine, fileCount } = report;
     const { error = 0, warn = 0, info = 0 } = counts;
     const head = [
         MARKER,
-        '### FATHOM DB Migration Review',
+        '### PulseDB DB Migration Review',
         '',
         `Engine: **${engine}** · Files scanned: **${fileCount}** · Findings: **${error} error**, **${warn} warn**, **${info} info**`,
         '',
@@ -48,7 +48,7 @@ function render() {
     if (!findings.length) {
         head.push('No issues detected. ');
         head.push('');
-        head.push('<sub>_FATHOM migration linter — `fathom db-migration-review` action_</sub>');
+        head.push('<sub>_PULSEDB migration linter — `pulsedb db-migration-review` action_</sub>');
         return head.join('\n');
     }
     const rows = ['| Level | Rule | File | Suggestion |', '|---|---|---|---|'];
@@ -68,7 +68,7 @@ ${f.snippet}
 
 </details>`
     ).join('\n');
-    return head.join('\n') + '\n' + rows.join('\n') + '\n\n' + details + '\n\n<sub>_FATHOM migration linter_</sub>';
+    return head.join('\n') + '\n' + rows.join('\n') + '\n\n' + details + '\n\n<sub>_PULSEDB migration linter_</sub>';
 }
 
 const body = render();
@@ -81,7 +81,7 @@ async function apiFetch(path, init = {}) {
         headers: {
             accept: 'application/vnd.github+json',
             authorization: `Bearer ${token}`,
-            'user-agent': 'fathom-db-migration-review',
+            'user-agent': 'pulsedb-db-migration-review',
             'x-github-api-version': '2022-11-28',
             'content-type': init.body ? 'application/json' : undefined,
             ...(init.headers || {}),

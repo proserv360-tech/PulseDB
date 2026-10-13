@@ -2,7 +2,7 @@
 /**
  * routes/pluginRoutes.js
  * ──────────────────────
- * Public read-only discovery + admin install/publish for FATHOM plugins
+ * Public read-only discovery + admin install/publish for PulseDB plugins
  * and shared dashboards.
  */
 

@@ -20,9 +20,9 @@
 
         "baseUrl": ".",
         "paths": {
-            "@fathom/types": ["../shared/types/index.ts"],
-            "@fathom/types/*": ["../shared/types/*"],
-            "@fathom/validators": ["../shared/validators/index.ts"]
+            "@pulsedb/types": ["../shared/types/index.ts"],
+            "@pulsedb/types/*": ["../shared/types/*"],
+            "@pulsedb/validators": ["../shared/validators/index.ts"]
         },
 
         "noEmit": true,

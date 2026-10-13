@@ -94,7 +94,7 @@ for (const { name, handler } of consumers) {
 const ONE_DAY_MS = 24 * 60 * 60_000;
 
 async function scheduledTick(jobName, lockMs, work) {
-    const got = await acquireLeaderLock(`fathom:cron:${jobName}`, lockMs);
+    const got = await acquireLeaderLock(`pulsedb:cron:${jobName}`, lockMs);
     if (!got) return;
     try { await work(); }
     catch (err) { log('WARN', `Scheduled job ${jobName} failed`, { error: String(err && err.message) }); }

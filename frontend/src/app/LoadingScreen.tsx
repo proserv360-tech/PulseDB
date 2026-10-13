@@ -57,7 +57,7 @@ export const LoadingScreen = () => (
                     letterSpacing: '-0.01em',
                 }}
             >
-                Fathom
+                PulseDB
             </div>
             <div
                 style={{

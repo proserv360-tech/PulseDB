@@ -1,22 +1,22 @@
--- PostgreSQL FATHOM Demo Database Seed Script
+-- PostgreSQL PulseDB Demo Database Seed Script
 -- ================================================
--- This script creates and populates the FATHOM demo database with realistic sample data
+-- This script creates and populates the PulseDB demo database with realistic sample data
 --
 -- USAGE: psql -f seed-postgres.sql
 -- OR:    psql -U username -d postgres -f seed-postgres.sql
 --
 -- CLEANUP: To remove the demo database, run:
---   DROP DATABASE IF EXISTS fathom_demo;
+--   DROP DATABASE IF EXISTS pulsedb_demo;
 -- ================================================
 
 -- Ensure we're connected to the right database (postgres)
 \c postgres
 
 -- Drop the database if it exists (for idempotent runs)
-DROP DATABASE IF EXISTS fathom_demo;
+DROP DATABASE IF EXISTS pulsedb_demo;
 
 -- Create the demo database
-CREATE DATABASE fathom_demo
+CREATE DATABASE pulsedb_demo
   WITH
   ENCODING 'UTF8'
   LC_COLLATE = 'en_US.UTF-8'
@@ -24,7 +24,7 @@ CREATE DATABASE fathom_demo
   TEMPLATE = template0;
 
 -- Connect to the newly created database
-\c fathom_demo
+\c pulsedb_demo
 
 -- Create the demo schema
 CREATE SCHEMA IF NOT EXISTS demo;
@@ -613,7 +613,7 @@ REFRESH MATERIALIZED VIEW demo.mv_product_performance;
 -- Display summary statistics
 \echo ''
 \echo '========================================='
-\echo 'FATHOM Demo Database Created Successfully'
+\echo 'PulseDB Demo Database Created Successfully'
 \echo '========================================='
 \echo ''
 SELECT 'Customers' as entity, COUNT(*) as count FROM demo.customers
@@ -633,6 +633,6 @@ UNION ALL
 SELECT 'Audit Log Entries' as entity, COUNT(*) as count FROM demo.audit_log;
 
 \echo ''
-\echo 'Database fathom_demo in schema demo is ready for testing!'
-\echo 'Connect: psql -d fathom_demo'
+\echo 'Database pulsedb_demo in schema demo is ready for testing!'
+\echo 'Connect: psql -d pulsedb_demo'
 \echo '';

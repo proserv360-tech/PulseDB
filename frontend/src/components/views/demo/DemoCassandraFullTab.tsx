@@ -54,7 +54,7 @@ const fmtHour = (iso: string) => {
 
 const CS = {
     identity: {
-        cluster: 'FATHOM',
+        cluster: 'PulseDB',
         version: '5.0.1',
         datacenter_count: '2',
         node_count: '6',
@@ -84,7 +84,7 @@ const CS = {
     ],
     keyspaces: [
         {
-            name: 'fathom_app',
+            name: 'pulsedb_app',
             strategy: 'NetworkTopologyStrategy',
             replication: '{ dc1: 3, dc2: 3 }',
             durable: true,
@@ -92,7 +92,7 @@ const CS = {
             consistency: 'LOCAL_QUORUM',
         },
         {
-            name: 'fathom_telemetry',
+            name: 'pulsedb_telemetry',
             strategy: 'NetworkTopologyStrategy',
             replication: '{ dc1: 3, dc2: 3 }',
             durable: true,
@@ -111,7 +111,7 @@ const CS = {
     ],
     compactions: [
         {
-            ks: 'fathom_app',
+            ks: 'pulsedb_app',
             table: 'events',
             kind: 'Compaction',
             strategy: 'STCS',
@@ -121,7 +121,7 @@ const CS = {
             eta_min: 18,
         },
         {
-            ks: 'fathom_app',
+            ks: 'pulsedb_app',
             table: 'audit',
             kind: 'Compaction',
             strategy: 'LCS',
@@ -131,7 +131,7 @@ const CS = {
             eta_min: 0,
         },
         {
-            ks: 'fathom_telemetry',
+            ks: 'pulsedb_telemetry',
             table: 'metrics',
             kind: 'Compaction',
             strategy: 'TWCS',
@@ -145,21 +145,21 @@ const CS = {
     slowQueries: [
         {
             session_id: 'a1b2c3',
-            cql: 'SELECT * FROM fathom_app.events WHERE partition_id = ? AND ts > ?',
+            cql: 'SELECT * FROM pulsedb_app.events WHERE partition_id = ? AND ts > ?',
             coord: 'node-1',
             duration_us: 1_842_000,
             activity: 'Read data from replicas',
         },
         {
             session_id: 'd4e5f6',
-            cql: 'INSERT INTO fathom_app.audit (ts, event, actor) VALUES (?, ?, ?)',
+            cql: 'INSERT INTO pulsedb_app.audit (ts, event, actor) VALUES (?, ?, ?)',
             coord: 'node-2',
             duration_us: 412_000,
             activity: 'Batch write to LOG',
         },
         {
             session_id: 'g7h8i9',
-            cql: 'SELECT COUNT(*) FROM fathom_telemetry.metrics WHERE ts > ?',
+            cql: 'SELECT COUNT(*) FROM pulsedb_telemetry.metrics WHERE ts > ?',
             coord: 'node-3',
             duration_us: 8_420_000,
             activity: 'Full-table scan — WARNING',
@@ -167,7 +167,7 @@ const CS = {
     ],
     mvs: [
         {
-            ks: 'fathom_app',
+            ks: 'pulsedb_app',
             base: 'events',
             mv: 'events_by_user',
             build_state: 'BUILT',
@@ -175,7 +175,7 @@ const CS = {
             consistency: 'ONE',
         },
         {
-            ks: 'fathom_app',
+            ks: 'pulsedb_app',
             base: 'events',
             mv: 'events_by_type',
             build_state: 'BUILT',
@@ -183,7 +183,7 @@ const CS = {
             consistency: 'ONE',
         },
         {
-            ks: 'fathom_app',
+            ks: 'pulsedb_app',
             base: 'orders',
             mv: 'orders_by_merchant',
             build_state: 'BUILDING',

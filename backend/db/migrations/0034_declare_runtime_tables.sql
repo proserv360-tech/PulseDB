@@ -120,8 +120,8 @@ CREATE TABLE IF NOT EXISTS pgmonitoringtool.cloud_provider_credentials (
     UNIQUE (workspace_id, provider, label)
 );
 
-/* fathom_capacity_history  — from services/capacityService.ts */
-CREATE TABLE IF NOT EXISTS pgmonitoringtool.fathom_capacity_history (
+/* pulsedb_capacity_history  — from services/capacityService.ts */
+CREATE TABLE IF NOT EXISTS pgmonitoringtool.pulsedb_capacity_history (
     id            BIGSERIAL    PRIMARY KEY,
     connection_id TEXT         NOT NULL,
     captured_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS pgmonitoringtool.schema_migrations (
 -- Indexes the runtime creators add separately, restated so a database built
 -- from migrations alone performs the same as one built by the application.
 CREATE INDEX IF NOT EXISTS capacity_history_conn_time_idx
-    ON pgmonitoringtool.fathom_capacity_history (connection_id, captured_at DESC);
+    ON pgmonitoringtool.pulsedb_capacity_history (connection_id, captured_at DESC);
 
 CREATE INDEX IF NOT EXISTS org_members_user_idx
     ON pgmonitoringtool.org_members (user_id);

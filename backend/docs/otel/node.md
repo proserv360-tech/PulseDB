@@ -1,4 +1,4 @@
-# Node.js — OTel to FATHOM
+# Node.js — OTel to PulseDB
 
 Targets `pg` ≥ 8 and `@opentelemetry/api` ≥ 1.7. Works with `pg-pool`,
 `pg-promise`, and `drizzle-orm` (they all delegate to `pg`).
@@ -6,7 +6,7 @@ Targets `pg` ≥ 8 and `@opentelemetry/api` ≥ 1.7. Works with `pg-pool`,
 ## Option A — application_name (recommended)
 
 Set the session's `application_name` to the active W3C traceparent whenever
-a new connection is checked out. FATHOM decodes this off `pg_stat_activity`.
+a new connection is checked out. PulseDB decodes this off `pg_stat_activity`.
 
 ```js
 import pg from 'pg';
@@ -25,7 +25,7 @@ function currentTraceparent() {
 
 pool.on('connect', (client) => {
     // One-shot per new physical connection. The session-level SET persists
-    // until the connection is recycled, which is fine — FATHOM only needs the
+    // until the connection is recycled, which is fine — PulseDB only needs the
     // most recent traceparent during the slow-query window.
     client
         .query('SET application_name = $1', [`traceparent:${currentTraceparent() ?? '00-unknown-unknown-00'}`])
@@ -76,7 +76,7 @@ db.query(tag('SELECT ...'), params);
 ## Verify
 
 1. Issue a request that hits the database.
-2. In FATHOM → Query Details, the slow query's row should show a
+2. In PulseDB → Query Details, the slow query's row should show a
    "Trace" column with a link that matches the span in your APM.
 3. If not, check `pg_stat_activity.application_name` — it should begin
    with `traceparent:`.

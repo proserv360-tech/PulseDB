@@ -5,11 +5,11 @@
  * Lightweight Prometheus text-format exposition for /metrics.
  *
  * Covers process-level metrics that every Prom scrape consumer expects:
- *   • fathom_process_uptime_seconds
- *   • fathom_process_memory_rss_bytes / heap_used_bytes
- *   • fathom_event_loop_lag_seconds   (best-effort via perf_hooks)
- *   • fathom_http_requests_total{method,status} — bumped by requestCounter()
- *   • fathom_build_info{version,node_version} — static labels, value 1
+ *   • pulsedb_process_uptime_seconds
+ *   • pulsedb_process_memory_rss_bytes / heap_used_bytes
+ *   • pulsedb_event_loop_lag_seconds   (best-effort via perf_hooks)
+ *   • pulsedb_http_requests_total{method,status} — bumped by requestCounter()
+ *   • pulsedb_build_info{version,node_version} — static labels, value 1
  *
  * The format is intentionally raw text — no prom-client dep — so the
  * endpoint stays dependency-free and the service can be used from any
@@ -23,7 +23,7 @@ const state = {
     startedAt:     Date.now(),
     httpRequests:  new Map(),  // key = `${method}|${status}` → count
     lastLoopLag:   0,
-    buildVersion:  process.env.FATHOM_VERSION || 'dev',
+    buildVersion:  process.env.PULSEDB_VERSION || 'dev',
 };
 
 /** Middleware: bumps http_requests_total counters. */
@@ -72,26 +72,26 @@ export function renderMetrics() {
     const mem = process.memoryUsage();
 
     const blocks = [
-        metric('fathom_process_uptime_seconds',
+        metric('pulsedb_process_uptime_seconds',
                'Seconds since process start', 'gauge',
                [{ value: uptime.toFixed(3) }]),
-        metric('fathom_process_memory_rss_bytes',
+        metric('pulsedb_process_memory_rss_bytes',
                'Resident set size in bytes', 'gauge',
                [{ value: mem.rss }]),
-        metric('fathom_process_heap_used_bytes',
+        metric('pulsedb_process_heap_used_bytes',
                'Heap bytes used', 'gauge',
                [{ value: mem.heapUsed }]),
-        metric('fathom_event_loop_lag_seconds',
+        metric('pulsedb_event_loop_lag_seconds',
                'Event-loop lag in seconds (best-effort)', 'gauge',
                [{ value: state.lastLoopLag.toFixed(6) }]),
-        metric('fathom_http_requests_total',
+        metric('pulsedb_http_requests_total',
                'Total HTTP requests by method and status', 'counter',
                [...state.httpRequests.entries()].map(([k, v]) => {
                    const [method, status] = k.split('|');
                    return { labels: { method, status }, value: v };
                })),
-        metric('fathom_build_info',
-               'FATHOM build info', 'gauge',
+        metric('pulsedb_build_info',
+               'PulseDB build info', 'gauge',
                [{ labels: { version: state.buildVersion, node_version: process.version, host: os.hostname() }, value: 1 }]),
     ];
     return blocks.join('\n\n') + '\n';

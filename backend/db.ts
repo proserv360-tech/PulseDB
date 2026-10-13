@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Database Pool  (db.js)
+//  PulseDB — Database Pool  (db.js)
 //
 //  NOTE: server.js creates and owns the primary connection pool using the
 //  individual PG* environment variables (PGHOST, PGUSER, etc.).  This file
@@ -18,14 +18,14 @@ const { Pool } = pg;
 // Resolve SSL config from environment.
 // Set DB_SSL=true to enable SSL. By default we validate the server's certificate
 // (strict TLS). To opt into accepting self-signed certs (non-production use):
-//   FATHOM_TLS_ALLOW_SELF_SIGNED=true
-// To trust a private CA, set FATHOM_TLS_CA_CERT to the PEM bundle contents.
+//   PULSEDB_TLS_ALLOW_SELF_SIGNED=true
+// To trust a private CA, set PULSEDB_TLS_CA_CERT to the PEM bundle contents.
 function resolveSsl() {
     if (process.env.DB_SSL !== 'true') return false;
     const isProd = process.env.NODE_ENV === 'production';
     const allowSelfSigned =
-        process.env.FATHOM_TLS_ALLOW_SELF_SIGNED === 'true' || (!isProd && process.env.FATHOM_TLS_STRICT !== 'true');
-    const ca = process.env.FATHOM_TLS_CA_CERT;
+        process.env.PULSEDB_TLS_ALLOW_SELF_SIGNED === 'true' || (!isProd && process.env.PULSEDB_TLS_STRICT !== 'true');
+    const ca = process.env.PULSEDB_TLS_CA_CERT;
     const opt = { rejectUnauthorized: !allowSelfSigned };
     if (ca) opt.ca = ca;
     return opt;

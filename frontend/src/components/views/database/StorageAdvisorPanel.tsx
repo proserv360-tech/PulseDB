@@ -38,7 +38,7 @@ const StorageAdvisorPanel: React.FC = () => {
         setError(null);
         try {
             const connId =
-                typeof localStorage !== 'undefined' ? localStorage.getItem('fathom_active_connection_id') : null;
+                typeof localStorage !== 'undefined' ? localStorage.getItem('pulsedb_active_connection_id') : null;
             if (!connId) {
                 setData({ supported: false, note: 'Select a connection to analyze reclaimable storage.' });
                 return;

@@ -1,6 +1,6 @@
 import { THEME } from './theme';
 // ==========================================================================
-//  FATHOM — Per-engine demo data for the 9 engines added in Phase-5.
+//  PulseDB — Per-engine demo data for the 9 engines added in Phase-5.
 //
 //  Shape mirrors what the real adapters return so the demo UI lights up
 //  with the exact fields operators will see in production. Every engine
@@ -131,7 +131,7 @@ export const DEMO_MSSQL: EngineDemoSpec = withDerivedTs({
     identity: { edition: 'Enterprise', collation: 'SQL_Latin1_General_CP1_CI_AS', product_level: 'RTM' },
     catalog: [
         { name: 'master' }, { name: 'tempdb' }, { name: 'model' },
-        { name: 'msdb' },   { name: 'fathom_prod' }, { name: 'fathom_staging' },
+        { name: 'msdb' },   { name: 'pulsedb_prod' }, { name: 'pulsedb_staging' },
     ],
     kpis: [
         { label: 'Batch req/sec', value: '12,480', unit: '',    trend: 'up',   sparkline: sparkline(12400, 400) },
@@ -186,7 +186,7 @@ Missing index recommendation: CREATE INDEX IX_Orders_CustomerId ON dbo.Orders (C
         ],
     },
     replication: {
-        note: 'Always-On AG: FATHOM_AG — 1 primary + 2 secondaries.',
+        note: 'Always-On AG: PULSEDB_AG — 1 primary + 2 secondaries.',
         rows: [
             { replica: 'sql-primary',   role: 'PRIMARY',   sync_state: 'SYNCHRONIZED',   lag_sec: 0 },
             { replica: 'sql-sec-east',  role: 'SECONDARY', sync_state: 'SYNCHRONIZED',   lag_sec: 1.2 },
@@ -227,10 +227,10 @@ export const DEMO_ORACLE: EngineDemoSpec = withDerivedTs({
     name: 'Oracle Database',
     accentColor:   '#F80000',
     versionString: 'Oracle Database 23ai Enterprise Edition',
-    identity: { container: 'CDB$ROOT', pdb: 'FATHOM_PDB', platform: 'Linux x86-64' },
+    identity: { container: 'CDB$ROOT', pdb: 'PULSEDB_PDB', platform: 'Linux x86-64' },
     catalog: [
-        { name: 'SYS' }, { name: 'SYSTEM' }, { name: 'FATHOM_APP' },
-        { name: 'FATHOM_REPORT' }, { name: 'AUDIT_ADMIN' },
+        { name: 'SYS' }, { name: 'SYSTEM' }, { name: 'PULSEDB_APP' },
+        { name: 'PULSEDB_REPORT' }, { name: 'AUDIT_ADMIN' },
     ],
     kpis: [
         { label: 'Executes/sec',   value: '9,421',  unit: '',    sparkline: sparkline(9400, 300) },
@@ -240,8 +240,8 @@ export const DEMO_ORACLE: EngineDemoSpec = withDerivedTs({
         { label: 'SGA target',     value: '24',     unit: 'GB' },
     ],
     slowQueries: [
-        { query: "SELECT /*+ PARALLEL(8) */ * FROM fathom_app.transactions WHERE ...", metric: '1,242 ms avg' },
-        { query: "MERGE INTO fathom_app.inventory i USING (...) src ON (i.sku=src.sku)", metric: '842 ms avg' },
+        { query: "SELECT /*+ PARALLEL(8) */ * FROM pulsedb_app.transactions WHERE ...", metric: '1,242 ms avg' },
+        { query: "MERGE INTO pulsedb_app.inventory i USING (...) src ON (i.sku=src.sku)", metric: '842 ms avg' },
         { query: "BEGIN pkg_audit.flush_buffer; END;",                                  metric: '512 ms avg' },
     ],
     plan: {
@@ -258,18 +258,18 @@ export const DEMO_ORACLE: EngineDemoSpec = withDerivedTs({
         { event: 'direct path read',        ms:  12_400 },
     ]},
     tables: [
-        { schema: 'FATHOM_APP',    name: 'TRANSACTIONS', rows: 88_142_000, bytes: 142_211_002_112 },
-        { schema: 'FATHOM_APP',    name: 'CUSTOMERS',    rows:    412_800, bytes:     890_210_816 },
-        { schema: 'FATHOM_REPORT', name: 'MV_DAILY_KPI', rows:     30_420, bytes:     210_001_920 },
+        { schema: 'PULSEDB_APP',    name: 'TRANSACTIONS', rows: 88_142_000, bytes: 142_211_002_112 },
+        { schema: 'PULSEDB_APP',    name: 'CUSTOMERS',    rows:    412_800, bytes:     890_210_816 },
+        { schema: 'PULSEDB_REPORT', name: 'MV_DAILY_KPI', rows:     30_420, bytes:     210_001_920 },
     ],
     indexes: [
-        { schema: 'FATHOM_APP', table: 'TRANSACTIONS', kind: 'b-tree',     definition: 'PK_TX (ID)' },
-        { schema: 'FATHOM_APP', table: 'TRANSACTIONS', kind: 'bitmap',     definition: 'BMX_TX_STATUS (STATUS)' },
-        { schema: 'FATHOM_APP', table: 'CUSTOMERS',    kind: 'function',   definition: 'FN_UPPER_EMAIL (UPPER(EMAIL))' },
+        { schema: 'PULSEDB_APP', table: 'TRANSACTIONS', kind: 'b-tree',     definition: 'PK_TX (ID)' },
+        { schema: 'PULSEDB_APP', table: 'TRANSACTIONS', kind: 'bitmap',     definition: 'BMX_TX_STATUS (STATUS)' },
+        { schema: 'PULSEDB_APP', table: 'CUSTOMERS',    kind: 'function',   definition: 'FN_UPPER_EMAIL (UPPER(EMAIL))' },
     ],
     connections: [
-        { session: '142', user: 'FATHOM_APP',    kind: 'DEDICATED', started: isoAgoSec(8240) },
-        { session: '168', user: 'FATHOM_REPORT', kind: 'DEDICATED', started: isoAgoSec(302) },
+        { session: '142', user: 'PULSEDB_APP',    kind: 'DEDICATED', started: isoAgoSec(8240) },
+        { session: '168', user: 'PULSEDB_REPORT', kind: 'DEDICATED', started: isoAgoSec(302) },
     ],
     locks: {
         note: 'Rows from V$LOCK for non-idle sessions.',
@@ -282,23 +282,23 @@ export const DEMO_ORACLE: EngineDemoSpec = withDerivedTs({
     replication: {
         note: 'Data Guard: 1 primary + 1 physical + 1 logical standby.',
         rows: [
-            { replica: 'FATHOM_PRIMARY', role: 'PRIMARY',          lag_sec: 0,  protection_mode: 'MAXIMUM AVAILABILITY' },
-            { replica: 'FATHOM_DR',      role: 'PHYSICAL STANDBY', lag_sec: 2.1 },
-            { replica: 'FATHOM_LOGIC',   role: 'LOGICAL STANDBY',  lag_sec: 18.4 },
+            { replica: 'PULSEDB_PRIMARY', role: 'PRIMARY',          lag_sec: 0,  protection_mode: 'MAXIMUM AVAILABILITY' },
+            { replica: 'PULSEDB_DR',      role: 'PHYSICAL STANDBY', lag_sec: 2.1 },
+            { replica: 'PULSEDB_LOGIC',   role: 'LOGICAL STANDBY',  lag_sec: 18.4 },
         ],
     },
     bloat: [
-        { table: 'FATHOM_APP.TRANSACTIONS', chain_rows: 2_842, row_chaining_pct: 3.2, action: 'SHRINK SPACE COMPACT' },
+        { table: 'PULSEDB_APP.TRANSACTIONS', chain_rows: 2_842, row_chaining_pct: 3.2, action: 'SHRINK SPACE COMPACT' },
     ],
     substitutes: ['Bloat: Oracle Segment Advisor / row-chaining signal (Tuning Pack).'],
     alerts: [
         { severity: 'critical', title: 'TX lock contention: SID 221 blocked by 142', time: '2m ago',  source: 'v$lock' },
-        { severity: 'warning',  title: 'Logical standby FATHOM_LOGIC lag 18s',       time: '12m ago', source: 'data-guard' },
+        { severity: 'warning',  title: 'Logical standby PULSEDB_LOGIC lag 18s',       time: '12m ago', source: 'data-guard' },
     ],
     topology: [
-        { id: 'FATHOM_PRIMARY', role: 'primary', region: 'us-east-1', lag_ms: 0,     status: 'healthy' },
-        { id: 'FATHOM_DR',      role: 'standby', region: 'us-west-2', lag_ms: 2_100, status: 'healthy' },
-        { id: 'FATHOM_LOGIC',   role: 'standby', region: 'eu-west-1', lag_ms: 18_400, status: 'degraded' },
+        { id: 'PULSEDB_PRIMARY', role: 'primary', region: 'us-east-1', lag_ms: 0,     status: 'healthy' },
+        { id: 'PULSEDB_DR',      role: 'standby', region: 'us-west-2', lag_ms: 2_100, status: 'healthy' },
+        { id: 'PULSEDB_LOGIC',   role: 'standby', region: 'eu-west-1', lag_ms: 18_400, status: 'degraded' },
     ],
     signature: {
         kind: 'session_history',
@@ -408,7 +408,7 @@ export const DEMO_ES: EngineDemoSpec = withDerivedTs({
     key:  'elasticsearch',
     name: 'Elasticsearch',
     accentColor:   '#00BFB3',
-    versionString: 'Elasticsearch 8.14.3 (cluster=fathom-search)',
+    versionString: 'Elasticsearch 8.14.3 (cluster=pulsedb-search)',
     identity: { cluster_uuid: 'aBcD-1234', node_count: '3', data_nodes: '3' },
     catalog: [
         { name: 'logs-app-*',     kind: 'data-stream' },
@@ -507,8 +507,8 @@ export const DEMO_SNOWFLAKE: EngineDemoSpec = withDerivedTs({
     versionString: 'Snowflake 8.18.0 (managed)',
     identity: { account: 'acme-analytics.us-east-1', region: 'US-EAST-1', edition: 'Business Critical' },
     catalog: [
-        { name: 'FATHOM_PROD', location: 'US-EAST-1' },
-        { name: 'FATHOM_DEV',  location: 'US-EAST-1' },
+        { name: 'PULSEDB_PROD', location: 'US-EAST-1' },
+        { name: 'PULSEDB_DEV',  location: 'US-EAST-1' },
         { name: 'SNOWFLAKE_SAMPLE_DATA', location: 'US-EAST-1' },
     ],
     kpis: [
@@ -558,9 +558,9 @@ export const DEMO_SNOWFLAKE: EngineDemoSpec = withDerivedTs({
         ],
     },
     replication: {
-        note: 'SHOW REPLICATION DATABASES — FATHOM_PROD replicated to EU-WEST-1.',
+        note: 'SHOW REPLICATION DATABASES — PULSEDB_PROD replicated to EU-WEST-1.',
         rows: [
-            { database: 'FATHOM_PROD', primary_account: 'acme-us-east-1', replicated_to: 'acme-eu-west-1', is_primary: true },
+            { database: 'PULSEDB_PROD', primary_account: 'acme-us-east-1', replicated_to: 'acme-eu-west-1', is_primary: true },
         ],
     },
     bloat: [
@@ -576,8 +576,8 @@ export const DEMO_SNOWFLAKE: EngineDemoSpec = withDerivedTs({
         { severity: 'info',     title: 'QUERY_HISTORY: 2 blocked transactions',  time: '11m ago', source: 'concurrency' },
     ],
     topology: [
-        { id: 'FATHOM_PROD (us-east-1)', role: 'primary', region: 'us-east-1', lag_ms: 0,     status: 'healthy' },
-        { id: 'FATHOM_PROD (eu-west-1)', role: 'replica', region: 'eu-west-1', lag_ms: 4_200, status: 'healthy' },
+        { id: 'PULSEDB_PROD (us-east-1)', role: 'primary', region: 'us-east-1', lag_ms: 0,     status: 'healthy' },
+        { id: 'PULSEDB_PROD (eu-west-1)', role: 'replica', region: 'eu-west-1', lag_ms: 4_200, status: 'healthy' },
     ],
     signature: {
         kind: 'credits_by_warehouse',
@@ -600,8 +600,8 @@ export const DEMO_BIGQUERY: EngineDemoSpec = withDerivedTs({
     versionString: 'BigQuery (managed)',
     identity: { project: 'acme-analytics', location: 'US' },
     catalog: [
-        { name: 'fathom_prod',    location: 'US' },
-        { name: 'fathom_staging', location: 'US' },
+        { name: 'pulsedb_prod',    location: 'US' },
+        { name: 'pulsedb_staging', location: 'US' },
         { name: 'marketing_eu',   location: 'EU' },
     ],
     kpis: [
@@ -672,8 +672,8 @@ stages:
         { severity: 'info',    title: 'stale_pilot_2024 cold 412 days — candidate for delete', time: '1h ago', source: 'cold-tail' },
     ],
     topology: [
-        { id: 'dataset(US):fathom_prod',    role: 'primary', region: 'US', status: 'healthy' },
-        { id: 'dataset(US):fathom_staging', role: 'primary', region: 'US', status: 'healthy' },
+        { id: 'dataset(US):pulsedb_prod',    role: 'primary', region: 'US', status: 'healthy' },
+        { id: 'dataset(US):pulsedb_staging', role: 'primary', region: 'US', status: 'healthy' },
         { id: 'dataset(EU):marketing_eu',   role: 'primary', region: 'EU', status: 'healthy' },
     ],
     signature: {
@@ -698,9 +698,9 @@ export const DEMO_REDSHIFT: EngineDemoSpec = withDerivedTs({
     name: 'AWS Redshift',
     accentColor:   '#FF9900',
     versionString: 'Redshift 1.0.82842 (dc2.large × 4)',
-    identity: { cluster: 'fathom-prod', region: 'us-east-1', node_type: 'dc2.large', node_count: '4' },
+    identity: { cluster: 'pulsedb-prod', region: 'us-east-1', node_type: 'dc2.large', node_count: '4' },
     catalog: [
-        { name: 'dev' }, { name: 'fathom_prod' }, { name: 'fathom_reporting' },
+        { name: 'dev' }, { name: 'pulsedb_prod' }, { name: 'pulsedb_reporting' },
     ],
     kpis: [
         { label: 'Queries (1h)',    value: '842',   unit: '',    sparkline: sparkline(840, 40) },
@@ -789,10 +789,10 @@ export const DEMO_CASSANDRA: EngineDemoSpec = withDerivedTs({
     key:  'cassandra',
     name: 'Apache Cassandra',
     accentColor:   '#1287B1',
-    versionString: 'Cassandra 5.0.1 (cluster=FATHOM)',
-    identity: { cluster: 'FATHOM', datacenter: 'dc1', rack: 'rack1', node_count: '6' },
+    versionString: 'Cassandra 5.0.1 (cluster=PulseDB)',
+    identity: { cluster: 'PulseDB', datacenter: 'dc1', rack: 'rack1', node_count: '6' },
     catalog: [
-        { name: 'fathom_app' },
+        { name: 'pulsedb_app' },
         { name: 'system' },
         { name: 'system_schema' },
     ],
@@ -804,8 +804,8 @@ export const DEMO_CASSANDRA: EngineDemoSpec = withDerivedTs({
         { label: 'Compactions',      value: '3',      unit: '' },
     ],
     slowQueries: [
-        { query: 'SELECT * FROM fathom_app.events WHERE partition_id=? AND ts>?', metric: 'avg 12 ms / p99 48 ms' },
-        { query: 'INSERT INTO fathom_app.audit (ts, event, actor) VALUES ...',    metric: 'avg 2 ms / p99 18 ms' },
+        { query: 'SELECT * FROM pulsedb_app.events WHERE partition_id=? AND ts>?', metric: 'avg 12 ms / p99 48 ms' },
+        { query: 'INSERT INTO pulsedb_app.audit (ts, event, actor) VALUES ...',    metric: 'avg 2 ms / p99 18 ms' },
     ],
     plan: {
         note: 'Via TRACING ON + system_traces.sessions.',
@@ -823,11 +823,11 @@ Merging data from memtables and sstables                                        
         { event: 'Parsing CQL',               micros:    18_400 },
     ]},
     tables: [
-        { schema: 'fathom_app', name: 'events',  rows: 48_210_000, bytes: 18_210_000_000, note: 'from size_estimates' },
-        { schema: 'fathom_app', name: 'audit',   rows:  8_420_100, bytes:  2_210_000_000 },
+        { schema: 'pulsedb_app', name: 'events',  rows: 48_210_000, bytes: 18_210_000_000, note: 'from size_estimates' },
+        { schema: 'pulsedb_app', name: 'audit',   rows:  8_420_100, bytes:  2_210_000_000 },
     ],
     indexes: [
-        { schema: 'fathom_app', table: 'events', kind: 'secondary', definition: 'ix_events_status (status)' },
+        { schema: 'pulsedb_app', table: 'events', kind: 'secondary', definition: 'ix_events_status (status)' },
     ],
     connections: [
         { session: 'native-1', user: 'app_service', kind: 'driver-v4', started: isoAgoSec(184_000) },
@@ -836,19 +836,19 @@ Merging data from memtables and sstables                                        
     locks: {
         note: 'Substitute: hot-partition rows (largest mean_partition_size).',
         rows: [
-            { schema: 'fathom_app', table: 'events', mean_size: 1_482_000, partitions: 18_420 },
-            { schema: 'fathom_app', table: 'audit',  mean_size:   412_000, partitions:  8_420 },
+            { schema: 'pulsedb_app', table: 'events', mean_size: 1_482_000, partitions: 18_420 },
+            { schema: 'pulsedb_app', table: 'audit',  mean_size:   412_000, partitions:  8_420 },
         ],
     },
     replication: {
         note: 'Keyspace replication strategy.',
         rows: [
-            { keyspace: 'fathom_app', strategy: 'NetworkTopologyStrategy', replication: '{ dc1: 3, dc2: 3 }', durable_writes: true },
+            { keyspace: 'pulsedb_app', strategy: 'NetworkTopologyStrategy', replication: '{ dc1: 3, dc2: 3 }', durable_writes: true },
             { keyspace: 'system',     strategy: 'LocalStrategy',           replication: '{}',                 durable_writes: true },
         ],
     },
     bloat: [
-        { table: 'fathom_app.events', tombstones_per_read: 184, action: 'Run compaction' },
+        { table: 'pulsedb_app.events', tombstones_per_read: 184, action: 'Run compaction' },
     ],
     substitutes: [
         'Tables → system.size_estimates aggregates (approximate).',
@@ -858,7 +858,7 @@ Merging data from memtables and sstables                                        
     ],
     alerts: [
         { severity: 'warning', title: '12 hinted handoffs in last hour (node-4)', time: '18m ago', source: 'cluster-health' },
-        { severity: 'info',    title: '3 compactions active on fathom_app.events', time: '5m ago', source: 'compaction' },
+        { severity: 'info',    title: '3 compactions active on pulsedb_app.events', time: '5m ago', source: 'compaction' },
     ],
     topology: [
         { id: 'node-1 (dc1)', role: 'coordinator', region: 'dc1', status: 'healthy' },

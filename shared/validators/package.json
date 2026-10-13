@@ -1,5 +1,5 @@
 {
-    "name": "@fathom/validators",
+    "name": "@pulsedb/validators",
     "version": "1.0.0",
     "private": true,
     "type": "module",

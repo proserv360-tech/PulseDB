@@ -20,7 +20,7 @@
 #   • backend tsc …… clean
 #   • ratchet …… swallowed 13 / leaked 62, "No regression against baseline"
 #   • audit …… still reports HIGHs (dependency bumps were DEFERRED — see the
-#     "Implementation status" section of docs/reports/FATHOM_Code_Audit_2026-07-24.md).
+#     "Implementation status" section of docs/reports/PULSEDB_Code_Audit_2026-07-24.md).
 #     Audit is therefore ADVISORY in this script and does not fail the run.
 #
 # Usage:
@@ -127,7 +127,7 @@ printf '  %s%d passed%s' "$GRN" "${#PASS[@]}" "$RST"
 printf '   %s%d failed%s\n' "$RED" "${#FAIL[@]}" "$RST"
 if [ "${#WARN[@]}" -gt 0 ]; then
   printf '  %sadvisory:%s %s\n' "$YLW" "$RST" "${WARN[*]}"
-  printf '  %s(deferred dependency bumps — see docs/reports/FATHOM_Code_Audit_2026-07-24.md)%s\n' "$DIM" "$RST"
+  printf '  %s(deferred dependency bumps — see docs/reports/PULSEDB_Code_Audit_2026-07-24.md)%s\n' "$DIM" "$RST"
 fi
 if [ "${#FAIL[@]}" -gt 0 ]; then
   printf '  %sfailed:%s %s\n' "$RED" "$RST" "${FAIL[*]}"

@@ -111,8 +111,8 @@ export class ErrorBoundary extends React.Component {
                             <button
                                 onClick={() => {
                                     try {
-                                        localStorage.removeItem('fathom_active_tab');
-                                        localStorage.removeItem('fathom_sidebar_collapsed');
+                                        localStorage.removeItem('pulsedb_active_tab');
+                                        localStorage.removeItem('pulsedb_sidebar_collapsed');
                                     } catch {}
                                     window.location.href = '/';
                                 }}
@@ -164,7 +164,7 @@ export class ErrorBoundary extends React.Component {
                         <p style={{ color: DS.textMuted, margin: '20px 0 0', fontSize: 11, lineHeight: 1.5 }}>
                             If this error persists, please{' '}
                             <a
-                                href="mailto:support@fathom.io"
+                                href="mailto:support@pulsedb.io"
                                 style={{ color: DS.cyan, textDecoration: 'none', fontWeight: 600 }}
                             >
                                 contact support

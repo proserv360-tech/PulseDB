@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  FATHOM — Schema-only bootstrap on Supabase (no data copied)
+#  PulseDB — Schema-only bootstrap on Supabase (no data copied)
 #  Use this when you want a FRESH Supabase control plane (e.g. new environment)
-#  instead of copying Neon's data. It just runs FATHOM's own migrator against
+#  instead of copying Neon's data. It just runs PulseDB's own migrator against
 #  the Supabase DATABASE_URL, which creates the pgmonitoringtool schema, all
 #  tables, and the initial admin user.
 #
@@ -17,7 +17,7 @@ say() { printf '\033[36m[schema]\033[0m %s\n' "$*"; }
 HERE="$(cd "$(dirname "$0")/.." && pwd)"   # backend/
 
 say "Target: ${DATABASE_URL%%@*}@… (Supabase)"
-say "Running FATHOM control-plane migrator…"
+say "Running PulseDB control-plane migrator…"
 # Reuse the project's own migrators so the schema always matches the app.
 ( cd "$HERE" && npm run migrate )
 # Enterprise tables (SCIM, licensing, etc.) if present:

@@ -1,28 +1,28 @@
-"""Tests for FathomSDK client."""
+"""Tests for PulseDBSDK client."""
 
 import pytest
 import httpx
 from unittest.mock import Mock, patch, MagicMock
-from fathom_sdk import FathomSDK
-from fathom_sdk.events import SdkEvent
+from pulsedb_sdk import PulseDBSDK
+from pulsedb_sdk.events import SdkEvent
 
 
-class TestFathomSDKInit:
-    """Tests for FathomSDK initialization."""
+class TestPulseDBSDKInit:
+    """Tests for PulseDBSDK initialization."""
 
     def test_init_requires_api_key(self):
         """API key is required."""
         with pytest.raises(ValueError, match="api_key is required"):
-            FathomSDK(api_key="", endpoint="https://example.com")
+            PulseDBSDK(api_key="", endpoint="https://example.com")
 
     def test_init_requires_endpoint(self):
         """Endpoint is required."""
         with pytest.raises(ValueError, match="endpoint is required"):
-            FathomSDK(api_key="sk_live_test", endpoint="")
+            PulseDBSDK(api_key="sk_live_test", endpoint="")
 
     def test_init_success(self):
         """SDK initializes successfully with valid args."""
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             app_name="test-app",
@@ -40,7 +40,7 @@ class TestFathomSDKInit:
 
     def test_init_strips_trailing_slash(self):
         """Trailing slash is stripped from endpoint."""
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com/",
         )
@@ -53,7 +53,7 @@ class TestSessionId:
 
     def test_session_id_format(self):
         """Session ID has correct format: <millis>-<8-hex>."""
-        sdk = FathomSDK(api_key="sk_live_test", endpoint="https://api.example.com")
+        sdk = PulseDBSDK(api_key="sk_live_test", endpoint="https://api.example.com")
         sid = sdk.session_id
 
         parts = sid.split("-")
@@ -74,7 +74,7 @@ class TestTrackAPI:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -119,7 +119,7 @@ class TestTrackAPI:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 3})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -160,7 +160,7 @@ class TestTrackError:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -197,7 +197,7 @@ class TestTrackError:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -229,7 +229,7 @@ class TestTrackAudit:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -268,7 +268,7 @@ class TestTrackMetric:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -308,7 +308,7 @@ class TestTrackCustom:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -352,7 +352,7 @@ class TestHeartbeat:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"acknowledged": True})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -389,7 +389,7 @@ class TestShutdown:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 0})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,
@@ -403,7 +403,7 @@ class TestShutdown:
         mock_http = MagicMock(spec=httpx.Client)
         mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
-        sdk = FathomSDK(
+        sdk = PulseDBSDK(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_http,

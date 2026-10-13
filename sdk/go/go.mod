@@ -1,3 +1,3 @@
-module github.com/fathom/fathom-go
+module github.com/pulsedb/pulsedb-go
 
 go 1.21

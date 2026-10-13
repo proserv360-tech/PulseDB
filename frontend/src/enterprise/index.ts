@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Enterprise Module Exports
+//  PulseDB — Enterprise Module Exports
 // ==========================================================================
 //  Central exports for license and organization management
 

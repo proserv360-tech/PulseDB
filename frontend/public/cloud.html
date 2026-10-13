@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FATHOM Cloud — managed database observability</title>
-<meta name="description" content="FATHOM Cloud is the managed tier of the open-source FATHOM platform. Connect Postgres, MySQL, or MongoDB in minutes — we run the metrics store, rollups, alerting, and SOC 2 controls." />
-<link rel="canonical" href="https://fathom.example.com/cloud.html" />
+<title>PulseDB Cloud — managed database observability</title>
+<meta name="description" content="PulseDB Cloud is the managed tier of the open-source PulseDB platform. Connect Postgres, MySQL, or MongoDB in minutes — we run the metrics store, rollups, alerting, and SOC 2 controls." />
+<link rel="canonical" href="https://pulsedb.example.com/cloud.html" />
 <style>
   :root{
     --bg:#0b1020; --ink:#0f172a; --muted:#475569; --soft:#e2e8f0;
@@ -67,12 +67,12 @@
 <body>
 <header class="nav">
   <div class="wrap nav-inner">
-    <div class="brand"><span class="brand-mark"></span> FATHOM</div>
+    <div class="brand"><span class="brand-mark"></span> PulseDB</div>
     <nav class="links">
       <a href="/">Product</a>
       <a href="/pricing.html">Pricing</a>
       <a href="/trust-center.html">Trust</a>
-      <a href="https://github.com/fathom-io/fathom">GitHub</a>
+      <a href="https://github.com/pulsedb-io/pulsedb">GitHub</a>
       <a class="btn primary" href="#signup">Start free</a>
     </nav>
   </div>
@@ -80,7 +80,7 @@
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill">● FATHOM Cloud — managed tier</span>
+    <span class="pill">● PulseDB Cloud — managed tier</span>
     <h1>Database observability, without the babysitting.</h1>
     <p class="lead">
       Connect Postgres, MySQL, or MongoDB and get query-level insight,
@@ -105,7 +105,7 @@
 
 <section>
   <div class="wrap">
-    <h2>Why teams run FATHOM Cloud</h2>
+    <h2>Why teams run PulseDB Cloud</h2>
     <p class="sub">Same binary as the self-hosted edition — with the undifferentiated operational work taken care of.</p>
     <div class="grid g3">
       <div class="card"><h3>Connect in minutes</h3><p>Drop in a read-only DSN, pick a region, and metrics start flowing. No Helm chart, no VPN, no Prometheus long-term storage to plan.</p></div>
@@ -126,10 +126,10 @@
       <div>
         <pre>
    ┌──────────────────────┐           ┌──────────────────────┐
-   │   Your VPC / net     │           │    FATHOM Cloud       │
+   │   Your VPC / net     │           │    PulseDB Cloud       │
    │                      │           │   (regional)         │
    │  ┌────────────────┐  │  mTLS     │                      │
-   │  │ fathom-agent    │──┼──────────▶│  ingest → rollups    │
+   │  │ pulsedb-agent    │──┼──────────▶│  ingest → rollups    │
    │  │ (read-only DSN)│  │  outbound │  time-series + audit │
    │  └────────────────┘  │  only     │         │            │
    │          │           │           │         ▼            │
@@ -162,7 +162,7 @@
 
 <section>
   <div class="wrap">
-    <h2>Three ways to run FATHOM</h2>
+    <h2>Three ways to run PulseDB</h2>
     <p class="sub">The engine is identical. Pick how much of the plumbing you want to own.</p>
     <div class="grid g3">
       <div class="card">
@@ -172,7 +172,7 @@
         <div class="badges"><span class="badge">All core features</span><span class="badge">Community support</span></div>
       </div>
       <div class="card" style="border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)">
-        <h3>FATHOM Cloud</h3>
+        <h3>PulseDB Cloud</h3>
         <div class="price"><strong>$19</strong><span>/ user / month</span></div>
         <p>Managed regional deployment. Zero ops, automatic upgrades, 99.9% SLO. Free tier up to 3 users &amp; 2 databases.</p>
         <div class="badges"><span class="badge">Managed</span><span class="badge">Business-hours support</span><span class="badge">EU/US</span></div>
@@ -190,7 +190,7 @@
 <section style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
   <div class="wrap">
     <h2>The numbers we commit to</h2>
-    <div class="row"><div class="k">Availability SLO</div><div class="v">99.9% monthly — service-credit remedy governed by the <a href="/trust-center.html">FATHOM Service Level Agreement</a> (the SLA is the controlling document; this page is a summary and subject to legal review).</div></div>
+    <div class="row"><div class="k">Availability SLO</div><div class="v">99.9% monthly — service-credit remedy governed by the <a href="/trust-center.html">PulseDB Service Level Agreement</a> (the SLA is the controlling document; this page is a summary and subject to legal review).</div></div>
     <div class="row"><div class="k">RPO / RTO</div><div class="v">≤ 15 minutes recovery point · ≤ 60 minutes recovery time.</div></div>
     <div class="row"><div class="k">Data residency</div><div class="v">EU (Frankfurt) and US (N. Virginia) regions — pick at workspace creation, never moved.</div></div>
     <div class="row"><div class="k">Encryption</div><div class="v">TLS 1.3 in transit · AES-256-GCM at rest · per-workspace KMS envelope keys.</div></div>
@@ -203,7 +203,7 @@
   <div class="wrap">
     <h2>Trusted by teams who can't afford downtime</h2>
     <div class="grid g2" style="margin-bottom:24px">
-      <div class="quote">“We replaced a $3k/mo Datadog DBM line item with FATHOM Cloud and got faster EXPLAIN-plan diffing as a bonus. The copilot catches at least one index miss per sprint.”
+      <div class="quote">“We replaced a $3k/mo Datadog DBM line item with PulseDB Cloud and got faster EXPLAIN-plan diffing as a bonus. The copilot catches at least one index miss per sprint.”
         <cite>— VP Engineering, fintech (Series B, 80 engineers)</cite></div>
       <div class="quote">“The alert DSL is what finally let us move alert rules into code review. Fewer pages at 3am, more fixes landed during work hours.”
         <cite>— Principal SRE, SaaS platform</cite></div>
@@ -217,10 +217,10 @@
     <h2>FAQ</h2>
     <details><summary>Does the agent need to see my data?</summary>
       <p>No. The agent reads <code>pg_stat_statements</code> / <code>performance_schema</code> / <code>currentOp</code> — aggregate counters and normalized query shapes, never row contents. You can additionally exclude schemas or databases in the agent config.</p></details>
-    <details><summary>What happens if FATHOM Cloud is down?</summary>
-      <p>Your database keeps running. The agent buffers metrics for up to 60 minutes and replays once the service returns. Alert rules fail-safe to <em>not-fire</em>, and your PagerDuty / Slack integrations are independent of FATHOM's UI.</p></details>
+    <details><summary>What happens if PulseDB Cloud is down?</summary>
+      <p>Your database keeps running. The agent buffers metrics for up to 60 minutes and replays once the service returns. Alert rules fail-safe to <em>not-fire</em>, and your PagerDuty / Slack integrations are independent of PulseDB's UI.</p></details>
     <details><summary>Can I self-host and use Cloud at the same time?</summary>
-      <p>Yes. The OSS edition and FATHOM Cloud use the same config format. Many teams self-host in staging and run Cloud in production, or vice-versa. You can migrate workspaces with a single <code>fathom workspace export</code> → <code>import</code>.</p></details>
+      <p>Yes. The OSS edition and PulseDB Cloud use the same config format. Many teams self-host in staging and run Cloud in production, or vice-versa. You can migrate workspaces with a single <code>pulsedb workspace export</code> → <code>import</code>.</p></details>
     <details><summary>How does billing work?</summary>
       <p>Monthly or annual, per active user. Data ingest and retention are included within the plan's stated limits. See <a href="/pricing.html">the pricing page</a> for details.</p></details>
     <details><summary>Can I bring my own cloud account?</summary>
@@ -233,16 +233,16 @@
     <h2 style="color:#fff">Start in under ten minutes</h2>
     <p class="sub" style="color:rgba(255,255,255,.85);margin-left:auto;margin-right:auto">Free tier is real — 3 users, 2 databases, 14-day retention. No card required.</p>
     <div class="cta" style="justify-content:center">
-      <a class="btn primary" style="background:#111827" href="https://app.fathom.example.com/signup">Create a workspace →</a>
-      <a class="btn" href="https://cal.com/fathom/demo">Book a demo</a>
+      <a class="btn primary" style="background:#111827" href="https://app.pulsedb.example.com/signup">Create a workspace →</a>
+      <a class="btn" href="https://cal.com/pulsedb/demo">Book a demo</a>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px">
-    <div>© 2026 FATHOM, Inc. · <a href="/trust-center.html">Trust</a> · <a href="/pricing.html">Pricing</a> · <a href="https://github.com/fathom-io/fathom">GitHub</a></div>
-    <div>Built on the open-source <a href="https://github.com/fathom-io/fathom">fathom</a> engine (AGPL-3.0).</div>
+    <div>© 2026 PulseDB, Inc. · <a href="/trust-center.html">Trust</a> · <a href="/pricing.html">Pricing</a> · <a href="https://github.com/pulsedb-io/pulsedb">GitHub</a></div>
+    <div>Built on the open-source <a href="https://github.com/pulsedb-io/pulsedb">pulsedb</a> engine (AGPL-3.0).</div>
   </div>
 </footer>
 </body>

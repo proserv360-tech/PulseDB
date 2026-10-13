@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Shared Animation System
+//  PulseDB — Shared Animation System
 // ==========================================================================
 //
 //  Centralises all @keyframes and timing constants.
@@ -104,7 +104,7 @@ export const ANIM = {
 // Inject once via <style>{KEYFRAMES_CSS}</style> in GlobalStyles.
 // Components reference animation names from ANIM_NAMES / ANIM presets.
 export const KEYFRAMES_CSS = `
-/* ═══ FATHOM Shared Keyframes ═══ */
+/* ═══ PulseDB Shared Keyframes ═══ */
 
 @keyframes ${ANIM_NAMES.fadeIn} {
     from { opacity: 0; }

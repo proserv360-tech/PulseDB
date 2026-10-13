@@ -2663,7 +2663,7 @@ function DemoPostgresTab({ tabId }) {
         if (sectionKey === 'alerts' && itemKey === 'active-alerts') {
             return (
                 <div className="dpg-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-                    {/* ── FATHOM Header ── */}
+                    {/* ── PulseDB Header ── */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 4 }}>
@@ -2676,7 +2676,7 @@ function DemoPostgresTab({ tabId }) {
                                         letterSpacing: '0.02em',
                                     }}
                                 >
-                                    FATHOM
+                                    PulseDB
                                 </span>
                                 <span
                                     style={{
@@ -8923,7 +8923,7 @@ function DemoPostgresTab({ tabId }) {
                             ]}
                             rows={[
                                 {
-                                    user: 'admin@fathom.io',
+                                    user: 'admin@pulsedb.io',
                                     role: 'Super Admin',
                                     lastLogin: '2m ago',
                                     status: 'Online',
@@ -9314,7 +9314,7 @@ function DemoPostgresTab({ tabId }) {
                                             color: THEME.textMain,
                                         }}
                                     >
-                                        FATHOM Report
+                                        PulseDB Report
                                     </div>
                                 </div>
                                 <div>
@@ -9667,14 +9667,14 @@ function DemoPostgresTab({ tabId }) {
                     <Panel title="Engine psql Console" icon={Terminal} accentColor={THEME.primary}>
                         <div style={{ background: THEME.bg, borderRadius: 10, padding: '16px 18px', fontFamily: THEME.fontMono, fontSize: 12, color: THEME.textMain, lineHeight: 1.7 }}>
                             <div style={{ color: THEME.textDim, marginBottom: 8 }}>-- PostgreSQL 16.2 on x86_64-pc-linux-gnu</div>
-                            <div><span style={{ color: THEME.primary }}>fathom=&gt;</span> <span style={{ color: '#f8f8f2' }}>SELECT version();</span></div>
+                            <div><span style={{ color: THEME.primary }}>pulsedb=&gt;</span> <span style={{ color: '#f8f8f2' }}>SELECT version();</span></div>
                             <div style={{ color: THEME.textMuted, paddingLeft: 16, marginBottom: 8 }}>PostgreSQL 16.2 (Debian 16.2-1.pgdg120+2)</div>
-                            <div><span style={{ color: THEME.primary }}>fathom=&gt;</span> <span style={{ color: '#f8f8f2' }}>SHOW max_connections;</span></div>
+                            <div><span style={{ color: THEME.primary }}>pulsedb=&gt;</span> <span style={{ color: '#f8f8f2' }}>SHOW max_connections;</span></div>
                             <div style={{ color: THEME.textMuted, paddingLeft: 16, marginBottom: 8 }}>200</div>
-                            <div><span style={{ color: THEME.primary }}>fathom=&gt;</span> <span style={{ color: '#f8f8f2' }}>SELECT count(*) FROM pg_stat_activity WHERE state = <span style={{ color: '#50fa7b' }}>'active'</span>;</span></div>
+                            <div><span style={{ color: THEME.primary }}>pulsedb=&gt;</span> <span style={{ color: '#f8f8f2' }}>SELECT count(*) FROM pg_stat_activity WHERE state = <span style={{ color: '#50fa7b' }}>'active'</span>;</span></div>
                             <div style={{ color: THEME.textMuted, paddingLeft: 16, marginBottom: 8 }}>42</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span style={{ color: THEME.primary }}>fathom=&gt;</span>
+                                <span style={{ color: THEME.primary }}>pulsedb=&gt;</span>
                                 <span style={{ display: 'inline-block', width: 8, height: 14, background: THEME.primary, animation: 'live-pulse 1s ease-in-out infinite' }} />
                             </div>
                         </div>
@@ -9726,12 +9726,12 @@ function DemoPostgresTab({ tabId }) {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
                         {[
-                            { name: 'Slack Alerts', author: 'Fathom', desc: 'Rich Slack notifications with query context', installed: true },
-                            { name: 'PagerDuty Integration', author: 'Fathom', desc: 'Auto-escalate critical alerts to on-call', installed: true },
+                            { name: 'Slack Alerts', author: 'PulseDB', desc: 'Rich Slack notifications with query context', installed: true },
+                            { name: 'PagerDuty Integration', author: 'PulseDB', desc: 'Auto-escalate critical alerts to on-call', installed: true },
                             { name: 'Cost Optimizer', author: 'Community', desc: 'Identify expensive queries and suggest savings', installed: false },
-                            { name: 'Compliance Reporter', author: 'Fathom', desc: 'SOC2, HIPAA audit log export', installed: false },
+                            { name: 'Compliance Reporter', author: 'PulseDB', desc: 'SOC2, HIPAA audit log export', installed: false },
                             { name: 'ML Anomaly Pack', author: 'Community', desc: 'Advanced seasonal anomaly detection models', installed: false },
-                            { name: 'Grafana Bridge', author: 'Community', desc: 'Push FATHOM metrics to Grafana dashboards', installed: true },
+                            { name: 'Grafana Bridge', author: 'Community', desc: 'Push PulseDB metrics to Grafana dashboards', installed: true },
                         ].map((p) => (
                             <div key={p.name} style={{ padding: '16px', borderRadius: 12, border: `1px solid ${THEME.glassBorder}`, background: THEME.surface, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

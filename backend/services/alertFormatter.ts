@@ -318,7 +318,7 @@ export function renderSlackBlocks(alert) {
             {
                 type: 'mrkdwn',
                 text:
-                    ':bar_chart: Sent by *Fathom*' +
+                    ':bar_chart: Sent by *PulseDB*' +
                     (unacked.length ? ' · or `/ack <incident-id>`' : ''),
             },
         ],
@@ -411,7 +411,7 @@ export function formatSlaRemaining(dueAt, { now = Date.now(), resolved = false }
  * @param {object} row      — as returned by incidentService
  * @param {string} timeZone — IANA zone for Detected At. Defaults to the host's.
  */
-export function toIncidentRow(row, { timeZone = process.env.FATHOM_DISPLAY_TZ || undefined, now = Date.now() } = {}) {
+export function toIncidentRow(row, { timeZone = process.env.PULSEDB_DISPLAY_TZ || undefined, now = Date.now() } = {}) {
     const detected = row.detected_at ? new Date(row.detected_at) : null;
     const resolved = ['resolved', 'closed'].includes(row.status);
     return {

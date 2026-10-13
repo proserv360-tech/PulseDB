@@ -1,5 +1,5 @@
 /**
- * SalesforceConnector - Salesforce platform integration for FATHOM
+ * SalesforceConnector - Salesforce platform integration for PulseDB
  * Provides OAuth 2.0 authentication and API limit/metrics monitoring
  */
 
@@ -433,26 +433,26 @@ export class SalesforceConnector extends EventEmitter {
   }
 
   /**
-   * Sync Salesforce metrics to FATHOM dashboard
+   * Sync Salesforce metrics to PulseDB dashboard
    *
-   * @param {Object} fathomClient - FathomClient instance
+   * @param {Object} pulsedbClient - PulseDBClient instance
    * @param {Object} [options] - Sync options
    * @returns {Promise<Object>} - Sync result
    *
    * @example
-   * await sfConnector.syncToFathom(fathomClient, {
+   * await sfConnector.syncToPulseDB(pulsedbClient, {
    *   includeAuditTrail: true
    * });
    */
-  async syncToFathom(fathomClient, options = {}) {
+  async syncToPulseDB(pulsedbClient, options = {}) {
     this._ensureAuthenticated();
 
     try {
-      this.logger.info('Starting Salesforce metrics sync to FATHOM');
+      this.logger.info('Starting Salesforce metrics sync to PulseDB');
 
       const metrics = await this.getMetrics();
 
-      const fathomMetrics = {
+      const pulsedbMetrics = {
         platform: 'salesforce',
         metrics: {
           apiLimitsUsed: metrics.limits.ApiCalls.Used,
@@ -467,16 +467,16 @@ export class SalesforceConnector extends EventEmitter {
       // If include audit trail, fetch and add
       if (options.includeAuditTrail) {
         const auditTrail = await this.getAuditTrail({ limit: 50 });
-        fathomMetrics.auditTrail = auditTrail.records;
+        pulsedbMetrics.auditTrail = auditTrail.records;
       }
 
-      // Send to FATHOM (this would use fathomClient.query or similar)
-      this.logger.info('Metrics synced to FATHOM', { recordCount: Object.keys(fathomMetrics.metrics).length });
-      this.emit('synced_to_fathom', fathomMetrics);
+      // Send to PulseDB (this would use pulsedbClient.query or similar)
+      this.logger.info('Metrics synced to PulseDB', { recordCount: Object.keys(pulsedbMetrics.metrics).length });
+      this.emit('synced_to_pulsedb', pulsedbMetrics);
 
-      return fathomMetrics;
+      return pulsedbMetrics;
     } catch (error) {
-      this.logger.error('Failed to sync metrics to FATHOM', error);
+      this.logger.error('Failed to sync metrics to PulseDB', error);
       this.emit('error', { type: 'sync_error', error });
       throw error;
     }

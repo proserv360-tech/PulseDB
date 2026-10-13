@@ -44,6 +44,6 @@ covered set; uncovered files keep working as plain `.js`.
 
 ## Shared types
 
-Backend imports `@fathom/types` (`shared/types/`) for cross-tier types,
-and `@fathom/validators` (`shared/validators/`) for Zod schemas that
+Backend imports `@pulsedb/types` (`shared/types/`) for cross-tier types,
+and `@pulsedb/validators` (`shared/validators/`) for Zod schemas that
 double as request validators (see `middleware/validate.js`, B5).

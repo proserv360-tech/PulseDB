@@ -99,11 +99,11 @@ describe('promScrapeService', () => {
     it('renders minimum required metrics in Prom text format', () => {
         _resetForTests();
         const out = renderMetrics();
-        assert.match(out, /# HELP fathom_process_uptime_seconds /);
-        assert.match(out, /# TYPE fathom_process_uptime_seconds gauge/);
-        assert.match(out, /fathom_process_memory_rss_bytes /);
-        assert.match(out, /fathom_event_loop_lag_seconds /);
-        assert.match(out, /fathom_build_info\{version="/);
+        assert.match(out, /# HELP pulsedb_process_uptime_seconds /);
+        assert.match(out, /# TYPE pulsedb_process_uptime_seconds gauge/);
+        assert.match(out, /pulsedb_process_memory_rss_bytes /);
+        assert.match(out, /pulsedb_event_loop_lag_seconds /);
+        assert.match(out, /pulsedb_build_info\{version="/);
     });
 
     it('requestCounter bumps counters per status', async () => {
@@ -119,8 +119,8 @@ describe('promScrapeService', () => {
             await fetch(`http://127.0.0.1:${port}/ok`);
             await fetch(`http://127.0.0.1:${port}/boom`);
             const body = renderMetrics();
-            assert.match(body, /fathom_http_requests_total\{method="GET",status="200"\} 2/);
-            assert.match(body, /fathom_http_requests_total\{method="GET",status="500"\} 1/);
+            assert.match(body, /pulsedb_http_requests_total\{method="GET",status="200"\} 2/);
+            assert.match(body, /pulsedb_http_requests_total\{method="GET",status="500"\} 1/);
         } finally {
             server.close();
         }
@@ -175,7 +175,7 @@ describe('hipaaMode', () => {
         assert.equal(captured.body.first_name, '[REDACTED:PHI]');
         assert.equal(captured.body.x, 1);
         assert.equal(headers['Cache-Control'], 'no-store, no-cache, must-revalidate, private');
-        assert.equal(headers['X-Fathom-PHI-Access'], '1');
+        assert.equal(headers['X-PulseDB-PHI-Access'], '1');
         delete process.env.HIPAA_MODE;
     });
 });

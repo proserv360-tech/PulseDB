@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Enterprise Features Migration  (scripts/migrate-enterprise.js)
+//  PulseDB — Enterprise Features Migration  (scripts/migrate-enterprise.js)
 //  Run once: npm run migrate:enterprise
 //  Or: node scripts/migrate-enterprise.js
 // ==========================================================================

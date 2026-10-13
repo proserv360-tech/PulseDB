@@ -206,10 +206,10 @@ describe('buildNotifierFromRow', () => {
 
     it('routes webhook to WebhookNotifier', () => {
         const n = ds.buildNotifierFromRow(baseRow('webhook', {
-            url: 'https://example.com/fathom',
+            url: 'https://example.com/pulsedb',
         }, 'hmac-secret'));
         assert.ok(n instanceof notifiers.WebhookNotifier);
-        assert.equal(n.url, 'https://example.com/fathom');
+        assert.equal(n.url, 'https://example.com/pulsedb');
     });
 
     it('throws on unknown providers', () => {

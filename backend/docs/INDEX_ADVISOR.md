@@ -1,4 +1,4 @@
-# FATHOM — Postgres Index Advisor
+# PulseDB — Postgres Index Advisor
 
 The index advisor inspects a monitored Postgres connection and surfaces three
 categories of index problems: **unused** indexes (wasting disk + write I/O),
@@ -14,7 +14,7 @@ only.
 
 All endpoints are mounted under the standard API prefix and gated by
 `authenticate` + `resolveWorkspace` + `requireWorkspaceRole('viewer')` for
-reads. They accept the same `connectionId` the rest of FATHOM uses to select a
+reads. They accept the same `connectionId` the rest of PulseDB uses to select a
 monitored Postgres pool.
 
 ### `GET /advisor/indexes/unused`

@@ -3,7 +3,7 @@
 -- The Postgres auto_explain extension writes the JSON plan of every
 -- statement that exceeds log_min_duration_statement (or the auto_explain
 -- threshold) to the server log. A log shipper (Vector / Filebeat / the
--- forthcoming FATHOM agent) parses each entry and POSTs it to
+-- forthcoming PulseDB agent) parses each entry and POSTs it to
 -- /api/auto-explain/ingest. We store the parsed plan alongside the
 -- (redacted) SQL text and surface it next to the live "EXPLAIN now"
 -- output so the operator sees the plan that actually ran in production.

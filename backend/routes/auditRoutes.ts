@@ -107,7 +107,7 @@ export default function auditRoutes(pool, authenticate, requireScreen) {
             // Build a filename that encodes the range for easy archival.
             const safeFrom = (from ? from.toISOString() : 'all').replace(/[:.]/g, '-');
             const safeTo   = (to   ? to.toISOString()   : 'now').replace(/[:.]/g, '-');
-            const filename = `fathom-audit-${safeFrom}_${safeTo}.${format}`;
+            const filename = `pulsedb-audit-${safeFrom}_${safeTo}.${format}`;
 
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
             res.setHeader('X-Content-Type-Options', 'nosniff');

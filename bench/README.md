@@ -1,6 +1,6 @@
-# FATHOM benchmark harness (C7)
+# PulseDB benchmark harness (C7)
 
-Reproducible load tests against a running FATHOM web tier. Three
+Reproducible load tests against a running PulseDB web tier. Three
 scenarios cover the hot paths identified by the gap analysis:
 
 | Scenario            | What it loads                                    | Target                               |
@@ -9,7 +9,7 @@ scenarios cover the hot paths identified by the gap analysis:
 | `alerts_fire.js`    | `POST /api/alerts/run-monitoring` (cron path)    | Median dispatch < 2 s                |
 | `dashboard_read.js` | Cycles a representative dashboard endpoint       | p95 < 250 ms                         |
 
-Targets come from `FATHOM_Implementation_Plan_2026-06-02.docx` §7. They
+Targets come from `PULSEDB_Implementation_Plan_2026-06-02.docx` §7. They
 are the public numbers we want to defend; CI runs a smaller smoke
 version of each on every PR (commented in `bench/k6/smoke.js`).
 
@@ -22,7 +22,7 @@ brew install k6      # or apt-get / scoop equivalent
 # Smoke a single scenario
 k6 run \
   -e BASE_URL=http://localhost:5000 \
-  -e SDK_KEY=$FATHOM_SDK_KEY \
+  -e SDK_KEY=$PULSEDB_SDK_KEY \
   bench/k6/otlp_ingest.js
 
 # Full sustained run (10 minutes per scenario)

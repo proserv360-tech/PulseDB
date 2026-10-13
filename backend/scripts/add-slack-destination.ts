@@ -18,7 +18,7 @@
  *   Options:
  *     --name <label>       destination name        (default: slack-alerts)
  *     --severity <level>   debug|info|warning|error|critical  (default: warning)
- *     --org <id>           organisation id         (default: FATHOM_DEFAULT_ORG_ID, or the only org)
+ *     --org <id>           organisation id         (default: PULSEDB_DEFAULT_ORG_ID, or the only org)
  *     --test               send a test alert through it afterwards
  *
  * Requires ENCRYPTION_KEY in .env — secrets are encrypted at rest.
@@ -39,13 +39,13 @@ const has = (name: string) => process.argv.includes(`--${name}`);
 
 /** Pick an org: explicit flag, then env, then the only one that exists. */
 async function resolveOrgId(): Promise<number> {
-    const explicit = arg('org') || process.env.FATHOM_DEFAULT_ORG_ID;
+    const explicit = arg('org') || process.env.PULSEDB_DEFAULT_ORG_ID;
     if (explicit) return Number(explicit);
 
     if (!(await pool.query(`SELECT to_regclass('pgmonitoringtool.organizations') AS t`)).rows[0].t) {
         // No organizations table on this database — destinations are still
         // usable because 0025 leaves org_id unconstrained when the parent is
-        // absent. Default to 1 and let FATHOM_DEFAULT_ORG_ID match it.
+        // absent. Default to 1 and let PULSEDB_DEFAULT_ORG_ID match it.
         console.log(`${Y}  no organizations table — defaulting to org_id 1${O}`);
         return 1;
     }
@@ -109,9 +109,9 @@ async function main() {
         `${D}  mode=${webhook ? 'incoming webhook' : 'bot token'}  secret ${created.hasSecret ? 'encrypted at rest' : 'not required'}${O}`,
     );
 
-    if (process.env.FATHOM_DEFAULT_ORG_ID !== String(orgId)) {
+    if (process.env.PULSEDB_DEFAULT_ORG_ID !== String(orgId)) {
         console.log(
-            `\n${Y}  Set FATHOM_DEFAULT_ORG_ID=${orgId} in backend/.env, otherwise alerts` +
+            `\n${Y}  Set PULSEDB_DEFAULT_ORG_ID=${orgId} in backend/.env, otherwise alerts` +
                 `\n  fire with no org and this destination is never reached.${O}`,
         );
     }
@@ -130,9 +130,9 @@ async function main() {
         const [result] = await manager.dispatch({
             id: `test-${Date.now()}`,
             severity: 'warning',
-            title: 'FATHOM test alert',
+            title: 'PulseDB test alert',
             message: 'If you can read this in Slack, the destination is wired up.',
-            source: 'fathom',
+            source: 'pulsedb',
             component: 'cli-test',
             timestamp: new Date().toISOString(),
             metadata: {},

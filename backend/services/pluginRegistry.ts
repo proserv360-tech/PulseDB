@@ -4,7 +4,7 @@
  * ──────────────────────────
  * Plugin manifest validation + registry access.
  *
- * Plugins never execute server-side code in the FATHOM host — they contribute
+ * Plugins never execute server-side code in the PulseDB host — they contribute
  * declarative dashboards, alert templates, and front-end panel bundles. This
  * makes the supply-chain small and auditable.
  */
@@ -26,7 +26,7 @@ export function validateManifest(m) {
     if (!SLUG.test(m.slug || '')) errors.push('slug must be kebab-case, ≤64 chars');
     if (!SEMVER.test(m.version || '')) errors.push('version must be semver');
     if (!m.name) errors.push('name is required');
-    if (!m.minFathomApi) errors.push('minFathomApi is required');
+    if (!m.minPulseDBApi) errors.push('minPulseDBApi is required');
     if (!Array.isArray(m.capabilities) || m.capabilities.length === 0) {
         errors.push('capabilities must be a non-empty array');
     } else {

@@ -1,7 +1,7 @@
 /**
  * Tremor-inspired Dashboard UI Components
  * ────────────────────────────────────────
- * Purpose-built for FATHOM PostgreSQL monitoring dashboard.
+ * Purpose-built for PulseDB PostgreSQL monitoring dashboard.
  * Inspired by Tremor (tremor.so) design language.
  * Compatible with React 19 + Tailwind CSS 4 + Recharts 3.
  */

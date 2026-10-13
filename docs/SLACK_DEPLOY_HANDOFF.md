@@ -90,7 +90,7 @@ sent, so nothing is modified and nothing is posted to Slack.
 
 Two things must happen alongside it, or alerts arrive twice:
 
-1. Invite the bot to the channel (`/invite @FATHOM`). `chat.postMessage` and
+1. Invite the bot to the channel (`/invite @PulseDB`). `chat.postMessage` and
    `chat.update` both fail with `not_in_channel` otherwise.
 2. Disable the webhook-mode Slack destination, so delivery does not run through
    both the global bot token and the per-org fan-out:

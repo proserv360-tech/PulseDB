@@ -1,6 +1,6 @@
-# Database Adapters for FATHOM
+# Database Adapters for PulseDB
 
-This directory contains a unified database monitoring abstraction layer that allows FATHOM to support multiple database engines while maintaining a single, standardized interface.
+This directory contains a unified database monitoring abstraction layer that allows PulseDB to support multiple database engines while maintaining a single, standardized interface.
 
 ## Quick Start
 
@@ -292,4 +292,4 @@ dbAdapters/
 
 ## License
 
-Part of the FATHOM monitoring system.
+Part of the PulseDB monitoring system.

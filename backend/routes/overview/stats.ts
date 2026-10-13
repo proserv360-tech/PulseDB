@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/stats
+//  PulseDB — /api/overview/stats
 //  Returns: connections, cache hit ratio, disk size, uptime, system resources,
 //           latency percentiles, pg version, host
 // ==========================================================================

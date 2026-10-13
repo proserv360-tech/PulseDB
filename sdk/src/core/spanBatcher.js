@@ -138,7 +138,7 @@ class SpanBatcher {
           scopeSpans: [
             {
               scope: {
-                name: '@fathom/sdk',
+                name: '@pulsedb/sdk',
                 version: SDK_VERSION,
               },
               spans: otlpSpans,

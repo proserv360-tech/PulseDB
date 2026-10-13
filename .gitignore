@@ -105,3 +105,8 @@ backend/scripts/*.dump
 
 # Local DB backup dump (real user data) — never commit
 supabase_backup_tool_monitoring/
+
+# Go example build output
+sdk/go/examples/*/gin
+sdk/go/examples/*/nethttp
+*-go-tmp-umask

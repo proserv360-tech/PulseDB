@@ -1,4 +1,4 @@
-# Python — OTel to FATHOM
+# Python — OTel to PulseDB
 
 Targets `psycopg` (≥ 3) and `psycopg2`, with examples for SQLAlchemy and
 Django. Requires `opentelemetry-api` ≥ 1.24.
@@ -67,7 +67,7 @@ This produces queries like:
 SELECT * FROM orders /*traceparent='00-...-...-01'*/
 ```
 
-FATHOM's parser handles both leading and trailing comments.
+PulseDB's parser handles both leading and trailing comments.
 
 ### Django
 
@@ -76,7 +76,7 @@ out of the box; no per-view changes needed.
 
 ## Verify
 
-After enabling, issue a request. In FATHOM the corresponding slow query
+After enabling, issue a request. In PulseDB the corresponding slow query
 should render with its traceparent. If the comment is not appearing,
 confirm your `OTEL_PYTHON_LOG_CORRELATION=true` env var and that the
 tracer provider is initialised _before_ engine creation.

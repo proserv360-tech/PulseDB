@@ -1,17 +1,17 @@
-"""Tests for FathomTransport."""
+"""Tests for PulseDBTransport."""
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 import httpx
-from fathom_sdk.transport import FathomTransport
+from pulsedb_sdk.transport import PulseDBTransport
 
 
-class TestFathomTransport:
-    """Tests for FathomTransport."""
+class TestPulseDBTransport:
+    """Tests for PulseDBTransport."""
 
     def test_init_validates_args(self):
         """Transport initializes with required args."""
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
         )
@@ -27,7 +27,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"ingested": 2}
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -60,7 +60,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"ingested": 100}
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -88,7 +88,7 @@ class TestFathomTransport:
 
         mock_client.post.side_effect = [mock_response_500, mock_response_200]
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -117,7 +117,7 @@ class TestFathomTransport:
 
         mock_client.post.side_effect = [mock_response_429, mock_response_200]
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -142,7 +142,7 @@ class TestFathomTransport:
 
         mock_client.post.return_value = mock_response_400
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -168,7 +168,7 @@ class TestFathomTransport:
 
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -191,7 +191,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"acknowledged": True}
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -234,7 +234,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"status": "ok"}
         mock_client.get.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -259,7 +259,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"ingested": 1}
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,
@@ -280,7 +280,7 @@ class TestFathomTransport:
         mock_response.json.return_value = {"ingested": 1}
         mock_client.post.return_value = mock_response
 
-        transport = FathomTransport(
+        transport = PulseDBTransport(
             api_key="sk_live_test",
             endpoint="https://api.example.com",
             http_client=mock_client,

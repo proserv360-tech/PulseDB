@@ -439,7 +439,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ embedded = false, onClose }) => {
             {/* middle illustration panel */}
             <div className="si-art" style={styles.art}>
                 <div key={mode} className="si-swap">
-                    <h1 style={styles.artTitle}>{isSignup ? 'Join Fathom.' : 'Welcome Back.'}</h1>
+                    <h1 style={styles.artTitle}>{isSignup ? 'Join PulseDB.' : 'Welcome Back.'}</h1>
                     <p style={styles.artSub}>{isSignup ? 'Create your account to get started.' : 'Please enter your credentials.'}</p>
                 </div>
                 <div style={{ marginTop: 18 }}><FleetArt /></div>

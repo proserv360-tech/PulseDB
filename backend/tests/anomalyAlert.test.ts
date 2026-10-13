@@ -22,13 +22,13 @@ function makeEngine() {
 }
 beforeEach(() => anomalyEvaluator.resetAll());
 test('no-op when mode off', async () => {
-    delete process.env.FATHOM_ANOMALY_MODE;
+    delete process.env.PULSEDB_ANOMALY_MODE;
     const { engine, fired } = makeEngine();
     assert.deepEqual(await engine.evaluateAnomalies({ activeConnections: 5 }), []);
     assert.equal(fired.length, 0);
 });
 test('fires warning on spike in page mode', async () => {
-    process.env.FATHOM_ANOMALY_MODE = 'page';
+    process.env.PULSEDB_ANOMALY_MODE = 'page';
     const { engine, fired } = makeEngine();
     for (let i = 0; i < 40; i++) await engine.evaluateAnomalies({ activeConnections: 10 + (i % 2) });
     const before = fired.length;
@@ -39,10 +39,10 @@ test('fires warning on spike in page mode', async () => {
     assert.ok(a.length >= 1);
     assert.equal(a[0].severity, 'warning');
     assert.equal(a[0].data.suggestionOnly, false);
-    delete process.env.FATHOM_ANOMALY_MODE;
+    delete process.env.PULSEDB_ANOMALY_MODE;
 });
 test('suggest mode → info + suggestionOnly', async () => {
-    process.env.FATHOM_ANOMALY_MODE = 'suggest';
+    process.env.PULSEDB_ANOMALY_MODE = 'suggest';
     const { engine, fired } = makeEngine();
     for (let i = 0; i < 40; i++) await engine.evaluateAnomalies({ diskUsedGB: 20 });
     const before = fired.length;
@@ -51,12 +51,12 @@ test('suggest mode → info + suggestionOnly', async () => {
     assert.ok(a.length >= 1);
     assert.equal(a[0].severity, 'info');
     assert.equal(a[0].data.suggestionOnly, true);
-    delete process.env.FATHOM_ANOMALY_MODE;
+    delete process.env.PULSEDB_ANOMALY_MODE;
 });
 test('flat series never fires', async () => {
-    process.env.FATHOM_ANOMALY_MODE = 'page';
+    process.env.PULSEDB_ANOMALY_MODE = 'page';
     const { engine, fired } = makeEngine();
     for (let i = 0; i < 50; i++) await engine.evaluateAnomalies({ blockingLocks: 2 });
     assert.equal(fired.filter((x) => x.category === 'anomaly' && x.data.metricKey === 'db.blocking_locks').length, 0);
-    delete process.env.FATHOM_ANOMALY_MODE;
+    delete process.env.PULSEDB_ANOMALY_MODE;
 });

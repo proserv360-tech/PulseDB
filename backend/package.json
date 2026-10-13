@@ -2,7 +2,7 @@
     "name": "postgrestool-backend",
     "version": "1.0.0",
     "type": "module",
-    "description": "FATHOM — Universal Database Monitoring & Administration Backend",
+    "description": "PulseDB — Universal Database Monitoring & Administration Backend",
     "main": "server.ts",
     "_note_optionalDependencies": "Phase-5 engine peer drivers. Each adapter in services/dbAdapters/ uses dynamic import() with graceful fallback, so these are OPTIONAL — npm install will still succeed on platforms where one of them can't build (e.g. oracledb needs the Oracle Instant Client). Only the drivers for engines you actually connect to need to be present at runtime.",
     "scripts": {

@@ -177,7 +177,7 @@ export default function alertDslRoutes(pool, authenticate, metricsProviderFactor
                 ruleId: 0,
                 ruleName: 'Test alert',
                 severity: 'warning',
-                message: 'Hello from FATHOM alerting.',
+                message: 'Hello from PulseDB alerting.',
                 expression: 'cpu_pct > 90',
                 value: 93.1,
                 connectionId: req.body?.connectionId,

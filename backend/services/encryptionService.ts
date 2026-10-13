@@ -2,7 +2,7 @@
 import crypto from 'crypto';
 
 /**
- * Encryption Service for FATHOM
+ * Encryption Service for PulseDB
  *
  * Two layers:
  *   1. AES-256-GCM — encrypts connection passwords at rest in the database.
@@ -25,7 +25,7 @@ const PBKDF2_DIGEST = 'sha256';
 // Derive salt deterministically from a fixed prefix hash to ensure consistency across restarts.
 // This allows data encrypted before a restart to be decrypted after the restart.
 function getDeterministicSalt() {
-    const prefix = 'fathom-encryption-salt-v1';
+    const prefix = 'pulsedb-encryption-salt-v1';
     return crypto.createHash('sha256').update(prefix).digest().slice(0, 16);
 }
 const SALT = getDeterministicSalt();
@@ -85,9 +85,9 @@ function getEncryptionSecret() {
 export function validateEncryptionConfig() {
     try {
         const secret = getEncryptionSecret();
-        const test = encrypt('fathom-self-test');
+        const test = encrypt('pulsedb-self-test');
         const back = decrypt(test);
-        if (back !== 'fathom-self-test') {
+        if (back !== 'pulsedb-self-test') {
             throw new Error('Encrypt/decrypt round-trip failed');
         }
         return true;
@@ -221,7 +221,7 @@ function deriveFieldKey() {
     // Re-use the same key-derivation as encrypt() — but in a separate domain
     // so a leaked field ciphertext can't be confused with a connection
     // secret ciphertext. The salt + info pair domain-separates the keys.
-    const info = Buffer.from('fathom-field-encryption-v1', 'utf8');
+    const info = Buffer.from('pulsedb-field-encryption-v1', 'utf8');
     // Fail closed: never derive from a hardcoded default (audit L-2). The boot
     // preflight already requires ENCRYPTION_KEY; this keeps parity with getKey().
     const fieldSecret = process.env.ENCRYPTION_KEY;

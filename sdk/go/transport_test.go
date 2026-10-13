@@ -1,4 +1,4 @@
-package fathom
+package pulsedb
 
 import (
 	"context"

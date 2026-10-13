@@ -315,7 +315,7 @@ export function buildNotifierFromRow(row, { httpFn } = {}) {
             if (!secret) throw new Error('pagerduty destination missing routing key secret');
             return new PagerDutyNotifier({
                 routingKey: secret,
-                source: cfg.source || 'fathom',
+                source: cfg.source || 'pulsedb',
                 ...common,
             });
         }
@@ -324,7 +324,7 @@ export function buildNotifierFromRow(row, { httpFn } = {}) {
             return new OpsgenieNotifier({
                 apiKey: secret,
                 euRegion: (cfg.region === 'eu'),
-                source: cfg.source || 'fathom',
+                source: cfg.source || 'pulsedb',
                 responderTeams: Array.isArray(cfg.responderTeams) ? cfg.responderTeams : [],
                 tags: Array.isArray(cfg.tags) ? cfg.tags : [],
                 ...common,

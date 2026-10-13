@@ -14,7 +14,7 @@
  *   writeTabCache('performance', connId, freshData);
  */
 
-const PREFIX = 'fathom_tabcache_';
+const PREFIX = 'pulsedb_tabcache_';
 const DEFAULT_TTL = 120_000; // 2 minutes, matches OverviewTab
 
 interface CacheEnvelope<T> {

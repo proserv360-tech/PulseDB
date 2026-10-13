@@ -234,7 +234,7 @@ export async function runRetentionCleanup(pool, orgId) {
         try {
             const aeRes = await pool.query(
                 `DELETE FROM ${S}.auto_explain_events WHERE captured_at < NOW() - ($1 || ' days')::interval`,
-                [String(Number(process.env.FATHOM_AUTO_EXPLAIN_DAYS) || 14)]
+                [String(Number(process.env.PULSEDB_AUTO_EXPLAIN_DAYS) || 14)]
             );
             deleted.auto_explain_events = aeRes.rowCount;
         } catch (err) { if (!/relation .* does not exist/i.test(err.message)) throw err; }

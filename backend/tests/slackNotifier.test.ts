@@ -34,7 +34,7 @@ const mkAlert = (overrides = {}) => ({
     severity: 'critical',
     title: 'Replication lag exceeded 10s',
     message: 'primary-1 lag=12.3s for 2m',
-    source: 'fathom',
+    source: 'pulsedb',
     component: 'primary-1',
     timestamp: '2026-04-22T10:00:00.000Z',
     metadata: { host: 'primary-1', lag_seconds: 12.3 },
@@ -95,7 +95,7 @@ describe('SlackNotifier — payload', () => {
 
     it('renders dashboard + runbook buttons when links are supplied', () => {
         const body = buildSlackBlocks(mkAlert({
-            dashboardUrl: 'https://fathom.example/d/1',
+            dashboardUrl: 'https://pulsedb.example/d/1',
             runbookUrl: 'https://wiki.example/runbooks/pg',
         }));
         const actionBlock = body.attachments[0].blocks.find(b => b.type === 'actions');

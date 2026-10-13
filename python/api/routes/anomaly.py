@@ -1,6 +1,6 @@
 """Anomaly detection endpoints.
 
-Statistical anomaly detection on FATHOM metric time-series — rolling z-score,
+Statistical anomaly detection on PulseDB metric time-series — rolling z-score,
 exponentially-weighted moving averages (EWMA), and a simple hour-of-week
 seasonal residual. Deliberately statistics-based (no model training) so it
 works out-of-the-box on day one of a workspace's history.

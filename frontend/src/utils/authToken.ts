@@ -16,7 +16,7 @@
  * exists mainly for legacy header-based calls during migration.
  */
 
-const TOKEN_KEY = 'fathom_token';
+const TOKEN_KEY = 'pulsedb_token';
 
 /** Read the token if it is still in localStorage (legacy/header path). */
 export function getToken(): string | null {

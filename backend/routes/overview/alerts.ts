@@ -1,9 +1,9 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/alerts
+//  PulseDB — /api/overview/alerts
 //
 //  Two modes:
-//  1. Read from fathom_alerts table (if exists) — persistent, dismissable
+//  1. Read from pulsedb_alerts table (if exists) — persistent, dismissable
 //  2. Auto-generate alerts by inspecting live pg metrics (always available)
 //
 //  Both modes are merged and deduplicated by fingerprint.
@@ -42,7 +42,7 @@ router.get('/', async (_req, res, next) => {
 router.patch('/:id/read', async (req, res, next) => {
     try {
         await ensureAlertsTable();
-        await query(`UPDATE fathom_alerts SET read = true WHERE id = $1`, [req.params.id]);
+        await query(`UPDATE pulsedb_alerts SET read = true WHERE id = $1`, [req.params.id]);
         res.json({ ok: true });
     } catch (err) {
         next(err);
@@ -53,7 +53,7 @@ router.patch('/:id/read', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
     try {
         await ensureAlertsTable();
-        await query(`UPDATE fathom_alerts SET dismissed = true WHERE id = $1`, [req.params.id]);
+        await query(`UPDATE pulsedb_alerts SET dismissed = true WHERE id = $1`, [req.params.id]);
         res.json({ ok: true });
     } catch (err) {
         next(err);
@@ -64,7 +64,7 @@ router.delete('/:id', async (req, res, next) => {
 router.patch('/read-all', async (_req, res, next) => {
     try {
         await ensureAlertsTable();
-        await query(`UPDATE fathom_alerts SET read = true WHERE read = false`);
+        await query(`UPDATE pulsedb_alerts SET read = true WHERE read = false`);
         res.json({ ok: true });
     } catch (err) {
         next(err);
@@ -76,14 +76,14 @@ router.patch('/read-all', async (_req, res, next) => {
    ══════════════════════════════════════════════════════════════════════════ */
 
 async function fetchStoredAlerts() {
-    const exists = await tableExists('fathom_alerts');
+    const exists = await tableExists('pulsedb_alerts');
     if (!exists) return [];
 
     const result = await query(`
         SELECT
             id, severity, title, message, fingerprint,
             read, dismissed, created_at
-        FROM fathom_alerts
+        FROM pulsedb_alerts
         WHERE dismissed = false
           AND created_at > now() - interval '24 hours'
         ORDER BY created_at DESC
@@ -282,7 +282,7 @@ async function tableExists(name) {
 
 async function ensureAlertsTable() {
     await query(`
-        CREATE TABLE IF NOT EXISTS fathom_alerts (
+        CREATE TABLE IF NOT EXISTS pulsedb_alerts (
             id          BIGSERIAL PRIMARY KEY,
             severity    TEXT        NOT NULL DEFAULT 'info',
             title       TEXT        NOT NULL,

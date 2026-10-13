@@ -1,7 +1,7 @@
-# FATHOM — Per-Organization Integrations
+# PulseDB — Per-Organization Integrations
 
-FATHOM's alert fan-out lets each organization configure its own notification
-destinations. When an alert fires against an organization, FATHOM dispatches
+PulseDB's alert fan-out lets each organization configure its own notification
+destinations. When an alert fires against an organization, PulseDB dispatches
 it in parallel to every enabled destination that organization has set up —
 Slack, PagerDuty, Opsgenie, Microsoft Teams, or a signed generic webhook.
 
@@ -56,7 +56,7 @@ still scoped to the org they name in the header.)
 | DELETE | `/api/integrations/:id`      | —                                                             | admin+  |
 | POST   | `/api/integrations/:id/test` | `{ severity? }` (default `warning`)                           | admin+  |
 
-`POST /test` dispatches a canned `"FATHOM integration test"` alert to the
+`POST /test` dispatches a canned `"PulseDB integration test"` alert to the
 one destination and returns the raw `NotifierManager` result
 (`{ ok, status, detail, ... }`).
 
@@ -118,7 +118,7 @@ Only `https://hooks.slack.com/` URLs are accepted for the webhook mode.
     "name": "pagerduty-primary",
     "provider": "pagerduty",
     "minSeverity": "error",
-    "config": { "source": "fathom-prod" },
+    "config": { "source": "pulsedb-prod" },
     "secret": "<32-char-events-api-integration-key>"
 }
 ```
@@ -133,7 +133,7 @@ Only `https://hooks.slack.com/` URLs are accepted for the webhook mode.
     "config": {
         "region": "eu",
         "responderTeams": ["DB On-call"],
-        "tags": ["fathom", "postgres"]
+        "tags": ["pulsedb", "postgres"]
     },
     "secret": "<opsgenie-api-integration-key>"
 }
@@ -156,7 +156,7 @@ Only `https://hooks.slack.com/` URLs are accepted for the webhook mode.
 ### Generic signed webhook
 
 Posts a JSON body signed with an HMAC-SHA256 timestamped header,
-`X-FATHOM-Signature: t=<unix>,v1=<hex>`. Receivers verify with
+`X-PULSEDB-Signature: t=<unix>,v1=<hex>`. Receivers verify with
 `verifyWebhookSignature()` exported from `services/notifiers/webhookNotifier.js`.
 
 ```json
@@ -164,7 +164,7 @@ Posts a JSON body signed with an HMAC-SHA256 timestamped header,
     "name": "siem",
     "provider": "webhook",
     "config": {
-        "url": "https://siem.example.com/fathom",
+        "url": "https://siem.example.com/pulsedb",
         "extraHeaders": { "X-Env": "prod" }
     },
     "secret": "<hmac-shared-secret>"
@@ -187,7 +187,7 @@ Every rotation is recorded in the audit log with
 
 `EnhancedAlertEngine.fire(severity, category, message, data)` looks at
 `data.orgId` (falling back to `data.organizationId`). If an `orgId` is
-present, FATHOM fans out in parallel to every enabled destination for that
+present, PulseDB fans out in parallel to every enabled destination for that
 organization. The legacy global `SLACK_WEBHOOK_URL` continues to work for
 backwards compatibility — both paths fire independently.
 

@@ -58,7 +58,7 @@ const DBATaskSchedulerTab = () => {
   };
 
   const getAuthHeader = () => {
-    const token = localStorage.getItem('fathom_token');
+    const token = localStorage.getItem('pulsedb_token');
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

@@ -556,7 +556,7 @@ export default function registerConnectionRoutes(app) {
                     await testConn.end();
                 } else {
                     // Try as-is first; on cert errors, retry with the configured SSL
-                    // policy (see buildSslOption + FATHOM_TLS_ALLOW_SELF_SIGNED).
+                    // policy (see buildSslOption + PULSEDB_TLS_ALLOW_SELF_SIGNED).
                     // PRF-03 (audit): always end() the test pool, even on the
                     // failure path, so we don't leak open sockets when the connect()
                     // succeeds but the followup query throws.

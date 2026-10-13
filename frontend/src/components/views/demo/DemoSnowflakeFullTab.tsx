@@ -321,13 +321,13 @@ const SF = {
             { name: 'MARKETING_ATTRIBUTION', provider: 'AD_PARTNER_X', last_refresh: '12h ago' },
         ],
         outbound: [
-            { name: 'FATHOM_ANALYTICS_READONLY', consumers: 8, last_accessed: '12m ago' },
-            { name: 'FATHOM_COHORT_FEED', consumers: 3, last_accessed: '2h ago' },
+            { name: 'PULSEDB_ANALYTICS_READONLY', consumers: 8, last_accessed: '12m ago' },
+            { name: 'PULSEDB_COHORT_FEED', consumers: 3, last_accessed: '2h ago' },
         ],
     },
     replication: [
         {
-            db: 'FATHOM_PROD',
+            db: 'PULSEDB_PROD',
             primary: 'acme-us-east-1',
             replicated_to: 'acme-eu-west-1',
             is_primary: true,
@@ -335,7 +335,7 @@ const SF = {
             lag_ms: 4_200,
         },
         {
-            db: 'FATHOM_DEV',
+            db: 'PULSEDB_DEV',
             primary: 'acme-us-east-1',
             replicated_to: null,
             is_primary: true,
@@ -1008,7 +1008,7 @@ function ReplicationPanel() {
                         acme-us-east-1
                     </text>
                     <text x={120} y={176} textAnchor="middle" fontSize={11} fill={THEME.textDim}>
-                        FATHOM_PROD / FATHOM_DEV
+                        PULSEDB_PROD / PULSEDB_DEV
                     </text>
 
                     {/* Edge */}
@@ -1026,7 +1026,7 @@ function ReplicationPanel() {
                         acme-eu-west-1
                     </text>
                     <text x={520} y={176} textAnchor="middle" fontSize={11} fill={THEME.textDim}>
-                        FATHOM_PROD (read-only)
+                        PULSEDB_PROD (read-only)
                     </text>
                 </svg>
 

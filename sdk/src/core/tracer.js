@@ -1,5 +1,5 @@
 /**
- * FATHOM SDK — Distributed Tracing (OTLP/HTTP)
+ * PulseDB SDK — Distributed Tracing (OTLP/HTTP)
  * Zero dependencies, context propagation, W3C traceparent support
  */
 
@@ -151,9 +151,9 @@ class Span {
 }
 
 /**
- * FathomTracer — Main tracer interface
+ * PulseDBTracer — Main tracer interface
  */
-class FathomTracer {
+class PulseDBTracer {
   constructor(client) {
     this.client = client;
     this.spanBatcher = null;
@@ -246,4 +246,4 @@ class FathomTracer {
   }
 }
 
-export { FathomTracer, Span, AsyncContextManager };
+export { PulseDBTracer, Span, AsyncContextManager };

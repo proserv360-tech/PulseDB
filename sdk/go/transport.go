@@ -1,4 +1,4 @@
-package fathom
+package pulsedb
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Transport handles HTTP communication with FATHOM backend
+// Transport handles HTTP communication with PulseDB backend
 type Transport struct {
 	apiKey     string
 	endpoint   string
@@ -118,7 +118,7 @@ func (t *Transport) PostIngest(ctx context.Context, events []*SdkEvent) (int, er
 
 // PostHeartbeat sends a heartbeat to /api/sdk/heartbeat
 // PostRaw POSTs a pre-marshalled JSON body to a non-/ingest path on the
-// same backend, sharing the apiKey header. Used by the FATHOM agent
+// same backend, sharing the apiKey header. Used by the PulseDB agent
 // (C1) to forward wait-event and query-stats batches without
 // re-implementing the back-off + retry envelope inside transport.go.
 //

@@ -1,9 +1,9 @@
 /**
- * FATHOM SDK — Lightweight JavaScript SDK for observability
+ * PulseDB SDK — Lightweight JavaScript SDK for observability
  * Zero dependencies, built-in batching, auto-capture for Express
  */
 
-import { FathomTracer } from './core/tracer.js';
+import { PulseDBTracer } from './core/tracer.js';
 import { SpanBatcher } from './core/spanBatcher.js';
 
 // SDK version — keep in sync with package.json. Used for OTLP resource attributes.
@@ -53,18 +53,18 @@ class EventEmitter {
 }
 
 /**
- * FathomSDK class — Main entry point for observability
+ * PulseDBSDK class — Main entry point for observability
  */
-class FathomSDK extends EventEmitter {
+class PulseDBSDK extends EventEmitter {
   constructor(options = {}) {
     super();
 
     // Required options
     if (!options.apiKey) {
-      throw new Error('[FATHOM SDK] apiKey is required (e.g., sk_live_xxx)');
+      throw new Error('[PulseDB SDK] apiKey is required (e.g., sk_live_xxx)');
     }
     if (!options.endpoint) {
-      throw new Error('[FATHOM SDK] endpoint is required (e.g., https://fathom.example.com)');
+      throw new Error('[PulseDB SDK] endpoint is required (e.g., https://pulsedb.example.com)');
     }
 
     // Configuration
@@ -86,7 +86,7 @@ class FathomSDK extends EventEmitter {
     this.sessionId = this._generateId();
 
     // Initialize tracing
-    this.tracing = new FathomTracer(this);
+    this.tracing = new PulseDBTracer(this);
     this.spanBatcher = new SpanBatcher(this, 100, this.flushInterval, this.maxQueueSize);
     this.tracing.registerBatcher(this.spanBatcher);
     this.spanBatcher.start();
@@ -300,7 +300,7 @@ class FathomSDK extends EventEmitter {
   }
 
   /**
-   * Flush all queued events to FATHOM
+   * Flush all queued events to PulseDB
    */
   async flush() {
     // Re-entrancy guard: a batchSize-overflow flush and a timer flush can fire
@@ -317,7 +317,7 @@ class FathomSDK extends EventEmitter {
 
     this.isFlushing = true;
     const batch = this.queue.splice(0, this.batchSize);
-    this._log(`[Flush] Sending ${batch.length} events to FATHOM`);
+    this._log(`[Flush] Sending ${batch.length} events to PulseDB`);
 
     try {
       await this._sendWithRetry(batch);
@@ -404,7 +404,7 @@ class FathomSDK extends EventEmitter {
   }
 
   /**
-   * Send a heartbeat to FATHOM
+   * Send a heartbeat to PulseDB
    */
   async heartbeat(status = 'healthy', metadata = {}) {
     this._log('[Heartbeat] Sending heartbeat:', status);
@@ -498,10 +498,10 @@ class FathomSDK extends EventEmitter {
    */
   _log(...args) {
     if (this.debug) {
-      console.log('[FATHOM]', ...args);
+      console.log('[PulseDB]', ...args);
     }
   }
 }
 
-export default FathomSDK;
-export { FathomSDK };
+export default PulseDBSDK;
+export { PulseDBSDK };

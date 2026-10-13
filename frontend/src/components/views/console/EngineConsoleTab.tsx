@@ -46,7 +46,7 @@ const PROMPT_COLORS: Record<string, string> = {
 };
 
 const HISTORY_LIMIT = 40;
-const HISTORY_KEY = 'fathom_console_history';
+const HISTORY_KEY = 'pulsedb_console_history';
 
 export default function EngineConsoleTab() {
     useAdaptiveTheme();

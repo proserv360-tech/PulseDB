@@ -1,20 +1,20 @@
-# FATHOM SDK Quick Reference Guide
+# PulseDB SDK Quick Reference Guide
 
 ## Installation
 
 ```bash
-npm install @fathom/sdk
+npm install @pulsedb/sdk
 ```
 
 ## Core Components at a Glance
 
-### 1. FathomClient - Main API Interface
+### 1. PulseDBClient - Main API Interface
 
 ```javascript
-import { FathomClient } from '@fathom/sdk';
+import { PulseDBClient } from '@pulsedb/sdk';
 
-const client = new FathomClient({
-    baseUrl: 'https://api.fathom.example.com',
+const client = new PulseDBClient({
+    baseUrl: 'https://api.pulsedb.example.com',
     apiKey: 'sk_test_...',
     orgId: 'org_123',
 });
@@ -37,7 +37,7 @@ client.unsubscribe('alert', subscriptionId);
 ### 2. SalesforceConnector - Salesforce Integration
 
 ```javascript
-import { SalesforceConnector } from '@fathom/sdk';
+import { SalesforceConnector } from '@pulsedb/sdk';
 
 const sf = new SalesforceConnector({
     instanceUrl: 'https://login.salesforce.com',
@@ -58,14 +58,14 @@ await sf.getAuditTrail();
 await sf.getOrgs();
 await sf.getObjects();
 
-// Sync to FATHOM
-await sf.syncToFathom(client, { includeAuditTrail: true });
+// Sync to PulseDB
+await sf.syncToPulseDB(client, { includeAuditTrail: true });
 ```
 
 ### 3. MulesoftConnector - Mulesoft Integration
 
 ```javascript
-import { MulesoftConnector } from '@fathom/sdk';
+import { MulesoftConnector } from '@pulsedb/sdk';
 
 const mule = new MulesoftConnector({
     anyPointUrl: 'https://anypoint.mulesoft.com',
@@ -85,8 +85,8 @@ await mule.getApiAnalytics('api_id');
 await mule.getAlerts();
 await mule.getAuditLogs();
 
-// Sync to FATHOM
-await mule.syncToFathom(client, {
+// Sync to PulseDB
+await mule.syncToPulseDB(client, {
     includeApps: true,
     includeApis: true,
 });
@@ -95,7 +95,7 @@ await mule.syncToFathom(client, {
 ### 4. DatabaseConnector - Multi-Database Support
 
 ```javascript
-import { DatabaseConnector } from '@fathom/sdk';
+import { DatabaseConnector } from '@pulsedb/sdk';
 
 const db = new DatabaseConnector({
     type: 'postgresql', // mysql, mongodb, mariadb, oracle
@@ -127,7 +127,7 @@ db.getCachedMetrics('performance');
 ### 5. EventEmitter - Event Management
 
 ```javascript
-import { EventEmitter } from '@fathom/sdk';
+import { EventEmitter } from '@pulsedb/sdk';
 
 const emitter = new EventEmitter();
 
@@ -148,7 +148,7 @@ emitter.eventNames();
 ### 6. Logger - Structured Logging
 
 ```javascript
-import { Logger } from '@fathom/sdk';
+import { Logger } from '@pulsedb/sdk';
 
 const logger = new Logger({
     name: 'MyApp',
@@ -173,7 +173,7 @@ logger.exportHistory();
 ### 7. AuthManager - Authentication
 
 ```javascript
-import { AuthManager } from '@fathom/sdk';
+import { AuthManager } from '@pulsedb/sdk';
 
 // API Key Auth
 const apiAuth = new AuthManager({
@@ -204,7 +204,7 @@ jwtAuth.setTokenExpiration(3600);
 ### Workflow 1: Monitor PostgreSQL Performance
 
 ```javascript
-const client = new FathomClient({
+const client = new PulseDBClient({
     /* config */
 });
 const db = new DatabaseConnector({ type: 'postgresql' /* ... */ });
@@ -230,7 +230,7 @@ db.on('performance_updated', (perf) => {
 const sf = new SalesforceConnector({
     /* config */
 });
-const client = new FathomClient({
+const client = new PulseDBClient({
     /* config */
 });
 
@@ -246,8 +246,8 @@ sf.on('metrics_updated', (m) => {
     }
 });
 
-// Sync to FATHOM dashboard
-await sf.syncToFathom(client);
+// Sync to PulseDB dashboard
+await sf.syncToPulseDB(client);
 ```
 
 ### Workflow 3: Monitor Mulesoft Applications
@@ -286,7 +286,7 @@ console.log('All databases monitored');
 ### Workflow 5: Real-Time Alert Handling
 
 ```javascript
-const client = new FathomClient({
+const client = new PulseDBClient({
     /* config */
 });
 
@@ -361,10 +361,10 @@ async function connectWithRetry(maxRetries = 3) {
 ### Production Environment
 
 ```javascript
-const client = new FathomClient({
-    baseUrl: process.env.FATHOM_API_URL,
-    apiKey: process.env.FATHOM_API_KEY,
-    orgId: process.env.FATHOM_ORG_ID,
+const client = new PulseDBClient({
+    baseUrl: process.env.PULSEDB_API_URL,
+    apiKey: process.env.PULSEDB_API_KEY,
+    orgId: process.env.PULSEDB_ORG_ID,
     options: {
         logLevel: 'warn',
         retryAttempts: 5,
@@ -382,7 +382,7 @@ const logger = new Logger({
 ### Development Environment
 
 ```javascript
-const client = new FathomClient({
+const client = new PulseDBClient({
     baseUrl: 'http://localhost:3000',
     apiKey: 'dev_key_123',
     orgId: 'dev_org',
@@ -438,7 +438,7 @@ const logger = new Logger({
 sdk/
 ├── src/index.js                  # Main exports
 ├── src/core/
-│   ├── client.js                 # FathomClient
+│   ├── client.js                 # PulseDBClient
 │   ├── auth.js                   # AuthManager
 │   ├── logger.js                 # Logger
 │   └── events.js                 # EventEmitter

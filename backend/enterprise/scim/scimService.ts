@@ -218,7 +218,7 @@ export class ScimService {
     serviceProviderConfig() {
         return {
             schemas: ['urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig'],
-            documentationUri: 'https://docs.fathom.example.com/scim',
+            documentationUri: 'https://docs.pulsedb.example.com/scim',
             patch: { supported: true },
             bulk: { supported: false, maxOperations: 0, maxPayloadSize: 0 },
             filter: { supported: true, maxResults: 200 },

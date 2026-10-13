@@ -37,7 +37,7 @@ export const AppStyles = React.memo(() => (
             }
         }
 
-        /* ═══ FATHOM — Clean & Refined ═══ */
+        /* ═══ PulseDB — Clean & Refined ═══ */
 
         /* ── Sidebar ── */
         aside {
@@ -80,10 +80,10 @@ export const AppStyles = React.memo(() => (
         }
 
         /* ═══ CARD SYSTEM — clean elevation ═══ */
-        .fathom-card {
+        .pulsedb-card {
             transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
         }
-        .fathom-card:hover {
+        .pulsedb-card:hover {
             box-shadow: ${
                 DS._dark
                     ? '0 4px 16px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15)'

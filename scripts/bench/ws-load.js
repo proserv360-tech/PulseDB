@@ -23,7 +23,7 @@ const { values } = parseArgs({
         url:      { type: 'string', default: 'ws://localhost:4000/ws' },
         clients:  { type: 'string', default: '500' },
         duration: { type: 'string', default: '30' },
-        token:    { type: 'string', default: process.env.FATHOM_JWT || '' },
+        token:    { type: 'string', default: process.env.PULSEDB_JWT || '' },
     },
 });
 

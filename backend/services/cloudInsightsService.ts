@@ -7,7 +7,7 @@
  * This is the activation layer the competitive-features hand-off referred to
  * as `_resolveCloudConfig`: instead of a single set of process-env AWS vars,
  * each workspace can register its own cloud credentials, encrypted at rest,
- * and FATHOM resolves them on demand to pull metrics.
+ * and PulseDB resolves them on demand to pull metrics.
  *
  * Providers
  *   • aws    → Amazon RDS / Aurora via CloudWatch (delegates to

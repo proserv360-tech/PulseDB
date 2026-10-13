@@ -72,7 +72,7 @@ const MS = {
         version: 'SQL Server 2022 (16.0.4085.2) CU13',
         edition: 'Enterprise',
         collation: 'SQL_Latin1_General_CP1_CI_AS',
-        cluster: 'FATHOM_AG',
+        cluster: 'PULSEDB_AG',
         os: 'Windows Server 2022',
     },
     kpis: [
@@ -161,7 +161,7 @@ const MS = {
         CXPACKET: 3_000 + Math.random() * 800,
     })),
     alwaysOn: {
-        name: 'FATHOM_AG',
+        name: 'PULSEDB_AG',
         role: 'PRIMARY',
         cluster_type: 'WSFC',
         replicas: [
@@ -204,14 +204,14 @@ const MS = {
             processes: [
                 {
                     spid: 54,
-                    db: 'fathom_prod',
+                    db: 'pulsedb_prod',
                     query: "UPDATE Orders SET Status='Shipped' WHERE Id=@id",
                     lock_mode: 'X',
                     resource: 'KEY: Orders.PK_Orders(id=8421)',
                 },
                 {
                     spid: 64,
-                    db: 'fathom_prod',
+                    db: 'pulsedb_prod',
                     query: 'UPDATE OrderLines SET Qty=@q WHERE OrderId=@id',
                     lock_mode: 'X',
                     resource: 'KEY: OrderLines.FK_OrderId(id=8421)',
@@ -225,7 +225,7 @@ const MS = {
     },
     missingIndexes: [
         {
-            database: 'fathom_prod',
+            database: 'pulsedb_prod',
             schema: 'dbo',
             table: 'Orders',
             equality: 'CustomerId',
@@ -235,7 +235,7 @@ const MS = {
             uses: 48_210,
         },
         {
-            database: 'fathom_prod',
+            database: 'pulsedb_prod',
             schema: 'dbo',
             table: 'LineItems',
             equality: 'ProductId',
@@ -245,7 +245,7 @@ const MS = {
             uses: 18_420,
         },
         {
-            database: 'fathom_prod',
+            database: 'pulsedb_prod',
             schema: 'dbo',
             table: 'AuditLog',
             equality: null,
@@ -255,7 +255,7 @@ const MS = {
             uses: 8_420,
         },
         {
-            database: 'fathom_prod',
+            database: 'pulsedb_prod',
             schema: 'dbo',
             table: 'Inventory',
             equality: 'Sku',
@@ -310,8 +310,8 @@ const MS = {
         },
     ],
     bufferPool: [
-        { database: 'fathom_prod', Orders: 842, Customers: 412, LineItems: 1_842, AuditLog: 2_210, Other: 184 },
-        { database: 'fathom_staging', Orders: 124, Customers: 88, LineItems: 420, AuditLog: 412, Other: 62 },
+        { database: 'pulsedb_prod', Orders: 842, Customers: 412, LineItems: 1_842, AuditLog: 2_210, Other: 184 },
+        { database: 'pulsedb_staging', Orders: 124, Customers: 88, LineItems: 420, AuditLog: 412, Other: 62 },
         { database: 'master', Orders: 0, Customers: 0, LineItems: 0, AuditLog: 0, Other: 18 },
         { database: 'msdb', Orders: 0, Customers: 0, LineItems: 0, AuditLog: 0, Other: 42 },
     ],
@@ -966,7 +966,7 @@ function BufferPoolPanel() {
                 </ResponsiveContainer>
             </div>
             <div style={{ fontSize: 11, color: THEME.textDim, padding: '0 12px 12px', fontStyle: 'italic' }}>
-                From <code>sys.dm_os_buffer_descriptors</code>. AuditLog consuming 2.2M pages in fathom_prod — 50%+ of
+                From <code>sys.dm_os_buffer_descriptors</code>. AuditLog consuming 2.2M pages in pulsedb_prod — 50%+ of
                 pool.
             </div>
         </Panel>

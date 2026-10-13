@@ -1,4 +1,4 @@
-# FATHOM — Query Workbench
+# PulseDB — Query Workbench
 
 The query workbench persists the state of the SQL editor on the server so an
 engineer can:

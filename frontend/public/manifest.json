@@ -1,6 +1,6 @@
 {
-    "name": "FATHOM — PostgreSQL Monitor",
-    "short_name": "FATHOM",
+    "name": "PulseDB — PostgreSQL Monitor",
+    "short_name": "PulseDB",
     "description": "Real-time PostgreSQL monitoring, performance analysis, and database administration",
     "start_url": "/",
     "display": "standalone",

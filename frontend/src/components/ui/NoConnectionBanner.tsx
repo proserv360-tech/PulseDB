@@ -1,7 +1,7 @@
 /**
  * NoConnectionBanner.jsx
  * Reusable component shown when no database is connected.
- * Matches FATHOM design with glassmorphism, cyan accents, and animations.
+ * Matches PulseDB design with glassmorphism, cyan accents, and animations.
  */
 import React, { useState, useEffect } from 'react';
 import { Database, Plus, Shield, Key, Wifi, Zap } from 'lucide-react';

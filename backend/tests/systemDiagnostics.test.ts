@@ -65,14 +65,14 @@ test('checkControlPlaneSchema: missing required tables → SCHEMA_NOT_MIGRATED',
     const r = await checkControlPlaneSchema(pool);
     assert.equal(r.ok, false);
     assert.equal(r.code, DiagnosticCodes.SCHEMA_NOT_MIGRATED);
-    assert.deepEqual(r.missing, ['fathom_connections', 'users']);
+    assert.deepEqual(r.missing, ['pulsedb_connections', 'users']);
 });
 
 test('checkControlPlaneSchema: all tables present → OK', async () => {
     const pool = {
         query: async (sql) => {
             if (/SELECT 1/.test(sql)) return { rows: [{ '?column?': 1 }] };
-            return { rows: [{ table_name: 'fathom_connections' }, { table_name: 'users' }] };
+            return { rows: [{ table_name: 'pulsedb_connections' }, { table_name: 'users' }] };
         },
     };
     const r = await checkControlPlaneSchema(pool);
@@ -104,7 +104,7 @@ test('runSystemDiagnostics: empty blocker list when clean', async () => {
     const pool = {
         query: async (sql) => {
             if (/SELECT 1/.test(sql)) return { rows: [{}] };
-            return { rows: [{ table_name: 'fathom_connections' }, { table_name: 'users' }] };
+            return { rows: [{ table_name: 'pulsedb_connections' }, { table_name: 'users' }] };
         },
     };
     const r = await runSystemDiagnostics({

@@ -5,7 +5,7 @@
  * Lazy, shared ioredis client.
  *
  * Reasoning
- *   FATHOM is moving from a single-process Node runtime to a web + worker
+ *   PulseDB is moving from a single-process Node runtime to a web + worker
  *   split. Cross-tier state (distributed rate-limit, BullMQ queues, cron
  *   leader election) lives in Redis. This module is the single place that
  *   knows how to construct the client.

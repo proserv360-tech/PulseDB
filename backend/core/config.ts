@@ -19,9 +19,9 @@ export const CONFIG = Object.freeze({
     JWT_SECRET: process.env.JWT_SECRET || null,
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '8h',
     // SEC-07 (audit): bind tokens to this app & issuer so a JWT minted for
-    // some other service (or a different FATHOM deployment) cannot be replayed.
-    JWT_AUDIENCE: process.env.JWT_AUDIENCE || 'fathom-api',
-    JWT_ISSUER: process.env.JWT_ISSUER || 'fathom-auth',
+    // some other service (or a different PulseDB deployment) cannot be replayed.
+    JWT_AUDIENCE: process.env.JWT_AUDIENCE || 'pulsedb-api',
+    JWT_ISSUER: process.env.JWT_ISSUER || 'pulsedb-auth',
     CORS_ORIGINS: [
         ...(IS_PROD ? [] : ['http://localhost:5173', 'http://localhost:3000']),
         'https://postgres-tool.vercel.app',
@@ -73,7 +73,7 @@ export const CONFIG = Object.freeze({
         provider: process.env.EMAIL_PROVIDER || 'smtp',
         minSeverity: process.env.EMAIL_MIN_SEVERITY || 'warning',
         recipients: process.env.EMAIL_RECIPIENTS?.split(',').map((e) => e.trim()) || [],
-        from: process.env.EMAIL_FROM || '"FATHOM Alert System" <alerts@fathom.local>',
+        from: process.env.EMAIL_FROM || '"PulseDB Alert System" <alerts@pulsedb.local>',
         dashboardUrl: process.env.DASHBOARD_URL || 'http://localhost:5173',
         databaseName: process.env.PGDATABASE || 'postgres',
         gmail: { user: process.env.GMAIL_USER, appPassword: process.env.GMAIL_APP_PASSWORD },
@@ -122,7 +122,7 @@ export const HAS_ADMIN_DB = !!(process.env.DATABASE_URL || (process.env.PGHOST &
         } else {
             warnings.push('JWT_SECRET not configured. Set a strong secret before deploying to production.');
         }
-    } else if (process.env.JWT_SECRET === 'fathom-change-me-in-production') {
+    } else if (process.env.JWT_SECRET === 'pulsedb-change-me-in-production') {
         errors.push(
             'FATAL: JWT_SECRET is using the insecure default value. ' +
                 'Change it to a strong, random secret in your environment configuration. ' +
@@ -136,7 +136,7 @@ export const HAS_ADMIN_DB = !!(process.env.DATABASE_URL || (process.env.PGHOST &
     }
 
     // ── Required variables in production ────────────────────────────────
-    // NOTE: PGHOST / PGPASSWORD are NOT required — FATHOM is a monitoring
+    // NOTE: PGHOST / PGPASSWORD are NOT required — PulseDB is a monitoring
     //       tool where users connect their own databases at runtime.
     if (IS_PROD) {
         // At least one CORS origin must be configured

@@ -1,4 +1,4 @@
-# Quick Start: Running FATHOM Tests
+# Quick Start: Running PulseDB Tests
 
 ## Installation
 

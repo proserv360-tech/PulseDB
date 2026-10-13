@@ -36,13 +36,13 @@ const mongoInFlight = new Map(); // Map<connectionId, Promise<{client,db}>>
 // PRF-02 (audit): per-pool lastUsed timestamps for idle eviction.
 const poolLastUsed = new Map(); // Map<connectionId, ms epoch>
 const mongoLastUsed = new Map(); // Map<connectionId, ms epoch>
-const POOL_IDLE_EVICT_MS = Number(process.env.FATHOM_POOL_IDLE_EVICT_MS) || 30 * 60 * 1000; // 30 min
-const POOL_EVICT_SWEEP_MS = Number(process.env.FATHOM_POOL_EVICT_SWEEP_MS) || 5 * 60 * 1000; // 5 min
+const POOL_IDLE_EVICT_MS = Number(process.env.PULSEDB_POOL_IDLE_EVICT_MS) || 30 * 60 * 1000; // 30 min
+const POOL_EVICT_SWEEP_MS = Number(process.env.PULSEDB_POOL_EVICT_SWEEP_MS) || 5 * 60 * 1000; // 5 min
 // Hard cap on simultaneously-live connection pools / Mongo clients across the
 // process. When we hit the cap we evict the least-recently-used entry instead
 // of throwing — see evictLruPoolIfNeeded() below.
-const MAX_LIVE_POOLS = Number(process.env.FATHOM_MAX_LIVE_POOLS) || 20;
-const MAX_LIVE_MONGO_CLIENTS = Number(process.env.FATHOM_MAX_LIVE_MONGO_CLIENTS) || 20;
+const MAX_LIVE_POOLS = Number(process.env.PULSEDB_MAX_LIVE_POOLS) || 20;
+const MAX_LIVE_MONGO_CLIENTS = Number(process.env.PULSEDB_MAX_LIVE_MONGO_CLIENTS) || 20;
 
 function touchPool(id) {
     poolLastUsed.set(id, Date.now());
@@ -82,7 +82,7 @@ export function isDatabaseSwitchable(conn) {
 // connectionPools cache so the existing pool mechanics stay untouched. Capped +
 // LRU-evicted so a user browsing many databases can't leak sockets forever.
 const overridePools = new Map(); // key -> { pool, dbType, lastUsed }
-const OVERRIDE_POOL_MAX = Number(process.env.FATHOM_OVERRIDE_POOL_MAX) || 8;
+const OVERRIDE_POOL_MAX = Number(process.env.PULSEDB_OVERRIDE_POOL_MAX) || 8;
 
 export async function getOverridePool(conn, database, schema = null) {
     // Only Postgres uses the schema part (search_path); ignore it elsewhere.
@@ -345,14 +345,14 @@ export async function getMongoClient(connectionId, userId) {
         // SEC: TLS certificate validation. Default to strict in production so
         // a MITM can't swap in a self-signed cert. Operators with self-signed
         // certs on internal Mongo clusters can opt back in via the same env
-        // var used for Postgres (FATHOM_TLS_ALLOW_SELF_SIGNED=true). In dev,
-        // unless FATHOM_TLS_STRICT=true, we keep the lax behavior so localhost
+        // var used for Postgres (PULSEDB_TLS_ALLOW_SELF_SIGNED=true). In dev,
+        // unless PULSEDB_TLS_STRICT=true, we keep the lax behavior so localhost
         // self-signed setups still work out of the box.
         let sslParam = '';
         if (conn.ssl) {
             const allowSelfSigned =
-                process.env.FATHOM_TLS_ALLOW_SELF_SIGNED === 'true' ||
-                (!IS_PROD && process.env.FATHOM_TLS_STRICT !== 'true');
+                process.env.PULSEDB_TLS_ALLOW_SELF_SIGNED === 'true' ||
+                (!IS_PROD && process.env.PULSEDB_TLS_STRICT !== 'true');
             sslParam = allowSelfSigned ? '?tls=true&tlsAllowInvalidCertificates=true' : '?tls=true';
         }
         const connStr = `mongodb://${userPart}${cfg.host}:${cfg.port || 27017}/${cfg.database || 'admin'}${sslParam}`;

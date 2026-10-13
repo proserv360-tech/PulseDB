@@ -3,7 +3,7 @@ package gin
 import (
 	"time"
 
-	"github.com/fathom/fathom-go"
+	"github.com/pulsedb/pulsedb-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +12,7 @@ import (
 // Usage:
 //   router := gin.Default()
 //   router.Use(gin.Middleware(client))
-func Middleware(client *fathom.Client) gin.HandlerFunc {
+func Middleware(client *pulsedb.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 

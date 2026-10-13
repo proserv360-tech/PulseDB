@@ -1,6 +1,6 @@
 /**
  * hooks/useApi.ts
- * TanStack Query hooks over the FATHOM API layer (utils/api.ts).
+ * TanStack Query hooks over the PulseDB API layer (utils/api.ts).
  *
  * useApiQuery shares its cache with imperative fetchData() calls because
  * both use apiQueryKey() and the singleton queryClient.

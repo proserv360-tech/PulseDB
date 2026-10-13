@@ -6,7 +6,7 @@
 
 ---
 
-## What drift means for FATHOM
+## What drift means for PulseDB
 
 "Infrastructure drift" is any difference between the rendered output of our
 infrastructure-as-code sources (Kustomize overlays, Helm charts, `docker-compose.yml`,
@@ -97,7 +97,7 @@ If the drift came from a merged PR that updated the charts but left
 3. Open a PR. The PR description must link the original change PR so
    the audit trail is continuous. Example description:
 
-    > Re-baseline after #1473 (upgrade of `deploy/helm/fathom-backend`
+    > Re-baseline after #1473 (upgrade of `deploy/helm/pulsedb-backend`
     > from 1.4.2 → 1.5.0). Drift diff attached; all changes are
     > expected image-tag and resource-limit updates.
 

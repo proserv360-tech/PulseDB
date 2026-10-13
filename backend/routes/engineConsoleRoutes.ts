@@ -51,9 +51,9 @@ const ENGINE_HELP = {
         examples: [
             'SELECT release_version, cluster_name FROM system.local;',
             'SELECT keyspace_name FROM system_schema.keyspaces;',
-            "SELECT table_name FROM system_schema.tables WHERE keyspace_name = 'fathom_app';",
-            'SELECT * FROM fathom_app.events WHERE partition_id = 42 AND ts > now() - 1h LIMIT 10;',
-            "INSERT INTO fathom_app.audit (id, ts, actor, event) VALUES (uuid(), now(), 'alice', 'login');",
+            "SELECT table_name FROM system_schema.tables WHERE keyspace_name = 'pulsedb_app';",
+            'SELECT * FROM pulsedb_app.events WHERE partition_id = 42 AND ts > now() - 1h LIMIT 10;',
+            "INSERT INTO pulsedb_app.audit (id, ts, actor, event) VALUES (uuid(), now(), 'alice', 'login');",
             'SELECT peer, data_center, rack FROM system.peers;',
         ],
     },

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: pulsedb
+description: PulseDB — Multi-database monitoring + observability + query workbench
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://pulsedb.dev
+sources:
+  - https://github.com/pulsedb-dev/pulsedb
+maintainers:
+  - name: PulseDB Engineering
+    email: engineering@pulsedb.dev
+keywords:
+  - database
+  - monitoring
+  - observability
+  - postgres
+  - mysql
+  - mongodb

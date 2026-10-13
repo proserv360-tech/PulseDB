@@ -19,8 +19,8 @@ import { AuthProvider, EXIT_REASONS } from '../../context/AuthContext';
 import { ThemeProvider } from '../../context/ThemeContext';
 import LoginPage from './LoginPage';
 
-const EXIT_KEY = 'fathom_exit_reason';
-const LAST_USER_KEY = 'fathom_last_username';
+const EXIT_KEY = 'pulsedb_exit_reason';
+const LAST_USER_KEY = 'pulsedb_last_username';
 
 async function renderLogin() {
     const utils = render(

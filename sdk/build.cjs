@@ -1,6 +1,6 @@
 /**
  * SDK build — produce a CommonJS copy of src/ under dist/ so that consumers
- * who require('@fathom/sdk') (older bundlers, plain Node CJS) get a working
+ * who require('@pulsedb/sdk') (older bundlers, plain Node CJS) get a working
  * module. ESM consumers continue to use src/ directly via the "import"
  * branch of package.json#exports.
  */

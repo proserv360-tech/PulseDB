@@ -3,7 +3,7 @@
     "server": {
         "version": "PostgreSQL 16.2",
         "uptime_days": 47,
-        "host": "pg-prod-01.fathom.demo",
+        "host": "pg-prod-01.pulsedb.demo",
         "port": 5432,
         "data_directory": "/var/lib/postgresql/16/main"
     },

@@ -1,8 +1,8 @@
 // ==========================================================================
-//  FATHOM — Service Worker (PWA offline + caching)
+//  PulseDB — Service Worker (PWA offline + caching)
 // ==========================================================================
 
-const CACHE_NAME = 'fathom-v2';
+const CACHE_NAME = 'pulsedb-v2';
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 // Install — cache shell

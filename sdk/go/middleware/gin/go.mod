@@ -1,9 +1,9 @@
-module github.com/fathom/fathom-go/middleware/gin
+module github.com/pulsedb/pulsedb-go/middleware/gin
 
 go 1.21
 
 require (
-	github.com/fathom/fathom-go v0.1.0
+	github.com/pulsedb/pulsedb-go v0.1.0
 	github.com/gin-gonic/gin v1.9.1
 )
 
@@ -35,4 +35,4 @@ require (
 )
 
 // For development within the same repo
-replace github.com/fathom/fathom-go => ../..
+replace github.com/pulsedb/pulsedb-go => ../..

@@ -4,7 +4,7 @@
  *
  * B8 — Backup orchestration scaffold.
  *
- * Execution layer is intentionally inert until FATHOM_BACKUPS_ENABLED=1
+ * Execution layer is intentionally inert until PULSEDB_BACKUPS_ENABLED=1
  * and the corresponding tools (pgBackRest / mongodump) are wired into
  * the worker tier. The schema layer (schedules, runs) and the API are
  * live, so the UI can show schedules even before the orchestrator runs.
@@ -20,7 +20,7 @@
 import { query } from '../db.js';
 
 export function isEnabled() {
-    return process.env.FATHOM_BACKUPS_ENABLED === '1';
+    return process.env.PULSEDB_BACKUPS_ENABLED === '1';
 }
 
 export async function listSchedules({ workspaceId }) {

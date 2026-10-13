@@ -1,8 +1,8 @@
-# FATHOM Test Framework Setup
+# PulseDB Test Framework Setup
 
 ## Overview
 
-This directory contains the test framework for the FATHOM PostgreSQL monitoring tool frontend. The framework uses **Vitest** (a Vite-native unit testing framework) to test core configuration and utility modules.
+This directory contains the test framework for the PulseDB PostgreSQL monitoring tool frontend. The framework uses **Vitest** (a Vite-native unit testing framework) to test core configuration and utility modules.
 
 ## Test Structure
 

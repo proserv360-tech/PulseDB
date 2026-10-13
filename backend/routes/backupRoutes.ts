@@ -2,7 +2,7 @@
 /**
  * routes/backupRoutes.js — B8 backup orchestration scaffold.
  *
- * Even when FATHOM_BACKUPS_ENABLED=0, the read endpoints serve so the UI
+ * Even when PULSEDB_BACKUPS_ENABLED=0, the read endpoints serve so the UI
  * can show "no schedules yet" instead of a 404; write endpoints return
  * 503 until the feature flag flips. Restore is always 503 — it's the most
  * destructive operation and we do not ship a half-built path for it.
@@ -39,7 +39,7 @@ export default function backupRoutes(pool, authenticate, resolveConn = null) {
             if (!isEnabled())
                 return res.status(503).json({
                     error: 'backups_disabled',
-                    detail: 'Set FATHOM_BACKUPS_ENABLED=1 in the backend env to enable.',
+                    detail: 'Set PULSEDB_BACKUPS_ENABLED=1 in the backend env to enable.',
                 });
             try {
                 const { connectionId, cadence, target, targetUri } = req.body || {};
@@ -87,7 +87,7 @@ export default function backupRoutes(pool, authenticate, resolveConn = null) {
             if (!isEnabled())
                 return res.status(503).json({
                     error: 'backups_disabled',
-                    detail: 'Set FATHOM_BACKUPS_ENABLED=1 in the backend env to enable.',
+                    detail: 'Set PULSEDB_BACKUPS_ENABLED=1 in the backend env to enable.',
                 });
             if (!resolveConn) return res.status(503).json({ error: 'resolver_unavailable' });
             try {

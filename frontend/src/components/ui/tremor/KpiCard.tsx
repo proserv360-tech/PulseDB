@@ -65,7 +65,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
 
   return (
     <div
-      className="fathom-card ov-metric-card"
+      className="pulsedb-card ov-metric-card"
       style={{
         display: 'flex',
         flexDirection: 'column',

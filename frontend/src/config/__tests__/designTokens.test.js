@@ -1,6 +1,6 @@
 /**
  * Design Tokens Test Suite
- * Tests the FATHOM design system's theme definitions and switching functionality
+ * Tests the PulseDB design system's theme definitions and switching functionality
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';

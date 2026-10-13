@@ -37,7 +37,7 @@ Most work concentrated in the demo dashboard views (~29 files), monitoring views
 ### In progress, to land soon
 
 - Finish and commit the ~40 in-flight files (MongoDB tabs, monitoring tabs — Kubernetes / CloudWatch / OpenTelemetry / FleetOverview, backend explain & licensing services); clear out the 3 open stashes including the temp UUID fix.
-- Complete the **FATHOM SDK Hub** (dashboard UI started) and align it fully with the design system.
+- Complete the **PulseDB SDK Hub** (dashboard UI started) and align it fully with the design system.
 - Finish wiring **Plan Viewer ↔ Query Optimizer** via the shared store and ship the plan-regression view.
 
 ### Stability & enterprise

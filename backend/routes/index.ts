@@ -179,7 +179,7 @@ export default function mountFeatureRoutes(app) {
         // ── Phase-5 gap-close routes ────────────────────────────────────────
         //    Observability ingest (OTLP logs, Sentry-shape errors, RUM beacon,
         //    Prom-compatible metrics push, GitHub/GitLab deploy markers).
-        //    Carries its own `X-Fathom-Ingest-Token` gate so SDKs can post
+        //    Carries its own `X-PulseDB-Ingest-Token` gate so SDKs can post
         //    without a user JWT; falls back to authenticate() when unset.
         // auto_explain ingest + Log Insights (recent, summary, plan regressions)
         app.use(prefix, autoExplainRoutes(pool, authenticate, sdkKeyAuth));

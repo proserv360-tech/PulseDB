@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — NotifierSettings view tests
+//  PulseDB — NotifierSettings view tests
 // ==========================================================================
 //  Covers: loading, success, empty, error, create/test/delete flows.
 // ==========================================================================

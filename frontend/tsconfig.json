@@ -29,8 +29,8 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"],
-            "@fathom/types": ["../shared/types/index.ts"],
-            "@fathom/types/*": ["../shared/types/*"]
+            "@pulsedb/types": ["../shared/types/index.ts"],
+            "@pulsedb/types/*": ["../shared/types/*"]
         },
 
         /* ── Output (Vite handles bundling — we only type-check) ───────── */

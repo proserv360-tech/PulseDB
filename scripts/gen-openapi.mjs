@@ -2,8 +2,8 @@
 /**
  * scripts/gen-openapi.mjs
  *
- * B5 — Emit an OpenAPI 3.0 document derived from the @fathom/validators Zod
- * schemas. Output: sdk/openapi/fathom-sdk.yaml.
+ * B5 — Emit an OpenAPI 3.0 document derived from the @pulsedb/validators Zod
+ * schemas. Output: sdk/openapi/pulsedb-sdk.yaml.
  *
  * This script is intentionally tolerant: it works without zod-to-openapi
  * installed (prints a clear message and exits 0), so CI can opt-in to the
@@ -15,7 +15,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-const OUT = new URL('../sdk/openapi/fathom-sdk.yaml', import.meta.url);
+const OUT = new URL('../sdk/openapi/pulsedb-sdk.yaml', import.meta.url);
 const outPath = OUT.pathname;
 
 async function loadGenerator() {
@@ -62,9 +62,9 @@ async function main() {
     const doc = generator.generateDocument({
         openapi: '3.0.3',
         info: {
-            title: 'FATHOM API (selected schemas)',
+            title: 'PulseDB API (selected schemas)',
             version: '1.0.0',
-            description: 'Auto-generated from @fathom/validators by scripts/gen-openapi.mjs.',
+            description: 'Auto-generated from @pulsedb/validators by scripts/gen-openapi.mjs.',
         },
     });
 

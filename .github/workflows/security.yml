@@ -1,6 +1,6 @@
 # .github/workflows/security.yml
 # ──────────────────────────────────
-# Supply-chain and static-analysis gates for FATHOM.
+# Supply-chain and static-analysis gates for PulseDB.
 #
 # Three layers:
 #   1. gitleaks   — block commits that introduce secrets (API keys, tokens,

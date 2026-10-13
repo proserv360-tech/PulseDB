@@ -1,13 +1,13 @@
--- MySQL FATHOM Demo Database Seed Script
+-- MySQL PulseDB Demo Database Seed Script
 -- ================================================
--- This script creates and populates the FATHOM demo database with realistic sample data
+-- This script creates and populates the PulseDB demo database with realistic sample data
 --
 -- USAGE: mysql -u root < seed-mysql.sql
 -- OR:    mysql -u username -p < seed-mysql.sql
 -- OR:    source seed-mysql.sql  (from mysql client prompt)
 --
 -- CLEANUP: To remove the demo database, run:
---   DROP DATABASE IF EXISTS fathom_demo;
+--   DROP DATABASE IF EXISTS pulsedb_demo;
 -- ================================================
 
 -- Set session variables for error handling
@@ -15,15 +15,15 @@ SET SESSION sql_mode='STRICT_TRANS_TABLES';
 SET foreign_key_checks = 0;
 
 -- Drop the database if it exists (for idempotent runs)
-DROP DATABASE IF EXISTS fathom_demo;
+DROP DATABASE IF EXISTS pulsedb_demo;
 
 -- Create the demo database
-CREATE DATABASE fathom_demo
+CREATE DATABASE pulsedb_demo
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 -- Use the newly created database
-USE fathom_demo;
+USE pulsedb_demo;
 
 -- ================================================
 -- TABLES
@@ -487,15 +487,15 @@ DO
 -- ================================================
 
 -- Create application user with limited privileges
-CREATE USER IF NOT EXISTS 'fathom_user'@'localhost' IDENTIFIED BY 'fathom_demo_password_123';
-GRANT SELECT, INSERT, UPDATE ON fathom_demo.* TO 'fathom_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE fathom_demo.sp_daily_summary TO 'fathom_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE fathom_demo.sp_cleanup_sessions TO 'fathom_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE fathom_user@'localhost' IDENTIFIED BY 'fathom_demo_password_123';
+CREATE USER IF NOT EXISTS 'pulsedb_user'@'localhost' IDENTIFIED BY 'pulsedb_demo_password_123';
+GRANT SELECT, INSERT, UPDATE ON pulsedb_demo.* TO 'pulsedb_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE pulsedb_demo.sp_daily_summary TO 'pulsedb_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE pulsedb_demo.sp_cleanup_sessions TO 'pulsedb_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE pulsedb_user@'localhost' IDENTIFIED BY 'pulsedb_demo_password_123';
 
 -- Create read-only user for analytics
-CREATE USER IF NOT EXISTS 'fathom_readonly'@'localhost' IDENTIFIED BY 'fathom_readonly_password_123';
-GRANT SELECT ON fathom_demo.* TO 'fathom_readonly'@'localhost';
+CREATE USER IF NOT EXISTS 'pulsedb_readonly'@'localhost' IDENTIFIED BY 'pulsedb_readonly_password_123';
+GRANT SELECT ON pulsedb_demo.* TO 'pulsedb_readonly'@'localhost';
 
 -- Flush privileges
 FLUSH PRIVILEGES;
@@ -506,7 +506,7 @@ FLUSH PRIVILEGES;
 
 -- Display summary statistics
 SELECT '=========================================' AS status;
-SELECT 'FATHOM Demo Database Created Successfully' AS status;
+SELECT 'PulseDB Demo Database Created Successfully' AS status;
 SELECT '=========================================' AS status;
 SELECT '' AS blank;
 
@@ -527,6 +527,6 @@ UNION ALL
 SELECT 'Audit Log Entries' AS entity, COUNT(*) AS count FROM audit_log;
 
 SELECT '' AS blank;
-SELECT 'Database fathom_demo is ready for testing!' AS status;
-SELECT 'Connect as fathom_user with: mysql -u fathom_user -p fathom_demo' AS connection_info;
+SELECT 'Database pulsedb_demo is ready for testing!' AS status;
+SELECT 'Connect as pulsedb_user with: mysql -u pulsedb_user -p pulsedb_demo' AS connection_info;
 SELECT '' AS blank;

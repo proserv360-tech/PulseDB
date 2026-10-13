@@ -3417,7 +3417,7 @@ function ApmPanel({
                 {queries.length === 0 && !apmLoading ? (
                     <EmptyState
                         icon={Workflow}
-                        text="No auto_explain events yet. Enable auto_explain in postgresql.conf, or install the Fathom log shipper."
+                        text="No auto_explain events yet. Enable auto_explain in postgresql.conf, or install the PulseDB log shipper."
                     />
                 ) : (
                     <div style={{ overflowX: 'auto' }}>

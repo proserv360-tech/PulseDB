@@ -418,7 +418,7 @@ describe('SlackNotifier honours the structured payload', () => {
 
     const baseAlert = {
         id: 'a1', severity: 'critical', title: 'High Table Bloat', message: 'plain fallback',
-        source: 'fathom', component: 'maintenance', timestamp: new Date().toISOString(),
+        source: 'pulsedb', component: 'maintenance', timestamp: new Date().toISOString(),
         metadata: { ruleId: 'high_bloat' },
     };
 

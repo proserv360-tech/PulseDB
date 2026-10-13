@@ -1,10 +1,10 @@
-# FATHOM Phase 1 Components
+# PulseDB Phase 1 Components
 
-This document describes the Phase 1 components built for FATHOM database monitoring platform.
+This document describes the Phase 1 components built for PulseDB database monitoring platform.
 
 ## Overview
 
-Phase 1 introduces three critical onboarding and connection management components that follow FATHOM's design system (glassmorphism, cyan/teal accents, inline styles, lucide-react icons).
+Phase 1 introduces three critical onboarding and connection management components that follow PulseDB's design system (glassmorphism, cyan/teal accents, inline styles, lucide-react icons).
 
 ## Components
 
@@ -22,7 +22,7 @@ A reusable banner component shown when no database connection is active.
 - Four info chips (Host & Port, Database Name, Credentials, SSL Optional)
 - "Add Connection" button that navigates to pool tab
 - Responsive design with hover animations
-- Semi-transparent backgrounds matching FATHOM theme (rgba values)
+- Semi-transparent backgrounds matching PulseDB theme (rgba values)
 
 **Props:**
 
@@ -195,7 +195,7 @@ export function OnboardingPage() {
 
 ## Design System Integration
 
-All components follow FATHOM's design conventions:
+All components follow PulseDB's design conventions:
 
 ### Colors & Tokens (from THEME)
 
@@ -381,7 +381,7 @@ frontend/src/components/
 ## Author Notes
 
 - All components are **production-ready**
-- Code follows existing FATHOM patterns and conventions
+- Code follows existing PulseDB patterns and conventions
 - Each component is self-contained and independently testable
 - API integration uses existing `postData` and `fetchData` utilities
 - Context providers (NavigationContext, ConnectionContext) are required in parent

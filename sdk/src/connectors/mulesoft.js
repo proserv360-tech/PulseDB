@@ -1,5 +1,5 @@
 /**
- * MulesoftConnector - Mulesoft Anypoint Platform integration for FATHOM
+ * MulesoftConnector - Mulesoft Anypoint Platform integration for PulseDB
  * Provides OAuth authentication and application/API metrics monitoring
  */
 
@@ -372,9 +372,9 @@ export class MulesoftConnector extends EventEmitter {
   }
 
   /**
-   * Sync Mulesoft metrics to FATHOM dashboard
+   * Sync Mulesoft metrics to PulseDB dashboard
    *
-   * @param {Object} fathomClient - FathomClient instance
+   * @param {Object} pulsedbClient - PulseDBClient instance
    * @param {Object} [options] - Sync options
    * @param {boolean} [options.includeApps=true] - Include application metrics
    * @param {boolean} [options.includeApis=true] - Include API metrics
@@ -382,18 +382,18 @@ export class MulesoftConnector extends EventEmitter {
    * @returns {Promise<Object>} - Sync result
    *
    * @example
-   * await muleConnector.syncToFathom(fathomClient, {
+   * await muleConnector.syncToPulseDB(pulsedbClient, {
    *   includeApps: true,
    *   includeApis: true
    * });
    */
-  async syncToFathom(fathomClient, options = {}) {
+  async syncToPulseDB(pulsedbClient, options = {}) {
     this._ensureAuthenticated();
 
     try {
-      this.logger.info('Starting Mulesoft metrics sync to FATHOM');
+      this.logger.info('Starting Mulesoft metrics sync to PulseDB');
 
-      const fathomMetrics = {
+      const pulsedbMetrics = {
         platform: 'mulesoft',
         orgId: this.config.orgId,
         metrics: {},
@@ -411,8 +411,8 @@ export class MulesoftConnector extends EventEmitter {
             appMetrics.push(metrics);
           }
 
-          fathomMetrics.metrics.applications = appMetrics;
-          fathomMetrics.metrics.appCount = apps.length;
+          pulsedbMetrics.metrics.applications = appMetrics;
+          pulsedbMetrics.metrics.appCount = apps.length;
         } catch (error) {
           this.logger.warn('Failed to sync app metrics', error);
         }
@@ -430,8 +430,8 @@ export class MulesoftConnector extends EventEmitter {
             apiMetrics.push(analytics);
           }
 
-          fathomMetrics.metrics.apis = apiMetrics;
-          fathomMetrics.metrics.apiCount = apis.length;
+          pulsedbMetrics.metrics.apis = apiMetrics;
+          pulsedbMetrics.metrics.apiCount = apis.length;
         } catch (error) {
           this.logger.warn('Failed to sync API metrics', error);
         }
@@ -441,19 +441,19 @@ export class MulesoftConnector extends EventEmitter {
       if (options.includeAlerts !== false) {
         try {
           const alerts = await this.getAlerts();
-          fathomMetrics.metrics.activeAlerts = alerts.filter((a) => a.active).length;
-          fathomMetrics.metrics.totalAlerts = alerts.length;
+          pulsedbMetrics.metrics.activeAlerts = alerts.filter((a) => a.active).length;
+          pulsedbMetrics.metrics.totalAlerts = alerts.length;
         } catch (error) {
           this.logger.warn('Failed to sync alerts', error);
         }
       }
 
-      this.logger.info('Metrics synced to FATHOM', { metrics: Object.keys(fathomMetrics.metrics) });
-      this.emit('synced_to_fathom', fathomMetrics);
+      this.logger.info('Metrics synced to PulseDB', { metrics: Object.keys(pulsedbMetrics.metrics) });
+      this.emit('synced_to_pulsedb', pulsedbMetrics);
 
-      return fathomMetrics;
+      return pulsedbMetrics;
     } catch (error) {
-      this.logger.error('Failed to sync metrics to FATHOM', error);
+      this.logger.error('Failed to sync metrics to PulseDB', error);
       this.emit('error', { type: 'sync_error', error });
       throw error;
     }

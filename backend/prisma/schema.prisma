@@ -94,7 +94,7 @@ model Connection {
   user User? @relation(fields: [userId], references: [id])
 
   @@index([userId])
-  @@map("fathom_connections")
+  @@map("pulsedb_connections")
   @@schema("pgmonitoringtool")
 }
 

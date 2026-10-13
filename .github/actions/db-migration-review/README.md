@@ -1,8 +1,8 @@
-# FATHOM DB Migration Review Action
+# PulseDB DB Migration Review Action
 
 Scan SQL migration files changed in a pull request and post a consolidated
 review comment on the PR. Built and maintained by
-[FATHOM](https://fathom.example.com).
+[PulseDB](https://pulsedb.example.com).
 
 ## What it catches
 
@@ -33,7 +33,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with: { fetch-depth: 0 }
-            - uses: fathom-io/fathom/.github/actions/db-migration-review@main
+            - uses: pulsedb-io/pulsedb/.github/actions/db-migration-review@main
               with:
                   migrations-glob: 'db/migrations/**/*.sql'
                   engine: postgres
@@ -47,8 +47,8 @@ jobs:
 | `migrations-glob`  | `db/migrations/**/*.sql` | Which files to scan.                                   |
 | `engine`           | `postgres`               | `postgres`, `mysql`, or `mongo`.                       |
 | `block-on-error`   | `false`                  | Fail the job when any ERROR-level finding is produced. |
-| `fathom-api-url`   | _(empty)_                | Optional — also ship findings to a FATHOM workspace.   |
-| `fathom-api-token` | _(empty)_                | Paired with `fathom-api-url`.                          |
+| `pulsedb-api-url`   | _(empty)_                | Optional — also ship findings to a PulseDB workspace.   |
+| `pulsedb-api-token` | _(empty)_                | Paired with `pulsedb-api-url`.                          |
 
 ## Output
 

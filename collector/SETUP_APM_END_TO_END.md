@@ -14,7 +14,7 @@ deploy script. There's a one-time **[App]** step to mint an SDK key.
 
 ---
 
-## Step 0 — Get a FATHOM SDK key **[App]**
+## Step 0 — Get a PulseDB SDK key **[App]**
 
 Both the Lambda and the poller authenticate with an SDK key (`sk_live_...`).
 
@@ -86,8 +86,8 @@ chmod +x deploy-lambda.sh
 
 AWS_REGION=<your-region> \
 CW_LOG_GROUP=/aws/rds/instance/<db-id>/postgresql \
-FATHOM_SDK_KEY=sk_live_xxx \
-FATHOM_CONNECTION_ID=10 \
+PULSEDB_SDK_KEY=sk_live_xxx \
+PULSEDB_CONNECTION_ID=10 \
 ./deploy-lambda.sh
 ```
 
@@ -108,10 +108,10 @@ npm install @aws-sdk/client-cloudwatch-logs
 
 AWS_REGION=<your-region> \
 CW_LOG_GROUP=/aws/rds/instance/<db-id>/postgresql \
-FATHOM_URL=https://postgres-tool.vercel.app \
-FATHOM_SDK_KEY=sk_live_xxx \
-FATHOM_CONNECTION_ID=10 \
-node fathom-autoexplain-shipper.mjs
+PULSEDB_URL=https://postgres-tool.vercel.app \
+PULSEDB_SDK_KEY=sk_live_xxx \
+PULSEDB_CONNECTION_ID=10 \
+node pulsedb-autoexplain-shipper.mjs
 ```
 
 (systemd unit + IAM policy in `RDS_AUTO_EXPLAIN_SETUP.md` section B. Don't run

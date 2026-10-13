@@ -705,7 +705,7 @@ const LeakDetector = () => {
     const scan = async () => {
         setLoading(true);
         try {
-            const token   = localStorage.getItem('fathom_token') || localStorage.getItem('authToken');
+            const token   = localStorage.getItem('pulsedb_token') || localStorage.getItem('authToken');
             const res     = await fetch(`${API_BASE}/api/reliability/active-connections`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -822,7 +822,7 @@ const ConnectionsTab = () => {
     // Hydrate from localStorage cache immediately to avoid "No Connections" flash
     const readCached = () => {
         try {
-            const raw = localStorage.getItem('fathom_cached_connections');
+            const raw = localStorage.getItem('pulsedb_cached_connections');
             if (!raw) return [];
             const parsed = JSON.parse(raw);
             return Array.isArray(parsed) ? parsed : [];
@@ -848,7 +848,7 @@ const ConnectionsTab = () => {
     // Connection context — keeps the header dropdown in sync
     const { refreshConnections: refreshCtxConnections, activeConnectionId, switchConnection } = useConnection();
 
-    const getAuthToken = () => localStorage.getItem('fathom_token') || localStorage.getItem('authToken');
+    const getAuthToken = () => localStorage.getItem('pulsedb_token') || localStorage.getItem('authToken');
 
     const fetchConnections = useCallback(async () => {
         // If we already have cached connections, show a subtle refresh indicator instead of full loading
@@ -864,7 +864,7 @@ const ConnectionsTab = () => {
                 const list = Array.isArray(data) ? data : [];
                 setConnections(list);
                 // Also update the shared localStorage cache
-                try { localStorage.setItem('fathom_cached_connections', JSON.stringify(list)); } catch {}
+                try { localStorage.setItem('pulsedb_cached_connections', JSON.stringify(list)); } catch {}
             } else {
                 console.error('Failed to fetch connections:', res.status, res.statusText);
             }
@@ -1057,8 +1057,8 @@ const ConnectionsTab = () => {
     // Listen for "open new connection" event from header + button
     useEffect(() => {
         const handler = () => openNew();
-        window.addEventListener('fathom:open-new-connection', handler);
-        return () => window.removeEventListener('fathom:open-new-connection', handler);
+        window.addEventListener('pulsedb:open-new-connection', handler);
+        return () => window.removeEventListener('pulsedb:open-new-connection', handler);
     }, []);
 
     // Filter connections based on search

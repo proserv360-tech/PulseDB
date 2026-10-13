@@ -466,7 +466,7 @@ export const GlassCard = ({
     return (
         <div
             {...hoverProps}
-            className="fathom-card glass-card"
+            className="pulsedb-card glass-card"
             style={{
                 background: _AT.surface,
                 borderRadius: 18,

@@ -1,4 +1,4 @@
-# FATHOM — Postgres Bloat & Vacuum Watcher
+# PulseDB — Postgres Bloat & Vacuum Watcher
 
 The bloat watcher estimates dead-tuple bloat on tables and indexes, surfaces
 autovacuum lag, and generates vacuum DDL on demand. It **never runs

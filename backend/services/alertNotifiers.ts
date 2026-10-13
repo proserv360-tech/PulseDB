@@ -63,9 +63,9 @@ export async function notifyPagerDuty(routingKey, alert) {
     const payload = {
         routing_key: routingKey,
         event_action: action,
-        dedup_key: `fathom:${alert.ruleId}:${alert.connectionId}`,
+        dedup_key: `pulsedb:${alert.ruleId}:${alert.connectionId}`,
         payload: {
-            summary: `[FATHOM] ${alert.ruleName}: ${alert.message}`.slice(0, 1024),
+            summary: `[PulseDB] ${alert.ruleName}: ${alert.message}`.slice(0, 1024),
             severity: mapSeverity(alert.severity),
             source: alert.connectionName || `connection:${alert.connectionId}`,
             component: alert.metric || 'database',
@@ -77,7 +77,7 @@ export async function notifyPagerDuty(routingKey, alert) {
             },
         },
         links: [
-            ...(alert.dashboardUrl ? [{ href: alert.dashboardUrl, text: 'FATHOM dashboard' }] : []),
+            ...(alert.dashboardUrl ? [{ href: alert.dashboardUrl, text: 'PulseDB dashboard' }] : []),
             ...(alert.runbookUrl ? [{ href: alert.runbookUrl, text: 'Runbook' }] : []),
         ],
     };

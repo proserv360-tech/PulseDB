@@ -1,10 +1,10 @@
-# FATHOM Python Backend
+# PulseDB Python Backend
 
 Analytics, ML, and Data Processing for PostgreSQL Monitoring
 
 ## Overview
 
-FATHOM Python Backend is a high-performance REST API built with FastAPI that provides advanced analytics, machine learning predictions, and data processing capabilities for the FATHOM database monitoring platform. It handles query analysis, anomaly detection, capacity forecasting, and metric aggregation.
+PulseDB Python Backend is a high-performance REST API built with FastAPI that provides advanced analytics, machine learning predictions, and data processing capabilities for the PulseDB database monitoring platform. It handles query analysis, anomaly detection, capacity forecasting, and metric aggregation.
 
 ## Quick Start
 
@@ -82,8 +82,8 @@ pytest tests/ -v
 Build and run the application in a Docker container:
 
 ```bash
-docker build -t fathom-python:latest .
-docker run -p 8000:8000 --env-file .env fathom-python:latest
+docker build -t pulsedb-python:latest .
+docker run -p 8000:8000 --env-file .env pulsedb-python:latest
 ```
 
 ## Configuration

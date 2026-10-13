@@ -1,4 +1,4 @@
-"""Configuration settings for the FATHOM FastAPI backend."""
+"""Configuration settings for the PulseDB FastAPI backend."""
 
 import os
 from pydantic_settings import BaseSettings
@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    DATABASE_URL: str = "postgresql://localhost:5432/fathom"
+    DATABASE_URL: str = "postgresql://localhost:5432/pulsedb"
     REDIS_URL: str = "redis://localhost:6379"
     NODE_BACKEND_URL: str = "http://localhost:3000"
     PORT: int = 8000

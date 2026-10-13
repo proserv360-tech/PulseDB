@@ -13,9 +13,9 @@ import { isFeatureAvailable, getTierConfig } from './tiers.js';
 const S = 'pgmonitoringtool';
 
 /* ─── LICENSE KEY FORMAT ───────────────────────────────────────────────────── */
-// Format: FATHOM-{TIER}-{ORG_HASH}-{SIGNATURE}
-// Example: FATHOM-PRO-abc123def456-signature789...
-// Signature is HMAC-SHA256 of "FATHOM-{TIER}-{ORG_HASH}"
+// Format: PULSEDB-{TIER}-{ORG_HASH}-{SIGNATURE}
+// Example: PULSEDB-PRO-abc123def456-signature789...
+// Signature is HMAC-SHA256 of "PULSEDB-{TIER}-{ORG_HASH}"
 
 function toClientLicense(row) {
   if (!row) return null;
@@ -52,14 +52,14 @@ const LICENSE_SIG_LEN_LEGACY = 16;
 export function generateLicenseKey(tier, orgId, licenseSecret) {
   const tierUpper = tier.toUpperCase();
   const orgHash = crypto.createHash('sha256').update(orgId).digest('hex').slice(0, 12);
-  const message = `FATHOM-${tierUpper}-${orgHash}`;
+  const message = `PULSEDB-${tierUpper}-${orgHash}`;
   const signature = crypto
     .createHmac('sha256', licenseSecret)
     .update(message)
     .digest('hex')
     .slice(0, LICENSE_SIG_LEN_NEW);
 
-  return `FATHOM-${tierUpper}-${orgHash}-${signature}`;
+  return `PULSEDB-${tierUpper}-${orgHash}-${signature}`;
 }
 
 /**
@@ -75,7 +75,7 @@ export function validateLicenseKeyFormat(licenseKey, licenseSecret) {
   }
 
   const parts = licenseKey.split('-');
-  if (parts.length !== 4 || parts[0] !== 'FATHOM') {
+  if (parts.length !== 4 || parts[0] !== 'PulseDB') {
     return { valid: false, error: 'License key has invalid format' };
   }
 
@@ -96,7 +96,7 @@ export function validateLicenseKeyFormat(licenseKey, licenseSecret) {
 
   // Verify signature with a constant-time comparison so an attacker cannot
   // recover the expected HMAC byte-by-byte via timing differences.
-  const message = `FATHOM-${tierPart}-${orgHash}`;
+  const message = `PULSEDB-${tierPart}-${orgHash}`;
   const expectedSig = crypto
     .createHmac('sha256', licenseSecret)
     .update(message)

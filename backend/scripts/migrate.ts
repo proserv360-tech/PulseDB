@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Database Migration  (scripts/migrate.js)
+//  PulseDB — Database Migration  (scripts/migrate.js)
 //  Run once: node scripts/migrate.js
 // ==========================================================================
 
@@ -16,7 +16,7 @@ const migrations = [
 
     // ── Connection registry ──
     `
-    CREATE TABLE IF NOT EXISTS pgmonitoringtool.fathom_connections (
+    CREATE TABLE IF NOT EXISTS pgmonitoringtool.pulsedb_connections (
         id              SERIAL      PRIMARY KEY,
         user_id         INTEGER,
         name            TEXT        NOT NULL,
@@ -44,7 +44,7 @@ const migrations = [
 
     // ── Metric snapshots (time-series store) ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_metric_snapshots (
+    CREATE TABLE IF NOT EXISTS pulsedb_metric_snapshots (
         time_bucket           TIMESTAMPTZ PRIMARY KEY,
         avg_qps               NUMERIC     DEFAULT 0,
         avg_tps               NUMERIC     DEFAULT 0,
@@ -60,7 +60,7 @@ const migrations = [
 
     // ── Backup history ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_backup_history (
+    CREATE TABLE IF NOT EXISTS pulsedb_backup_history (
         id                BIGSERIAL    PRIMARY KEY,
         backup_type       TEXT         NOT NULL DEFAULT 'Full',
         status            TEXT         NOT NULL DEFAULT 'success',
@@ -76,7 +76,7 @@ const migrations = [
 
     // ── Alerts ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_alerts (
+    CREATE TABLE IF NOT EXISTS pulsedb_alerts (
         id          BIGSERIAL    PRIMARY KEY,
         severity    TEXT         NOT NULL DEFAULT 'info',
         title       TEXT         NOT NULL,
@@ -107,14 +107,14 @@ const migrations = [
     `CREATE INDEX IF NOT EXISTS otel_metrics_resource_gin ON pgmonitoringtool.otel_metrics USING GIN (resource)`,
 
     // ── Index on alerts for fast unread lookups ──
-    `CREATE INDEX IF NOT EXISTS idx_fathom_alerts_unread ON fathom_alerts (read, dismissed, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_pulsedb_alerts_unread ON pulsedb_alerts (read, dismissed, created_at DESC)`,
 
     // ── Index on snapshots for time-range queries ──
-    `CREATE INDEX IF NOT EXISTS idx_fathom_snapshots_bucket ON fathom_metric_snapshots (time_bucket DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_pulsedb_snapshots_bucket ON pulsedb_metric_snapshots (time_bucket DESC)`,
 
     // ── Schema tracking: snapshots + drift timeline (schemaTrackingService.ts) ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_schema_snapshots (
+    CREATE TABLE IF NOT EXISTS pulsedb_schema_snapshots (
         id            BIGSERIAL    PRIMARY KEY,
         connection_id TEXT         NOT NULL,
         hash          TEXT         NOT NULL,
@@ -122,9 +122,9 @@ const migrations = [
         captured_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
     `,
-    `CREATE INDEX IF NOT EXISTS idx_schema_snapshots_conn ON fathom_schema_snapshots (connection_id, captured_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_schema_snapshots_conn ON pulsedb_schema_snapshots (connection_id, captured_at DESC)`,
     `
-    CREATE TABLE IF NOT EXISTS fathom_schema_changes (
+    CREATE TABLE IF NOT EXISTS pulsedb_schema_changes (
         id            BIGSERIAL    PRIMARY KEY,
         connection_id TEXT         NOT NULL,
         change_type   TEXT         NOT NULL,
@@ -134,11 +134,11 @@ const migrations = [
         detected_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
     `,
-    `CREATE INDEX IF NOT EXISTS idx_schema_changes_conn ON fathom_schema_changes (connection_id, detected_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_schema_changes_conn ON pulsedb_schema_changes (connection_id, detected_at DESC)`,
 
     // ── Query advisor recommendations (queryAdvisorService.ts) ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_query_recommendations (
+    CREATE TABLE IF NOT EXISTS pulsedb_query_recommendations (
         id            BIGSERIAL    PRIMARY KEY,
         workspace_id  TEXT         NOT NULL DEFAULT 'default',
         connection_id TEXT,
@@ -153,7 +153,7 @@ const migrations = [
         UNIQUE (workspace_id, query_hash)
     )
     `,
-    `CREATE INDEX IF NOT EXISTS idx_query_recs_status ON fathom_query_recommendations (workspace_id, status, severity)`,
+    `CREATE INDEX IF NOT EXISTS idx_query_recs_status ON pulsedb_query_recommendations (workspace_id, status, severity)`,
 
     // ── Collector query-stat snapshots (agentIngestRoutes / queryStatsRollup) ──
     `
@@ -168,7 +168,7 @@ const migrations = [
 
     // ── Autonomous agent findings (agentLoopService.ts) ──
     `
-    CREATE TABLE IF NOT EXISTS fathom_agent_findings (
+    CREATE TABLE IF NOT EXISTS pulsedb_agent_findings (
         id          BIGSERIAL    PRIMARY KEY,
         metric      TEXT         NOT NULL,
         severity    TEXT         NOT NULL DEFAULT 'info',
@@ -182,12 +182,12 @@ const migrations = [
         resolved_at TIMESTAMPTZ
     )
     `,
-    `CREATE INDEX IF NOT EXISTS idx_agent_findings_status ON fathom_agent_findings (status, detected_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS idx_agent_findings_status ON pulsedb_agent_findings (status, detected_at DESC)`,
 
     // ── Auto-prune snapshots older than 48 hours (optional pg rule) ──
     // Uncomment if you want DB-level enforcement:
-    // `CREATE RULE fathom_snapshot_ttl AS ON INSERT TO fathom_metric_snapshots
-    //  DO ALSO DELETE FROM fathom_metric_snapshots WHERE time_bucket < now() - interval '48 hours'`,
+    // `CREATE RULE pulsedb_snapshot_ttl AS ON INSERT TO pulsedb_metric_snapshots
+    //  DO ALSO DELETE FROM pulsedb_metric_snapshots WHERE time_bucket < now() - interval '48 hours'`,
     // ── Cloud provider credentials (per-workspace, encrypted at rest) ──
     // Stores AWS / MongoDB-Atlas credentials so cloud-managed DB insights
     // (RDS/Aurora via CloudWatch, Atlas via the Atlas Admin API) work

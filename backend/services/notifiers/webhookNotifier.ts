@@ -7,7 +7,7 @@
  * integrity.
  *
  * Signature format:
- *   X-FATHOM-Signature: t=<unix-seconds>,v1=<hex(hmac-sha256(secret, t + '.' + body))>
+ *   X-PULSEDB-Signature: t=<unix-seconds>,v1=<hex(hmac-sha256(secret, t + '.' + body))>
  *
  * This matches the widely-adopted "Stripe-style" signing convention, chosen
  * for familiarity. The timestamp prevents replay; receivers reject signatures
@@ -64,8 +64,8 @@ export class WebhookNotifier extends BaseNotifier {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'FATHOM/1.0',
-        'X-FATHOM-Signature': `t=${ts},v1=${sig}`,
+        'User-Agent': 'PulseDB/1.0',
+        'X-PULSEDB-Signature': `t=${ts},v1=${sig}`,
         ...this.extraHeaders,
       },
       body,
@@ -84,12 +84,12 @@ export class WebhookNotifier extends BaseNotifier {
 
 /**
  * Receiver-side verifier. Pass the raw request body as a string, the value of
- * the X-FATHOM-Signature header, and the shared secret. Returns true iff the
+ * the X-PULSEDB-Signature header, and the shared secret. Returns true iff the
  * signature is valid AND the timestamp is within tolerance.
  *
  * @param {object} params
  * @param {string} params.rawBody
- * @param {string} params.header               — value of X-FATHOM-Signature
+ * @param {string} params.header               — value of X-PULSEDB-Signature
  * @param {string} params.secret
  * @param {number} [params.toleranceSeconds=300]
  * @param {number} [params.nowSeconds]         — injectable clock (tests)

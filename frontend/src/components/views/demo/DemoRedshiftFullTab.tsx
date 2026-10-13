@@ -54,12 +54,12 @@ const fmtHour = (iso: string) => {
 
 const RD = {
     identity: {
-        cluster: 'fathom-prod',
+        cluster: 'pulsedb-prod',
         region: 'us-east-1',
         node_type: 'dc2.large',
         node_count: '4',
         version: '1.0.82842',
-        endpoint: 'fathom.abc.us-east-1.redshift.amazonaws.com:5439',
+        endpoint: 'pulsedb.abc.us-east-1.redshift.amazonaws.com:5439',
     },
     kpis: [
         { label: 'Queries/hr', value: '842', unit: '', color: RS_ORANGE, icon: Activity },

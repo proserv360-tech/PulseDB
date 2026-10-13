@@ -1,4 +1,4 @@
-# FATHOM — Phase 2 Deliverables
+# PulseDB — Phase 2 Deliverables
 
 Phase 2 closes two competitive gaps identified in the strategic roadmap:
 
@@ -6,7 +6,7 @@ Phase 2 closes two competitive gaps identified in the strategic roadmap:
    and Go siblings at feature parity, stitched together by a shared OpenAPI
    spec that is the wire contract.
 2. **Postgres depth** — on top of the existing `/explain/diff` plan diff,
-   FATHOM now ships an **index advisor** (unused / redundant / missing) and a
+   PulseDB now ships an **index advisor** (unused / redundant / missing) and a
    **bloat & vacuum watcher** (table + index bloat, autovacuum lag).
 
 Everything below is shipped and tested.
@@ -15,7 +15,7 @@ Everything below is shipped and tested.
 
 ### Shared OpenAPI spec
 
-`sdk/openapi/fathom-sdk.yaml` — 443 lines, OpenAPI 3.0.3, validated with
+`sdk/openapi/pulsedb-sdk.yaml` — 443 lines, OpenAPI 3.0.3, validated with
 `openapi-spec-validator`. Defines the `SdkEvent` base type plus
 `ApiCallEvent`, `ErrorEvent`, `AuditEvent`, `MetricEvent` via `allOf`. Includes
 the three SDK endpoints:
@@ -32,7 +32,7 @@ source of truth.
 ### Python SDK — `sdk/python/`
 
 - Pure-Python, single hard dependency (`httpx>=0.25`).
-- API: `FathomSDK.track_api`, `track_error`, `track_audit`, `track_metric`,
+- API: `PulseDBSDK.track_api`, `track_error`, `track_audit`, `track_metric`,
   `track`, `heartbeat`, `flush`, `shutdown`, `capture_uncaught_exceptions`.
 - Thread-safe batcher, auto-retry with backoff, failed batches re-queue to the
   front.
@@ -42,7 +42,7 @@ source of truth.
 ### Go SDK — `sdk/go/`
 
 - Multi-module monorepo stitched with `go.work`:
-    - Root module: `github.com/fathom/fathom-go` (client, events, transport,
+    - Root module: `github.com/pulsedb/pulsedb-go` (client, events, transport,
       batcher)
     - `middleware/nethttp` — standard library wrapper
     - `middleware/gin` — Gin framework wrapper
@@ -120,4 +120,4 @@ cd sdk/go/middleware/gin && go test ./... -race
 
 The roadmap calls for: RUM-lite frontend SDK, a per-org audit of sensitive
 operations with redaction policies, and deeper MongoDB / MySQL plan diffing.
-See `docs/FATHOM_Strategic_Competitive_Roadmap.docx` for the full plan.
+See `docs/PULSEDB_Strategic_Competitive_Roadmap.docx` for the full plan.

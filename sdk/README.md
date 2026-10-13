@@ -1,6 +1,6 @@
-# FATHOM SDK
+# PulseDB SDK
 
-Lightweight JavaScript SDK for integrating your applications with the FATHOM observability platform. Send API logs, errors, metrics, and audit events directly to your FATHOM dashboard.
+Lightweight JavaScript SDK for integrating your applications with the PulseDB observability platform. Send API logs, errors, metrics, and audit events directly to your PulseDB dashboard.
 
 **Zero dependencies • ESM + CJS • Browser & Node.js compatible**
 
@@ -11,27 +11,27 @@ Lightweight JavaScript SDK for integrating your applications with the FATHOM obs
 ### Installation
 
 ```bash
-npm install @fathom/sdk
+npm install @pulsedb/sdk
 ```
 
 ### Basic Setup
 
 ```javascript
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
     apiKey: 'sk_live_your_api_key_here',
-    endpoint: 'https://fathom.example.com',
+    endpoint: 'https://pulsedb.example.com',
     appName: 'my-app',
     environment: 'production',
     debug: false,
 });
 
 // Start auto-flush timer
-fathom.start();
+pulsedb.start();
 
 // Track an API call
-fathom.trackAPI({
+pulsedb.trackAPI({
     method: 'GET',
     endpoint: '/api/users',
     statusCode: 200,
@@ -39,7 +39,7 @@ fathom.trackAPI({
 });
 
 // Gracefully shutdown
-await fathom.shutdown();
+await pulsedb.shutdown();
 ```
 
 ---
@@ -47,10 +47,10 @@ await fathom.shutdown();
 ## Configuration Options
 
 ```javascript
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
     // ─── Required ───────────────────────────────────────
-    apiKey: 'sk_live_xxx', // FATHOM API key (from dashboard)
-    endpoint: 'https://fathom.app', // FATHOM instance URL
+    apiKey: 'sk_live_xxx', // PulseDB API key (from dashboard)
+    endpoint: 'https://pulsedb.app', // PulseDB instance URL
 
     // ─── Optional ───────────────────────────────────────
     appName: 'my-service', // App name (default: 'unnamed-app')
@@ -70,7 +70,7 @@ const fathom = new FathomSDK({
 #### Track API Calls
 
 ```javascript
-fathom.trackAPI({
+pulsedb.trackAPI({
     method: 'POST',
     endpoint: '/api/orders',
     statusCode: 201,
@@ -89,7 +89,7 @@ fathom.trackAPI({
 try {
     await riskyOperation();
 } catch (error) {
-    fathom.trackError({
+    pulsedb.trackError({
         error,
         severity: 'error',
         metadata: { context: 'payment-processing' },
@@ -97,7 +97,7 @@ try {
 }
 
 // From a string or object
-fathom.trackError({
+pulsedb.trackError({
     error: 'Database connection timeout',
     title: 'DB Connection Failed',
     severity: 'critical',
@@ -107,7 +107,7 @@ fathom.trackError({
 #### Track Audit Events
 
 ```javascript
-fathom.trackAudit({
+pulsedb.trackAudit({
     title: 'User Permission Changed',
     message: 'Admin elevated user_123 to manager role',
     metadata: {
@@ -123,7 +123,7 @@ fathom.trackAudit({
 #### Track Metrics
 
 ```javascript
-fathom.trackMetric({
+pulsedb.trackMetric({
     title: 'Database Connection Pool',
     value: 87,
     unit: '%',
@@ -137,7 +137,7 @@ fathom.trackMetric({
 #### Track Custom Events
 
 ```javascript
-fathom.track('payment.completed', {
+pulsedb.track('payment.completed', {
     title: 'Payment Processed',
     severity: 'info',
     message: 'Payment of $99.99 processed successfully',
@@ -156,25 +156,25 @@ Use the built-in Express middleware to automatically track all HTTP requests:
 
 ```javascript
 import express from 'express';
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
 const app = express();
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
     apiKey: 'sk_live_xxx',
-    endpoint: 'https://fathom.app',
+    endpoint: 'https://pulsedb.app',
     appName: 'api-server',
     debug: true,
 });
 
-// Add FATHOM middleware
-app.use(fathom.expressMiddleware());
+// Add PulseDB middleware
+app.use(pulsedb.expressMiddleware());
 
 // Your routes
 app.get('/api/users', (req, res) => {
     res.json({ users: [] });
 });
 
-fathom.start();
+pulsedb.start();
 app.listen(3000);
 ```
 
@@ -191,7 +191,7 @@ The middleware automatically captures:
 Automatically capture uncaught exceptions and unhandled promise rejections:
 
 ```javascript
-fathom.captureUncaughtExceptions();
+pulsedb.captureUncaughtExceptions();
 
 // Now all crashes are tracked
 throw new Error('Something went very wrong!');
@@ -205,23 +205,23 @@ throw new Error('Something went very wrong!');
 
 ```javascript
 // Manually flush the queue
-await fathom.flush();
+await pulsedb.flush();
 ```
 
 ### Heartbeats
 
-Send periodic health checks to FATHOM:
+Send periodic health checks to PulseDB:
 
 ```javascript
 // Send a heartbeat
-await fathom.heartbeat('healthy', {
+await pulsedb.heartbeat('healthy', {
     uptime: process.uptime(),
     memoryUsage: process.memoryUsage(),
 });
 
 // Periodic heartbeats every 30 seconds
 setInterval(() => {
-    fathom.heartbeat('healthy');
+    pulsedb.heartbeat('healthy');
 }, 30000);
 ```
 
@@ -229,17 +229,17 @@ setInterval(() => {
 
 ```javascript
 // Listen to flush events
-fathom.on('flush', ({ count, timestamp }) => {
+pulsedb.on('flush', ({ count, timestamp }) => {
     console.log(`Flushed ${count} events`);
 });
 
 // Listen to errors
-fathom.on('error', ({ error, batch }) => {
+pulsedb.on('error', ({ error, batch }) => {
     console.error('Failed to send batch:', error);
 });
 
 // Listen to shutdown
-fathom.on('shutdown', ({ timestamp }) => {
+pulsedb.on('shutdown', ({ timestamp }) => {
     console.log('SDK shutdown complete');
 });
 ```
@@ -249,7 +249,7 @@ fathom.on('shutdown', ({ timestamp }) => {
 ```javascript
 process.on('SIGTERM', async () => {
     console.log('Shutting down...');
-    await fathom.shutdown();
+    await pulsedb.shutdown();
     process.exit(0);
 });
 ```
@@ -267,7 +267,7 @@ Send events from a MuleSoft flow using HTTP request:
   method="POST"
   config-ref="HTTP_Config"
   path="/api/sdk/ingest"
-  doc:name="Send to FATHOM">
+  doc:name="Send to PulseDB">
   <http:body>
     <![CDATA[
     %dw 2.0
@@ -302,10 +302,10 @@ Send events from a MuleSoft flow using HTTP request:
 Send events from Salesforce using HTTP callouts:
 
 ```apex
-public class FathomCallout {
+public class PulseDBCallout {
   public static void trackEvent(String title, String severity, Map<String, Object> metadata) {
     HttpRequest req = new HttpRequest();
-    req.setEndpoint('https://fathom.app/api/sdk/ingest');
+    req.setEndpoint('https://pulsedb.app/api/sdk/ingest');
     req.setMethod('POST');
     req.setHeader('Content-Type', 'application/json');
     req.setHeader('X-SDK-Key', 'sk_live_xxx');
@@ -333,7 +333,7 @@ public class FathomCallout {
 Usage in Apex:
 
 ```apex
-FathomCallout.trackEvent(
+PulseDBCallout.trackEvent(
   'Opportunity Closed',
   'info',
   new Map<String, Object>{
@@ -352,16 +352,16 @@ Events are batched for performance:
 
 1. **Auto-flush by count**: When `batchSize` events accumulate, they flush immediately
 2. **Auto-flush by time**: Events flush periodically (every `flushInterval` ms)
-3. **Manual flush**: Call `fathom.flush()` at any time
+3. **Manual flush**: Call `pulsedb.flush()` at any time
 
 Default behavior: 50 events per batch, flush every 10 seconds.
 
 Tune for your use case:
 
 ```javascript
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
     apiKey: 'sk_live_xxx',
-    endpoint: 'https://fathom.app',
+    endpoint: 'https://pulsedb.app',
     batchSize: 100, // Larger batches = fewer requests
     flushInterval: 20000, // Longer intervals = better latency
 });
@@ -381,7 +381,7 @@ Example with retry logic:
 
 ```javascript
 try {
-    await fathom.flush();
+    await pulsedb.flush();
 } catch (error) {
     console.error('Failed to flush:', error.message);
     // Events are automatically re-queued
@@ -395,9 +395,9 @@ try {
 Load configuration from environment:
 
 ```javascript
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT || 'https://fathom.app',
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT || 'https://pulsedb.app',
     appName: process.env.APP_NAME || 'my-app',
     environment: process.env.NODE_ENV || 'production',
     debug: process.env.DEBUG === 'true',
@@ -407,8 +407,8 @@ const fathom = new FathomSDK({
 **.env example:**
 
 ```
-FATHOM_API_KEY=sk_live_xxx
-FATHOM_ENDPOINT=https://fathom.example.com
+PULSEDB_API_KEY=sk_live_xxx
+PULSEDB_ENDPOINT=https://pulsedb.example.com
 APP_NAME=api-server
 NODE_ENV=production
 ```
@@ -421,15 +421,15 @@ The SDK works in modern browsers (with `fetch` support):
 
 ```javascript
 // In a browser app
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
     apiKey: 'sk_live_xxx',
-    endpoint: 'https://fathom.app',
+    endpoint: 'https://pulsedb.app',
     appName: 'web-app',
 });
 
 // Track user interactions
 document.addEventListener('click', (event) => {
-    fathom.track('user.interaction', {
+    pulsedb.track('user.interaction', {
         title: 'User Click',
         metadata: { target: event.target.tagName },
     });
@@ -443,13 +443,13 @@ document.addEventListener('click', (event) => {
 ### Constructor
 
 ```javascript
-new FathomSDK(options);
+new PulseDBSDK(options);
 ```
 
 | Option          | Type    | Required | Default         | Description         |
 | --------------- | ------- | -------- | --------------- | ------------------- |
-| `apiKey`        | string  | Yes      | -               | FATHOM API key      |
-| `endpoint`      | string  | Yes      | -               | FATHOM instance URL |
+| `apiKey`        | string  | Yes      | -               | PulseDB API key      |
+| `endpoint`      | string  | Yes      | -               | PulseDB instance URL |
 | `appName`       | string  | No       | `'unnamed-app'` | Application name    |
 | `environment`   | string  | No       | `'production'`  | Environment name    |
 | `batchSize`     | number  | No       | `50`            | Events per batch    |
@@ -530,7 +530,7 @@ track('payment.completed', {
 Returns Express middleware for auto-tracking HTTP requests.
 
 ```javascript
-app.use(fathom.expressMiddleware());
+app.use(pulsedb.expressMiddleware());
 ```
 
 #### `captureUncaughtExceptions()`
@@ -538,7 +538,7 @@ app.use(fathom.expressMiddleware());
 Automatically capture uncaught exceptions and unhandled rejections.
 
 ```javascript
-fathom.captureUncaughtExceptions();
+pulsedb.captureUncaughtExceptions();
 ```
 
 #### `start()`
@@ -546,7 +546,7 @@ fathom.captureUncaughtExceptions();
 Start the auto-flush timer.
 
 ```javascript
-fathom.start();
+pulsedb.start();
 ```
 
 #### `flush()`
@@ -554,15 +554,15 @@ fathom.start();
 Manually flush the event queue.
 
 ```javascript
-await fathom.flush();
+await pulsedb.flush();
 ```
 
 #### `heartbeat(status, metadata)`
 
-Send a heartbeat to FATHOM.
+Send a heartbeat to PulseDB.
 
 ```javascript
-await fathom.heartbeat('healthy', { uptime: 3600 });
+await pulsedb.heartbeat('healthy', { uptime: 3600 });
 ```
 
 #### `shutdown()`
@@ -570,7 +570,7 @@ await fathom.heartbeat('healthy', { uptime: 3600 });
 Stop auto-flush and flush remaining events.
 
 ```javascript
-await fathom.shutdown();
+await pulsedb.shutdown();
 ```
 
 ---
@@ -606,6 +606,6 @@ MIT
 
 For issues, feature requests, or integrations, visit:
 
-- **Dashboard**: https://fathom.app
-- **Docs**: https://docs.fathom.app
-- **Email**: support@fathom.app
+- **Dashboard**: https://pulsedb.app
+- **Docs**: https://docs.pulsedb.app
+- **Email**: support@pulsedb.app

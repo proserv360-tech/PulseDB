@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Shared view kit for the Observability/Admin pages
+//  PulseDB — Shared view kit for the Observability/Admin pages
 // ==========================================================================
 //  These pages (RedisOverview, ElasticsearchOverview, DetectorPicker,
 //  TraceDetail, NotifierSettings) used to use ad-hoc Tailwind utility

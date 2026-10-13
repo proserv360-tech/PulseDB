@@ -1,7 +1,7 @@
 {
-    "name": "@fathom/sdk",
+    "name": "@pulsedb/sdk",
     "version": "1.0.0",
-    "description": "FATHOM SDK — Send API logs, errors, metrics, and audit events to your FATHOM dashboard",
+    "description": "PulseDB SDK — Send API logs, errors, metrics, and audit events to your PulseDB dashboard",
     "main": "dist/index.cjs",
     "module": "src/index.js",
     "type": "module",
@@ -17,13 +17,13 @@
         "README.md"
     ],
     "keywords": [
-        "fathom",
+        "pulsedb",
         "monitoring",
         "observability",
         "api-monitoring",
         "error-tracking"
     ],
-    "author": "FATHOM Team",
+    "author": "PulseDB Team",
     "license": "MIT",
     "engines": {
         "node": ">=18.0.0"

@@ -171,7 +171,7 @@ export default function Marketplace() {
             {/* Header */}
             <div style={{ marginBottom: '28px' }}>
                 <h1 style={{ fontSize: '24px', fontWeight: 800, color: THEME.textMain, margin: '0 0 6px' }}>Plugin Marketplace</h1>
-                <p style={{ fontSize: '13px', color: THEME.textMuted, margin: 0 }}>Extend Fathom with community and verified plugins</p>
+                <p style={{ fontSize: '13px', color: THEME.textMuted, margin: 0 }}>Extend PulseDB with community and verified plugins</p>
             </div>
 
             {/* Search + Filter */}

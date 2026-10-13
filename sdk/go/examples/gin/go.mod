@@ -1,10 +1,10 @@
-module github.com/fathom/fathom-go/examples/gin
+module github.com/pulsedb/pulsedb-go/examples/gin
 
 go 1.21
 
 require (
-	github.com/fathom/fathom-go v0.1.0
-	github.com/fathom/fathom-go/middleware/gin v0.1.0
+	github.com/pulsedb/pulsedb-go v0.1.0
+	github.com/pulsedb/pulsedb-go/middleware/gin v0.1.0
 	github.com/gin-gonic/gin v1.9.1
 )
 
@@ -35,6 +35,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/fathom/fathom-go => ../..
+replace github.com/pulsedb/pulsedb-go => ../..
 
-replace github.com/fathom/fathom-go/middleware/gin => ../../middleware/gin
+replace github.com/pulsedb/pulsedb-go/middleware/gin => ../../middleware/gin

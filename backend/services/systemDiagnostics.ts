@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ─────────────────────────────────────────────────────────────────────────────
-// FATHOM — System Diagnostics
+// PulseDB — System Diagnostics
 //
 // Single source of truth for "is the backend configured correctly" checks.
 // Powers three callers:
@@ -103,7 +103,7 @@ export async function checkControlPlaneSchema(pool, { timeoutMs = 2500 } = {}) {
         return {
             ok: false,
             code: DiagnosticCodes.DB_NOT_CONFIGURED,
-            hint: 'DATABASE_URL is not set. Point it at the FATHOM control-plane Postgres.',
+            hint: 'DATABASE_URL is not set. Point it at the PulseDB control-plane Postgres.',
         };
     }
 
@@ -120,7 +120,7 @@ export async function checkControlPlaneSchema(pool, { timeoutMs = 2500 } = {}) {
 
     // Minimum table set a working install needs to create connections.
     // Anything beyond this is a feature-specific concern, not a boot blocker.
-    const REQUIRED = ['fathom_connections', 'users'];
+    const REQUIRED = ['pulsedb_connections', 'users'];
     let rows;
     try {
         const res = await withTimeout(
@@ -227,7 +227,7 @@ export async function checkDbProvider(pool, { env = process.env, timeoutMs = 250
 
     // The pooler (6543) is correct for serverless runtime but breaks pg_restore;
     // only warn when this process is the migrator (npm run migrate sets this).
-    if (info.pooled && env.FATHOM_RUNNING_MIGRATION === 'true') {
+    if (info.pooled && env.PULSEDB_RUNNING_MIGRATION === 'true') {
         warnings.push({
             code: DiagnosticCodes.DB_POOLER_FOR_MIGRATION,
             hint: 'Migrations should use the DIRECT connection (port 5432), not the transaction pooler (6543).',

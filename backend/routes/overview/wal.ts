@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/wal
+//  PulseDB — /api/overview/wal
 //  Returns: WAL generation, checkpoint stats, archive status, autovacuum flag
 // ==========================================================================
 

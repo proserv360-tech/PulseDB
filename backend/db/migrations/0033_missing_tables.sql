@@ -117,7 +117,7 @@ CREATE INDEX IF NOT EXISTS vacuum_snapshots_table_time_idx
     ON pgmonitoringtool.vacuum_snapshots (schemaname, relname, captured_at DESC);
 
 -- ── 4. database_connections ──────────────────────────────────────────────────
--- terraformService exports HCL from this. Distinct from fathom_connections:
+-- terraformService exports HCL from this. Distinct from pulsedb_connections:
 -- that one is the live monitored-connection registry keyed to a user; this is
 -- the org-scoped declarative inventory the Terraform export describes. The
 -- export deliberately never reads a password — it emits a tfvars reference.

@@ -1335,7 +1335,7 @@ const SchemaVersioningTab = () => {
     const [filterTags, setFilterTags] = useState([]);
     const [expandedMigrations, setExpandedMigrations] = useState([]);
     const [selectedMigration, setSelectedMigration] = useState(null);
-    const [favorites, setFavorites] = useLocalStorage('fathom_favorite_migrations', []);
+    const [favorites, setFavorites] = useLocalStorage('pulsedb_favorite_migrations', []);
     const [migrations, setMigrations] = useState([]);
     const [pendingMigrations, setPendingMigrations] = useState([]);
     const [schemaMessage, setSchemaMessage] = useState('');

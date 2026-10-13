@@ -4,7 +4,7 @@
  * Continuous query advisor v1 (gap-analysis P1-1).
  *
  * pganalyze Query Advisor / Datadog DBM turn streams of EXPLAIN plans into
- * concrete optimization recommendations. FATHOM already ingests auto_explain
+ * concrete optimization recommendations. PulseDB already ingests auto_explain
  * events with plan JSON (autoExplainService); this service walks those plans,
  * detects well-known anti-patterns, and maintains a deduplicated
  * recommendations queue. A benchmark endpoint compares a proposed rewrite
@@ -178,11 +178,11 @@ export async function runAdvisorSweep({ controlPool, workspaceId = 'default', co
         if (!issues.length) continue;
         const qhash = statementHash(ev.statement);
         const res = await controlPool.query(
-            `INSERT INTO fathom_query_recommendations
+            `INSERT INTO pulsedb_query_recommendations
                 (workspace_id, connection_id, query_hash, statement, issues, severity, occurrences)
              VALUES ($1, $2, $3, $4, $5, $6, 1)
              ON CONFLICT (workspace_id, query_hash)
-             DO UPDATE SET occurrences = fathom_query_recommendations.occurrences + 1,
+             DO UPDATE SET occurrences = pulsedb_query_recommendations.occurrences + 1,
                            last_seen   = now(),
                            issues      = EXCLUDED.issues,
                            severity    = EXCLUDED.severity
@@ -207,7 +207,7 @@ export async function listRecommendations({ controlPool, workspaceId = 'default'
     const { rows } = await controlPool.query(
         `SELECT id, connection_id, query_hash, statement, issues, severity, status,
                 occurrences, first_seen, last_seen
-           FROM fathom_query_recommendations
+           FROM pulsedb_query_recommendations
           WHERE workspace_id = $1 AND ($2::text IS NULL OR status = $2)
           ORDER BY CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END,
                    occurrences DESC
@@ -221,7 +221,7 @@ export async function setRecommendationStatus({ controlPool, id, status, workspa
     if (!['open', 'dismissed', 'applied'].includes(status)) throw new Error(`invalid status '${status}'`);
     // Scope by workspace so a user can't mutate another tenant's rows by id.
     const { rows } = await controlPool.query(
-        `UPDATE fathom_query_recommendations SET status = $2
+        `UPDATE pulsedb_query_recommendations SET status = $2
           WHERE id = $1 AND workspace_id = $3 RETURNING id, status`,
         [id, status, workspaceId],
     );

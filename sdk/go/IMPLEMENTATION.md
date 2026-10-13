@@ -1,12 +1,12 @@
-# FATHOM Go SDK - Implementation Report
+# PulseDB Go SDK - Implementation Report
 
 ## Project Overview
 
-A production-quality Go SDK for FATHOM observability platform, maintaining 100% wire contract parity with the JavaScript and Python SDKs.
+A production-quality Go SDK for PulseDB observability platform, maintaining 100% wire contract parity with the JavaScript and Python SDKs.
 
 **Location**: `/sessions/blissful-hopeful-lovelace/mnt/PostgresTool/sdk/go/`
 
-**Module**: `github.com/fathom/fathom-go` (Go 1.21+)
+**Module**: `github.com/pulsedb/pulsedb-go` (Go 1.21+)
 
 ## Deliverables Summary
 
@@ -14,7 +14,7 @@ A production-quality Go SDK for FATHOM observability platform, maintaining 100% 
 
 | File           | Lines | Purpose                                                                 |
 | -------------- | ----- | ----------------------------------------------------------------------- |
-| `fathom.go`    | 414   | Main client API, configuration, event tracking methods                  |
+| `pulsedb.go`    | 414   | Main client API, configuration, event tracking methods                  |
 | `events.go`    | 213   | SdkEvent struct, event constructors (API, Error, Audit, Metric, Custom) |
 | `transport.go` | 223   | HTTP client wrapper with retry logic and exponential backoff            |
 | `batcher.go`   | 234   | Background event batcher with goroutine and channel-driven flushing     |
@@ -23,7 +23,7 @@ A production-quality Go SDK for FATHOM observability platform, maintaining 100% 
 
 | File                                 | Lines | Tests | Purpose                                                                        |
 | ------------------------------------ | ----- | ----- | ------------------------------------------------------------------------------ |
-| `fathom_test.go`                     | 330   | 7     | Client initialization, API tracking, auto-severity, batch flushing, shutdown   |
+| `pulsedb_test.go`                     | 330   | 7     | Client initialization, API tracking, auto-severity, batch flushing, shutdown   |
 | `transport_test.go`                  | 328   | 10    | HTTP requests, auth headers, retries, backoff, error handling                  |
 | `batcher_test.go`                    | 284   | 7     | Enqueue, size-based flush, timer-based flush, failure re-queueing, concurrency |
 | `middleware/nethttp/nethttp_test.go` | 260   | 6     | Middleware integration, status code capture, method/duration recording         |
@@ -137,9 +137,9 @@ All fields maintain exact camelCase match with JavaScript/Python SDKs:
 ### Client Initialization
 
 ```go
-client, err := fathom.New(fathom.Config{
+client, err := pulsedb.New(pulsedb.Config{
     APIKey:        "sk_live_...",
-    Endpoint:      "https://api.fathom.example.com",
+    Endpoint:      "https://api.pulsedb.example.com",
     Environment:   "production",      // optional
     AppName:       "my-app",          // optional
     BatchSize:     50,                // optional
@@ -290,11 +290,11 @@ sdk/go/
 ├── LICENSE                          # MIT
 ├── README.md                        # 280-line quickstart + examples
 ├── IMPLEMENTATION.md                # This file
-├── fathom.go                        # 414 lines - Public API
+├── pulsedb.go                        # 414 lines - Public API
 ├── events.go                        # 213 lines - Event types
 ├── transport.go                     # 223 lines - HTTP client
 ├── batcher.go                       # 234 lines - Background batching
-├── fathom_test.go                   # 330 lines - 7 tests
+├── pulsedb_test.go                   # 330 lines - 7 tests
 ├── transport_test.go                # 328 lines - 10 tests
 ├── batcher_test.go                  # 284 lines - 7 tests
 ├── middleware/
@@ -438,4 +438,4 @@ cd ../gin && go build -o app && ./app
 
 ## Summary
 
-A complete, production-ready Go SDK for FATHOM with 100% wire contract parity, comprehensive test coverage, and idiomatic Go implementation. The SDK is ready for integration into Go applications of any scale, from single services to microservice architectures.
+A complete, production-ready Go SDK for PulseDB with 100% wire contract parity, comprehensive test coverage, and idiomatic Go implementation. The SDK is ready for integration into Go applications of any scale, from single services to microservice architectures.

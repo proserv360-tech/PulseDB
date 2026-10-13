@@ -115,7 +115,7 @@ describe('EnhancedAlertEngine.escalate()', () => {
                 name: 'primary-oncall',
                 enabled: true,
                 min_severity: 'warning',
-                config: { source: 'fathom' },
+                config: { source: 'pulsedb' },
                 secret_enc: encrypt('routingkey0000000000000000000000'),
             };
 

@@ -38,7 +38,7 @@ outcomes, and the fix differs:
   read as live to anyone grepping the codebase.
 
 `workbookRoutes.ts` is worth a closer look before deleting: it imports
-`@fathom/validators`, which suggests it was written to the current standard
+`@pulsedb/validators`, which suggests it was written to the current standard
 rather than abandoned early.
 
 ## 2. Unused dependencies

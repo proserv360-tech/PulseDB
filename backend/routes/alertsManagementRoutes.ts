@@ -204,7 +204,7 @@ export default function alertsManagementRoutes(
         try {
             const webhookUrl = process.env.SLACK_WEBHOOK_URL;
             if (!webhookUrl) return res.status(400).json({ error: 'SLACK_WEBHOOK_URL is not configured.' });
-            await sendSlackMessage(':white_check_mark: *Fathom Slack integration is working!* This is a test message from your Fathom monitoring platform.', webhookUrl);
+            await sendSlackMessage(':white_check_mark: *PulseDB Slack integration is working!* This is a test message from your PulseDB monitoring platform.', webhookUrl);
             res.json({ success: true, message: 'Test message sent to Slack.' });
         } catch (e) {
             log('ERROR', 'Slack test error', { error: e.message });

@@ -1,6 +1,6 @@
-# Fathom Python SDK
+# PulseDB Python SDK
 
-A lightweight, production-ready Python SDK for observability and event tracking with FATHOM.
+A lightweight, production-ready Python SDK for observability and event tracking with PulseDB.
 
 ## Features
 
@@ -14,20 +14,20 @@ A lightweight, production-ready Python SDK for observability and event tracking 
 ## Installation
 
 ```bash
-pip install fathom-sdk
+pip install pulsedb-sdk
 ```
 
 For optional framework support:
 
 ```bash
 # FastAPI
-pip install fathom-sdk[fastapi]
+pip install pulsedb-sdk[fastapi]
 
 # Django
-pip install fathom-sdk[django]
+pip install pulsedb-sdk[django]
 
 # Flask and other WSGI apps
-pip install fathom-sdk[flask]
+pip install pulsedb-sdk[flask]
 ```
 
 ## Quick Start
@@ -35,12 +35,12 @@ pip install fathom-sdk[flask]
 ### Basic Usage
 
 ```python
-from fathom_sdk import FathomSDK
+from pulsedb_sdk import PulseDBSDK
 
 # Initialize SDK
-sdk = FathomSDK(
+sdk = PulseDBSDK(
     api_key="sk_live_your_key_here",
-    endpoint="https://api.fathom.example.com",
+    endpoint="https://api.pulsedb.example.com",
     app_name="my-app",
     environment="production",
 )
@@ -164,16 +164,16 @@ sdk.track(
 
 ```python
 from fastapi import FastAPI
-from fathom_sdk import FathomSDK
-from fathom_sdk.integrations.fastapi import FathomFastAPIMiddleware
+from pulsedb_sdk import PulseDBSDK
+from pulsedb_sdk.integrations.fastapi import PulseDBFastAPIMiddleware
 
-sdk = FathomSDK(
+sdk = PulseDBSDK(
     api_key="sk_live_xxx",
-    endpoint="https://api.fathom.example.com",
+    endpoint="https://api.pulsedb.example.com",
 )
 
 app = FastAPI()
-app.add_middleware(FathomFastAPIMiddleware, sdk=sdk)
+app.add_middleware(PulseDBFastAPIMiddleware, sdk=sdk)
 
 # Now all HTTP requests are automatically tracked
 ```
@@ -188,7 +188,7 @@ Custom skip paths:
 
 ```python
 app.add_middleware(
-    FathomFastAPIMiddleware,
+    PulseDBFastAPIMiddleware,
     sdk=sdk,
     skip_paths={"/health", "/readyz", "/custom-endpoint"}
 )
@@ -205,15 +205,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # ... other middleware ...
-    "fathom_sdk.integrations.django.FathomDjangoMiddleware",
+    "pulsedb_sdk.integrations.django.PulseDBDjangoMiddleware",
 ]
 
 # Optional: configure SDK via settings
-from fathom_sdk import FathomSDK
+from pulsedb_sdk import PulseDBSDK
 
-FATHOM_SDK = FathomSDK(
+PULSEDB_SDK = PulseDBSDK(
     api_key="sk_live_xxx",
-    endpoint="https://api.fathom.example.com",
+    endpoint="https://api.pulsedb.example.com",
     app_name="my-django-app",
 )
 ```
@@ -222,27 +222,27 @@ Or pass SDK directly to middleware in `wsgi.py`:
 
 ```python
 from django.core.wsgi import get_wsgi_application
-from fathom_sdk import FathomSDK
-from fathom_sdk.integrations.django import FathomDjangoMiddleware
+from pulsedb_sdk import PulseDBSDK
+from pulsedb_sdk.integrations.django import PulseDBDjangoMiddleware
 
-sdk = FathomSDK(...)
-application = FathomDjangoMiddleware(get_wsgi_application(), sdk=sdk)
+sdk = PulseDBSDK(...)
+application = PulseDBDjangoMiddleware(get_wsgi_application(), sdk=sdk)
 ```
 
 ### Flask / WSGI
 
 ```python
 from flask import Flask
-from fathom_sdk import FathomSDK
-from fathom_sdk.integrations.wsgi import FathomWSGIMiddleware
+from pulsedb_sdk import PulseDBSDK
+from pulsedb_sdk.integrations.wsgi import PulseDBWSGIMiddleware
 
-sdk = FathomSDK(
+sdk = PulseDBSDK(
     api_key="sk_live_xxx",
-    endpoint="https://api.fathom.example.com",
+    endpoint="https://api.pulsedb.example.com",
 )
 
 app = Flask(__name__)
-app.wsgi_app = FathomWSGIMiddleware(app.wsgi_app, sdk=sdk)
+app.wsgi_app = PulseDBWSGIMiddleware(app.wsgi_app, sdk=sdk)
 
 # Now all requests are tracked
 ```
@@ -266,9 +266,9 @@ This captures:
 ## Configuration
 
 ```python
-sdk = FathomSDK(
+sdk = PulseDBSDK(
     api_key="sk_live_...",
-    endpoint="https://api.fathom.example.com",
+    endpoint="https://api.pulsedb.example.com",
 
     # Optional:
     app_name="my-app",              # default: "unnamed-app"
@@ -300,7 +300,7 @@ Transient errors are retried up to 3 times with exponential backoff:
 
 ```python
 # Initialize
-sdk = FathomSDK(...)
+sdk = PulseDBSDK(...)
 
 # Use SDK
 sdk.track_api(...)
@@ -326,14 +326,14 @@ The SDK is designed for testability:
 ```python
 import httpx
 from unittest.mock import MagicMock
-from fathom_sdk import FathomSDK
+from pulsedb_sdk import PulseDBSDK
 
 # Mock HTTP client
 mock_http = MagicMock(spec=httpx.Client)
 mock_http.post.return_value = Mock(status_code=200, json=lambda: {"ingested": 1})
 
 # Inject mock client
-sdk = FathomSDK(
+sdk = PulseDBSDK(
     api_key="sk_live_test",
     endpoint="https://api.test.com",
     http_client=mock_http,  # custom client
@@ -359,7 +359,7 @@ pip install -e ".[dev]"
 pytest tests/ -v
 
 # Run with coverage
-pytest tests/ --cov=fathom_sdk
+pytest tests/ --cov=pulsedb_sdk
 ```
 
 ## Example Application
@@ -372,7 +372,7 @@ cd sdk/python
 # Install dependencies
 pip install -e ".[fastapi]"
 
-# Run example (make sure FATHOM backend is running on http://localhost:5000)
+# Run example (make sure PulseDB backend is running on http://localhost:5000)
 python examples/fastapi_app.py
 
 # In another terminal, test it:
@@ -383,7 +383,7 @@ curl -X POST "http://localhost:8000/users?name=Alice"
 
 ## Wire Protocol
 
-The SDK implements the FATHOM wire contract:
+The SDK implements the PulseDB wire contract:
 
 ### Events Endpoint
 
@@ -448,4 +448,4 @@ MIT — See LICENSE file.
 
 ## Support
 
-For issues, features, or questions, contact the FATHOM team.
+For issues, features, or questions, contact the PulseDB team.

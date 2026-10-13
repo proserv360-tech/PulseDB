@@ -7,7 +7,7 @@ export const lazyRetry = (importFn) =>
     lazy(() =>
         importFn().catch((err) => {
             // Chunk fetch failed (likely stale hash after deploy) — force-reload once
-            const key = 'fathom_chunk_retry';
+            const key = 'pulsedb_chunk_retry';
             try {
                 if (!sessionStorage.getItem(key)) {
                     sessionStorage.setItem(key, '1');

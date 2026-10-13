@@ -16,7 +16,7 @@ export const rateLimiter = buildRateLimiter({
     windowMs: CONFIG.RATE_LIMIT.WINDOW_MS,
     maxRequests: CONFIG.RATE_LIMIT.MAX_REQUESTS,
     keyFn: (req) => req.ip || 'unknown',
-    prefix: 'fathom:rl:global',
+    prefix: 'pulsedb:rl:global',
 });
 
 // strictRateLimiter is a factory used by sensitive endpoints (login,
@@ -27,7 +27,7 @@ export function strictRateLimiter(windowMs = 60_000, maxReqs = 10) {
         windowMs,
         maxRequests: maxReqs,
         keyFn: (req) => `${req.ip || 'unknown'}:${req.path}`,
-        prefix: 'fathom:rl:strict',
+        prefix: 'pulsedb:rl:strict',
     });
 }
 
@@ -158,7 +158,7 @@ export function csrfProtection(req, res, next) {
     }
 
     const hasBearer = req.headers.authorization?.startsWith('Bearer ');
-    const hasAuthCookie = typeof req.headers.cookie === 'string' && req.headers.cookie.includes('fathom_token=');
+    const hasAuthCookie = typeof req.headers.cookie === 'string' && req.headers.cookie.includes('pulsedb_token=');
     const csrfToken = req.headers['x-csrf-token'];
 
     // (2) Validate the CSRF token if one is supplied (double-submit pattern).

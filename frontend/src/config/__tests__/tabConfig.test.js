@@ -1,6 +1,6 @@
 /**
  * Tab Configuration Test Suite
- * Tests the FATHOM dashboard tab registry, component registration, and grouping logic
+ * Tests the PulseDB dashboard tab registry, component registration, and grouping logic
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';

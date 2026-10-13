@@ -106,7 +106,7 @@ const RollupTiersPanel: React.FC = () => {
             </div>
             <div style={{ fontSize: 11.5, color: THEME.textMuted, marginTop: 12 }}>
                 Rollups also run automatically (hourly) with daily pruning. Tiers are env-tunable via
-                FATHOM_METRICS_*_DAYS.
+                PULSEDB_METRICS_*_DAYS.
             </div>
         </div>
     );

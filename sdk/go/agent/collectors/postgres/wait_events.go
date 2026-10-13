@@ -1,4 +1,4 @@
-// Package postgres implements the Postgres collectors used by the FATHOM
+// Package postgres implements the Postgres collectors used by the PulseDB
 // managed agent. Each collector exposes a Sample method that returns a
 // batch of observations the agent forwards via the existing SDK Transport.
 package postgres

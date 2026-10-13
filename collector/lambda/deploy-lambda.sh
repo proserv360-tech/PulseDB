@@ -13,7 +13,7 @@
 #   - aws CLI installed & configured (`aws sts get-caller-identity` works)
 #   - auto_explain enabled on the RDS parameter group (log_format=json)
 #   - PostgreSQL log exported to CloudWatch Logs (you have the log group name)
-#   - A FATHOM SDK key (sk_live_...) from the app's SDK Dashboard
+#   - A PulseDB SDK key (sk_live_...) from the app's SDK Dashboard
 #
 # USAGE:
 #   Edit the CONFIG block below, then:
@@ -26,13 +26,13 @@ set -euo pipefail
 
 # ───────────────────────── CONFIG — EDIT THESE ─────────────────────────
 AWS_REGION="${AWS_REGION:-us-east-1}"                 # region of the RDS log group
-FUNCTION_NAME="${FUNCTION_NAME:-fathom-autoexplain}"
+FUNCTION_NAME="${FUNCTION_NAME:-pulsedb-autoexplain}"
 LOG_GROUP="${CW_LOG_GROUP:-/aws/rds/instance/REPLACE-DB-ID/postgresql}"
-FATHOM_URL="${FATHOM_URL:-https://postgres-tool.vercel.app}"
-FATHOM_SDK_KEY="${FATHOM_SDK_KEY:-sk_live_REPLACE_ME}"
-FATHOM_CONNECTION_ID="${FATHOM_CONNECTION_ID:-10}"   # numeric VIGIL PRD connection id
-ROLE_NAME="${ROLE_NAME:-fathom-autoexplain-role}"
-FILTER_NAME="${FILTER_NAME:-fathom-autoexplain}"
+PULSEDB_URL="${PULSEDB_URL:-https://postgres-tool.vercel.app}"
+PULSEDB_SDK_KEY="${PULSEDB_SDK_KEY:-sk_live_REPLACE_ME}"
+PULSEDB_CONNECTION_ID="${PULSEDB_CONNECTION_ID:-10}"   # numeric VIGIL PRD connection id
+ROLE_NAME="${ROLE_NAME:-pulsedb-autoexplain-role}"
+FILTER_NAME="${FILTER_NAME:-pulsedb-autoexplain}"
 FILTER_PATTERN="${FILTER_PATTERN:-duration}"          # only deliver lines containing "duration"
 # ───────────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,7 @@ parent="$(cd "$here/.." && pwd)"
 echo "==> sanity checks"
 command -v aws >/dev/null || { echo "aws CLI not found"; exit 1; }
 command -v zip >/dev/null || { echo "zip not found"; exit 1; }
-[[ "$FATHOM_SDK_KEY" == sk_live_REPLACE_ME ]] && { echo "Set FATHOM_SDK_KEY"; exit 1; }
+[[ "$PULSEDB_SDK_KEY" == sk_live_REPLACE_ME ]] && { echo "Set PULSEDB_SDK_KEY"; exit 1; }
 [[ "$LOG_GROUP" == *REPLACE-DB-ID* ]] && { echo "Set CW_LOG_GROUP to the real RDS log group"; exit 1; }
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
@@ -71,7 +71,7 @@ fi
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
 
 echo "==> 3. Lambda function"
-ENV_VARS="Variables={FATHOM_URL=$FATHOM_URL,FATHOM_SDK_KEY=$FATHOM_SDK_KEY,FATHOM_CONNECTION_ID=$FATHOM_CONNECTION_ID}"
+ENV_VARS="Variables={PULSEDB_URL=$PULSEDB_URL,PULSEDB_SDK_KEY=$PULSEDB_SDK_KEY,PULSEDB_CONNECTION_ID=$PULSEDB_CONNECTION_ID}"
 if aws lambda get-function --function-name "$FUNCTION_NAME" --region "$AWS_REGION" >/dev/null 2>&1; then
     echo "    updating code + config"
     aws lambda update-function-code --function-name "$FUNCTION_NAME" --region "$AWS_REGION" \

@@ -3,7 +3,7 @@
     "server": {
         "version": "MySQL 8.4.0",
         "uptime_days": 34,
-        "host": "mysql-prod-01.fathom.demo",
+        "host": "mysql-prod-01.pulsedb.demo",
         "port": 3306,
         "data_directory": "/var/lib/mysql"
     },

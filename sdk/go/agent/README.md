@@ -1,8 +1,8 @@
-# FATHOM managed agent (Wave C — task C1)
+# PulseDB managed agent (Wave C — task C1)
 
 A thin Go binary that runs on a host close to the monitored Postgres
 instance, samples wait events and pg_stat_statements at a configurable
-cadence, and forwards the data via the existing FATHOM SDK transport.
+cadence, and forwards the data via the existing PulseDB SDK transport.
 
 This closes the productisation gap with Datadog Agent / Percona PMM
 client / pganalyze collector identified in the 2 June 2026 gap analysis.
@@ -14,9 +14,9 @@ client / pganalyze collector identified in the 2 June 2026 gap analysis.
 - `agent/collectors/postgres/wait_events.go` — `pg_stat_activity` poller.
 - `agent/collectors/postgres/query_stats.go` — `pg_stat_statements`
   poller with graceful no-op when the extension is missing.
-- `cmd/fathom-agent/main.go` — binary entrypoint.
-- `cmd/fathom-agent/forwarder.go` — SDK Transport adaptor.
-- `agent/dist/fathom-agent.service` — SystemD unit.
+- `cmd/pulsedb-agent/main.go` — binary entrypoint.
+- `cmd/pulsedb-agent/forwarder.go` — SDK Transport adaptor.
+- `agent/dist/pulsedb-agent.service` — SystemD unit.
 - `agent/dist/agent.yaml.example` — config template.
 
 ## Out of scope (tracked separately)
@@ -30,7 +30,7 @@ client / pganalyze collector identified in the 2 June 2026 gap analysis.
 
 ```sh
 cd sdk/go
-go build -o bin/fathom-agent ./cmd/fathom-agent
+go build -o bin/pulsedb-agent ./cmd/pulsedb-agent
 ```
 
 The binary is a single static file; the official release artifacts are

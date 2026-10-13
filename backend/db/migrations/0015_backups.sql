@@ -1,7 +1,7 @@
 -- 0015_backups.sql — B8 backup orchestration scaffold.
 --
 -- This schema is in-place but the execution layer is gated behind
--- FATHOM_BACKUPS_ENABLED=1. Until that env is set, the UI tab shows the
+-- PULSEDB_BACKUPS_ENABLED=1. Until that env is set, the UI tab shows the
 -- schedules in "preview" state and the orchestrator never runs.
 --
 -- Real execution arrives once the worker tier (B1) consumes the

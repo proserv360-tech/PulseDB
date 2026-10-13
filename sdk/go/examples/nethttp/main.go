@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fathom/fathom-go"
-	"github.com/fathom/fathom-go/middleware/nethttp"
+	"github.com/pulsedb/pulsedb-go"
+	"github.com/pulsedb/pulsedb-go/middleware/nethttp"
 )
 
 func main() {
-	// Initialize Fathom SDK
-	client, err := fathom.New(fathom.Config{
+	// Initialize PulseDB SDK
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test123",
 		Endpoint:      "http://localhost:3000",
 		AppName:       "nethttp-example",
@@ -49,7 +49,7 @@ func main() {
 		}
 	})
 
-	// Wrap handler with Fathom middleware
+	// Wrap handler with PulseDB middleware
 	wrappedHandler := nethttp.Middleware(client)(handler)
 
 	// Also track custom events
@@ -59,7 +59,7 @@ func main() {
 			"userId": "user123",
 		})
 
-		client.TrackAudit("User Login", fathom.AuditOpts{
+		client.TrackAudit("User Login", pulsedb.AuditOpts{
 			Message: "User successfully logged in",
 			Severity: "info",
 		})

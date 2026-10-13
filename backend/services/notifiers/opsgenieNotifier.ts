@@ -27,13 +27,13 @@ export class OpsgenieNotifier extends BaseNotifier {
    * @param {object} opts
    * @param {string} opts.apiKey        — Opsgenie API integration key
    * @param {boolean} [opts.euRegion]   — true for EU Opsgenie tenants
-   * @param {string}  [opts.source='fathom']
+   * @param {string}  [opts.source='pulsedb']
    * @param {string[]} [opts.responderTeams=[]] — list of team names
    * @param {string[]} [opts.tags=[]]
    * @param {string} [opts.name='opsgenie']
    */
   constructor({
-    apiKey, euRegion = false, source = 'fathom',
+    apiKey, euRegion = false, source = 'pulsedb',
     responderTeams = [], tags = [], name = 'opsgenie', ...rest
   } = {}) {
     super({ name, ...rest });
@@ -47,7 +47,7 @@ export class OpsgenieNotifier extends BaseNotifier {
 
   buildPayload(alert) {
     return {
-      message: (alert.title || alert.message || 'FATHOM alert').slice(0, 130),
+      message: (alert.title || alert.message || 'PulseDB alert').slice(0, 130),
       alias: alert.dedupKey || alert.id,
       description: alert.message || alert.title || '',
       priority: OG_PRIORITY[alert.severity] || 'P3',
@@ -83,7 +83,7 @@ export class OpsgenieNotifier extends BaseNotifier {
   async closeAlert(alert) {
     const alias = encodeURIComponent(alert.dedupKey || alert.id);
     const url = `${this.urlBase}/${alias}/close?identifierType=alias`;
-    const res = await postJson(this.http, url, { note: 'Resolved by FATHOM' }, {
+    const res = await postJson(this.http, url, { note: 'Resolved by PulseDB' }, {
       headers: { Authorization: `GenieKey ${this.apiKey}` },
       timeoutMs: this.timeoutMs,
     });

@@ -117,7 +117,7 @@ export default function registerAdminDbRoutes(app) {
             );
             if (check.rows.length === 0) return res.status(404).json({ error: 'Connection not found' });
             const conn = check.rows[0];
-            if (conn.application_name === 'fathom_backend') {
+            if (conn.application_name === 'pulsedb_backend') {
                 return res.status(403).json({ error: 'Cannot terminate the monitoring backend connection' });
             }
             const r = await _p.query('SELECT pg_terminate_backend($1) AS killed', [pid]);

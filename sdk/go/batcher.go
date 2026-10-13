@@ -1,4 +1,4 @@
-package fathom
+package pulsedb
 
 import (
 	"context"
@@ -104,7 +104,7 @@ func (b *Batcher) Enqueue(event *SdkEvent) {
 	}
 }
 
-// flushBatch sends a batch of events to FATHOM
+// flushBatch sends a batch of events to PulseDB
 // On failure, re-queues at front of queue
 // If queue is full, drops oldest event (bounded memory)
 func (b *Batcher) flushBatch(ctx context.Context) {
@@ -126,7 +126,7 @@ func (b *Batcher) flushBatch(ctx context.Context) {
 
 	b.mu.Unlock()
 
-	b.logf("[Flush] Sending %d events to FATHOM", len(batch))
+	b.logf("[Flush] Sending %d events to PulseDB", len(batch))
 
 	// Send batch
 	_, err := b.transport.PostIngest(ctx, batch)

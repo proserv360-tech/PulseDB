@@ -1,7 +1,7 @@
 /**
  * TraceCorrelationTab.tsx — dashboard tab wrapper for TraceCorrelationView.
  * Accepts a 32-hex trace id (typed, or handed over from the traces list via
- * the fathom:navigate-tab event) and renders the span↔query correlation view.
+ * the pulsedb:navigate-tab event) and renders the span↔query correlation view.
  */
 import { useEffect, useState } from 'react';
 import TraceCorrelationView from './TraceCorrelationView';
@@ -9,7 +9,7 @@ import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { GitBranch, Info } from 'lucide-react';
 
 const TRACE_RE = /^[0-9a-f]{32}$/i;
-const PAYLOAD_KEY = 'fathom:tab-payload:trace-correlation';
+const PAYLOAD_KEY = 'pulsedb:tab-payload:trace-correlation';
 
 export default function TraceCorrelationTab() {
     useAdaptiveTheme();

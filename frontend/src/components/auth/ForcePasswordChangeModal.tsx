@@ -44,7 +44,7 @@ const ForcePasswordChangeModal: React.FC<ForcePasswordChangeModalProps> = ({ onS
         setError('');
 
         try {
-            const token = localStorage.getItem('fathom_token');
+            const token = localStorage.getItem('pulsedb_token');
             const res = await fetch(`${API_BASE}/api/auth/change-password`, {
                 method: 'POST',
                 headers: {
@@ -63,7 +63,7 @@ const ForcePasswordChangeModal: React.FC<ForcePasswordChangeModalProps> = ({ onS
             }
 
             // Clear the must-change flag
-            localStorage.removeItem('fathom_must_change_password');
+            localStorage.removeItem('pulsedb_must_change_password');
             setSuccess(true);
 
             // Brief success message then proceed to dashboard

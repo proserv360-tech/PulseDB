@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * seed-apm-demo.mjs — send sample auto_explain events to FATHOM's ingest API.
+ * seed-apm-demo.mjs — send sample auto_explain events to PulseDB's ingest API.
  *
  * Purpose: see the **Performance → Deep Insights → APM (auto_explain)** tab
  * populate with real data flowing through the real ingest endpoint, WITHOUT
@@ -11,18 +11,18 @@
  * use only to validate the pipeline, then run the real shipper for live data.
  *
  * USAGE:
- *   FATHOM_URL=https://postgres-tool.vercel.app \
- *   FATHOM_SDK_KEY=sk_live_xxx \
- *   FATHOM_CONNECTION_ID=10 \
+ *   PULSEDB_URL=https://postgres-tool.vercel.app \
+ *   PULSEDB_SDK_KEY=sk_live_xxx \
+ *   PULSEDB_CONNECTION_ID=10 \
  *   node seed-apm-demo.mjs            # send events
  *
  *   add --dry-run to print the payload without sending.
  *   add --count=N to control how many events (default 24, max 500).
  */
 
-const FATHOM_URL = need('FATHOM_URL');
-const SDK_KEY = need('FATHOM_SDK_KEY');
-const CONNECTION_ID = Number(need('FATHOM_CONNECTION_ID'));
+const PULSEDB_URL = need('PULSEDB_URL');
+const SDK_KEY = need('PULSEDB_SDK_KEY');
+const CONNECTION_ID = Number(need('PULSEDB_CONNECTION_ID'));
 const DRY = process.argv.includes('--dry-run');
 const COUNT = Math.min(
     Number((process.argv.find((a) => a.startsWith('--count=')) || '').split('=')[1]) || 24,
@@ -35,7 +35,7 @@ function need(name) {
         console.error(`missing required env var ${name}`);
         process.exit(1);
     }
-    return v || (name === 'FATHOM_CONNECTION_ID' ? '10' : `<${name}>`);
+    return v || (name === 'PULSEDB_CONNECTION_ID' ? '10' : `<${name}>`);
 }
 
 const SAMPLES = [
@@ -114,11 +114,11 @@ const events = buildEvents(COUNT);
 
 if (DRY) {
     console.log(JSON.stringify({ connectionId: CONNECTION_ID, events: events.slice(0, 2) }, null, 2));
-    console.log(`\n(dry run) would send ${events.length} events to ${FATHOM_URL}/api/auto-explain/ingest`);
+    console.log(`\n(dry run) would send ${events.length} events to ${PULSEDB_URL}/api/auto-explain/ingest`);
     process.exit(0);
 }
 
-const res = await fetch(`${FATHOM_URL}/api/auto-explain/ingest`, {
+const res = await fetch(`${PULSEDB_URL}/api/auto-explain/ingest`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-sdk-key': SDK_KEY },
     body: JSON.stringify({ connectionId: CONNECTION_ID, events }),

@@ -1,4 +1,4 @@
-# Component Index - FATHOM Phase 1
+# Component Index - PulseDB Phase 1
 
 Quick reference for Phase 1 components.
 

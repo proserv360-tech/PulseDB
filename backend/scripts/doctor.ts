@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Doctor  (scripts/doctor.js)
+//  PulseDB — Doctor  (scripts/doctor.js)
 //
 //  Post-deploy smoke check. Verifies that the environment required for the
 //  backend to serve write traffic is in place. Safe to run from CI: exits 0
@@ -30,7 +30,7 @@ function formatRow(label, verdict, code, hint) {
 
 async function main() {
     console.log('');
-    console.log('FATHOM doctor — checking configuration…');
+    console.log('PulseDB doctor — checking configuration…');
     console.log('-'.repeat(72));
 
     // pg natively reads either DATABASE_URL or the discrete PG* vars. Build

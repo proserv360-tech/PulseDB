@@ -3,14 +3,14 @@
  * B5 — Zod-driven request validation middleware.
  *
  * Replaces ad-hoc `if (!req.body.x) return res.status(400)...` boilerplate
- * with a single source of truth that lives in @fathom/validators. The
+ * with a single source of truth that lives in @pulsedb/validators. The
  * shared schema is used by the frontend (form validation) and the backend
  * (request validation), so a rename in one place breaks the type check in
  * the other.
  *
  * Usage:
  *   import { validate } from '../middleware/validate.js';
- *   import { CreateAlertRuleSchema } from '@fathom/validators';
+ *   import { CreateAlertRuleSchema } from '@pulsedb/validators';
  *
  *   router.post('/alerts',
  *     authenticate,

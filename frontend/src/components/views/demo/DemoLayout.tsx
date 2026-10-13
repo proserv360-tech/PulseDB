@@ -10,7 +10,7 @@ import { ChevronDown, ArrowUpRight, ArrowDownRight, Bell, User, Search, X, Panel
 import DemoDatabasePicker, { DemoOverviewSummary, DEMO_DB_OPTIONS } from './DemoDatabasePicker';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   DemoLayout — rewritten to match the main FATHOM app's look & feel.
+   DemoLayout — rewritten to match the main PulseDB app's look & feel.
 
    Now uses:
      • THEME adaptive tokens (works in both light and dark mode, same as the

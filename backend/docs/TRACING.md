@@ -1,6 +1,6 @@
-# FATHOM — Distributed Tracing (OTLP)
+# PulseDB — Distributed Tracing (OTLP)
 
-FATHOM ingests OpenTelemetry spans over OTLP/HTTP, stores them with per-org
+PulseDB ingests OpenTelemetry spans over OTLP/HTTP, stores them with per-org
 sampling + retention controls, and exposes a trace-viewer API that pivots
 from any span into the SQL queries it triggered.
 
@@ -15,7 +15,7 @@ X-SDK-Key: sk_live_…
 ```
 
 The payload is the OTLP/HTTP JSON shape
-(https://opentelemetry.io/docs/specs/otlp/#otlphttp). FATHOM normalises into
+(https://opentelemetry.io/docs/specs/otlp/#otlphttp). PulseDB normalises into
 `pgmonitoringtool.otlp_spans` and rolls up each trace into
 `pgmonitoringtool.otlp_traces`.
 
@@ -99,7 +99,7 @@ renderable.
 ### `GET /api/traces/:traceId/pivot`
 
 Returns the DB queries correlated with this trace, by joining the existing
-FATHOM query log on `trace_id`. Useful for "why is this request slow" —
+PulseDB query log on `trace_id`. Useful for "why is this request slow" —
 click a span, land on the culprit query's plan history.
 
 ## Trace ID validation
@@ -110,7 +110,7 @@ stored as `BYTEA`. Invalid IDs return `400`.
 ## Jaeger / Tempo
 
 Any tool that speaks OTLP/HTTP can push to `/api/otlp/v1/traces`. To import
-from Jaeger or Tempo, configure their OTLP exporters to point at the FATHOM
+from Jaeger or Tempo, configure their OTLP exporters to point at the PulseDB
 endpoint with the tenant's SDK key. No special Jaeger-format adapter is
 needed — OTLP is the lingua franca.
 
@@ -123,8 +123,8 @@ idiomatic per language (async-local in JS, `contextvars` in Python,
 ### JavaScript
 
 ```js
-import { FathomSDK } from '@fathom/sdk';
-const sdk = new FathomSDK({ apiKey, endpoint });
+import { PulseDBSDK } from '@pulsedb/sdk';
+const sdk = new PulseDBSDK({ apiKey, endpoint });
 
 const span = sdk.startSpan('GET /api/orders', {
     attributes: { 'http.method': 'GET' },
@@ -144,9 +144,9 @@ sdk.tracing.injectHeaders(outgoingHeaders);
 ### Python
 
 ```python
-from fathom_sdk import FathomSDK
+from pulsedb_sdk import PulseDBSDK
 
-client = FathomSDK(api_key=..., endpoint=...)
+client = PulseDBSDK(api_key=..., endpoint=...)
 with client.start_span("GET /api/orders", attributes={"http.method": "GET"}) as span:
     span.set_attribute("user.id", "u123")
     # … work …
@@ -155,7 +155,7 @@ with client.start_span("GET /api/orders", attributes={"http.method": "GET"}) as 
 ### Go
 
 ```go
-client, _ := fathom.New(fathom.Config{APIKey: "...", Endpoint: "..."})
+client, _ := pulsedb.New(pulsedb.Config{APIKey: "...", Endpoint: "..."})
 
 ctx, span := client.StartSpan(ctx, "GET /api/orders")
 defer span.End()

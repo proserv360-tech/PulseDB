@@ -1,4 +1,4 @@
-# FATHOM — Migration Notes
+# PulseDB — Migration Notes
 
 This file collects historical migration notes that used to live next to the
 source they described. They are kept here for archaeological reference; the
@@ -11,7 +11,7 @@ The originals were:
 - `frontend/src/components/views/database/MANIFEST.md`
 
 They were folded into this file on 2026-06-02 as part of Wave A code hygiene
-(task A7 in `FATHOM_Implementation_Plan_2026-06-02.docx`). If you need the
+(task A7 in `PULSEDB_Implementation_Plan_2026-06-02.docx`). If you need the
 verbatim history, recover them from git.
 
 ## Why move them?

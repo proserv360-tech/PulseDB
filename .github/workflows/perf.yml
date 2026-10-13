@@ -12,7 +12,7 @@ on:
       target:
         description: 'BASE_URL to load against'
         required: true
-        default: 'https://staging.fathom.example.com'
+        default: 'https://staging.pulsedb.example.com'
       scenario:
         description: 'k6 scenario file under bench/k6/'
         required: true

@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — TraceDetail view tests
+//  PulseDB — TraceDetail view tests
 // ==========================================================================
 //  Covers: traceparent normalisation, load flow, summary + queries render,
 //  error surface, initialTraceId auto-load.

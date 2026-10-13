@@ -60,7 +60,7 @@ interface CreateSessionInput {
 // especially on serverless (cold pooler connects). Cache the boolean result
 // briefly so revocation still propagates within SESSION_CACHE_TTL_MS but the
 // common (unchanged) case is served from memory. Revoke paths bust the entry.
-const SESSION_CACHE_TTL_MS = Number(process.env.FATHOM_SESSION_CACHE_TTL_MS) || 30_000;
+const SESSION_CACHE_TTL_MS = Number(process.env.PULSEDB_SESSION_CACHE_TTL_MS) || 30_000;
 const _sessionActiveCache = new Map<string, { active: boolean; expiresAt: number }>();
 
 export function invalidateSessionCache(sessionId?: string | null): void {
@@ -88,7 +88,7 @@ function toClientSession(row: any): ClientSession {
 // How long a session row stays valid. Kept deliberately >= the JWT lifetime
 // (JWT_EXPIRES_IN, default 8h) so the JWT expires before the session row does;
 // the session row is the revocation handle, not a second, shorter clock.
-const SESSION_TTL_HOURS = Number(process.env.FATHOM_SESSION_TTL_HOURS) || 24;
+const SESSION_TTL_HOURS = Number(process.env.PULSEDB_SESSION_TTL_HOURS) || 24;
 
 /**
  * Create a session record when a user logs in.

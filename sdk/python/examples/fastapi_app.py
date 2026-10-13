@@ -1,11 +1,11 @@
-"""Example FastAPI app using Fathom SDK."""
+"""Example FastAPI app using PulseDB SDK."""
 
 from fastapi import FastAPI, HTTPException
-from fathom_sdk import FathomSDK
-from fathom_sdk.integrations.fastapi import FathomFastAPIMiddleware
+from pulsedb_sdk import PulseDBSDK
+from pulsedb_sdk.integrations.fastapi import PulseDBFastAPIMiddleware
 
-# Initialize Fathom SDK
-sdk = FathomSDK(
+# Initialize PulseDB SDK
+sdk = PulseDBSDK(
     api_key="sk_live_example",
     endpoint="http://localhost:5000",
     app_name="fastapi-example",
@@ -14,10 +14,10 @@ sdk = FathomSDK(
 )
 
 # Create FastAPI app
-app = FastAPI(title="Fathom FastAPI Example")
+app = FastAPI(title="PulseDB FastAPI Example")
 
-# Add Fathom middleware
-app.add_middleware(FathomFastAPIMiddleware, sdk=sdk)
+# Add PulseDB middleware
+app.add_middleware(PulseDBFastAPIMiddleware, sdk=sdk)
 
 # Install uncaught exception handlers
 sdk.capture_uncaught_exceptions()
@@ -27,7 +27,7 @@ sdk.capture_uncaught_exceptions()
 async def root():
     """Root endpoint."""
     sdk.track_metric(title="home_visit", value=1, unit="visits")
-    return {"message": "Hello from Fathom FastAPI example"}
+    return {"message": "Hello from PulseDB FastAPI example"}
 
 
 @app.get("/users/{user_id}")
@@ -80,6 +80,6 @@ if __name__ == "__main__":
     print("  http://localhost:8000/error")
     print("  POST http://localhost:8000/users?name=John")
     print("")
-    print("Make sure FATHOM backend is running on http://localhost:5000")
+    print("Make sure PulseDB backend is running on http://localhost:5000")
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

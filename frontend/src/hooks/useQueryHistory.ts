@@ -22,7 +22,7 @@ export interface UseQueryHistoryReturn {
   searchHistory: (query: string) => QueryEntry[];
 }
 
-const STORAGE_KEY = 'fathom_query_history';
+const STORAGE_KEY = 'pulsedb_query_history';
 const DEFAULT_MAX_ENTRIES = 100;
 
 const generateId = (): string => {

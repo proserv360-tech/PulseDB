@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/traffic
+//  PulseDB — /api/overview/traffic
 //  Returns: tup_fetched, tup_inserted, tup_updated, tup_deleted + blk stats
 // ==========================================================================
 

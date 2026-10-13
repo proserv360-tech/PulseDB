@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Repository API Endpoints
+//  PulseDB — Repository API Endpoints
 // ==========================================================================
 import express from 'express';
 import fs from 'fs/promises';

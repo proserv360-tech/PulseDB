@@ -53,7 +53,7 @@ const fmtHour = (iso: string) => {
 
 const ES = {
     identity: {
-        cluster_name: 'fathom-search',
+        cluster_name: 'pulsedb-search',
         cluster_uuid: 'aBcD-1234',
         version: '8.14.3',
         data_nodes: '3',

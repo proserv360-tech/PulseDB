@@ -121,7 +121,7 @@ function useUsers(initialUsers = []) {
     const abortRef              = useRef(null);
 
     const getAuthHeaders = useCallback(() => {
-        const token = localStorage.getItem('fathom_token');
+        const token = localStorage.getItem('pulsedb_token');
         return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
     }, []);
 

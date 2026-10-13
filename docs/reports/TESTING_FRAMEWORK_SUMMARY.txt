@@ -1,8 +1,8 @@
 ================================================================================
-FATHOM TEST FRAMEWORK SETUP — COMPLETION SUMMARY
+PulseDB TEST FRAMEWORK SETUP — COMPLETION SUMMARY
 ================================================================================
 
-PROJECT: FATHOM PostgreSQL Monitoring Tool Frontend
+PROJECT: PulseDB PostgreSQL Monitoring Tool Frontend
 LOCATION: /sessions/zealous-dazzling-mendel/mnt/PostgresTool/frontend
 
 ================================================================================

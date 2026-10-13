@@ -1,4 +1,4 @@
-# Auth Review — Fathom / PostgresTool
+# Auth Review — PulseDB / PostgresTool
 
 > **Status: P0 items 1–4 and item 5 (API-key scope) are implemented.**
 > See "Implementation log" at the bottom for what changed and what is still
@@ -24,15 +24,15 @@ const token = jwt.default.sign(
     process.env.JWT_SECRET || 'changeme',      // (a)
     { expiresIn: '8h' },                        // (b) no audience/issuer
 );
-res.cookie('fathom_session', token, { ... });   // (c) wrong cookie name
+res.cookie('pulsedb_session', token, { ... });   // (c) wrong cookie name
 ```
 
 | # | Problem | Consequence |
 |---|---|---|
 | a | Falls back to the literal secret `'changeme'` | Bypasses the startup guard at `server.ts:251–270` that refuses to boot without a strong `JWT_SECRET`. If the env var is ever unset outside production, tokens are forgeable. |
-| b | No `audience` / `issuer` claims | `authenticate` verifies with `audience: 'fathom-api'`, `issuer: 'fathom-auth'` → this token **fails verification immediately** |
+| b | No `audience` / `issuer` claims | `authenticate` verifies with `audience: 'pulsedb-api'`, `issuer: 'pulsedb-auth'` → this token **fails verification immediately** |
 | c | No `sid` claim | Even if (b) were fixed, `authenticate` explicitly rejects sid-less tokens (SEC-11 block, `authenticate.ts:139–150`) |
-| d | Sets cookie `fathom_session`, but `readAuthCookie()` reads `fathom_token` (`authCookie.ts:19`) | The refreshed cookie is never read by anything |
+| d | Sets cookie `pulsedb_session`, but `readAuthCookie()` reads `pulsedb_token` (`authCookie.ts:19`) | The refreshed cookie is never read by anything |
 
 Net effect: the "cookie-based session recovery" path hands the client a token that
 can never authenticate. Fix by routing `/api/auth/me` through the same
@@ -185,8 +185,8 @@ from item 10.
 
 | File | Change |
 |---|---|
-| `backend/server.ts` | `/api/auth/me` no longer mints its own token. It echoes the caller's already-validated token and refreshes the cookie via `setAuthCookie()`. Removes the `'changeme'` secret fallback, the missing `sid`/`aud`/`iss` claims, and the wrong `fathom_session` cookie name. Returns `{user, token: null}` for X-API-Key callers. |
-| `backend/services/sessionService.ts` | `isSessionActive()` no longer swallows DB errors — it propagates, so `authenticate`'s documented fail-closed 503 path actually fires. `createSession()` sets `expires_at` explicitly (24h, `FATHOM_SESSION_TTL_HOURS`). `revokeAllSessions()` now busts the cache. Adds `API_KEY_SCOPES`, `isValidApiKeyScope()`, `scopeAllowsMethod()`; `authenticateApiKey()` now returns the key's scope and prefix. |
+| `backend/server.ts` | `/api/auth/me` no longer mints its own token. It echoes the caller's already-validated token and refreshes the cookie via `setAuthCookie()`. Removes the `'changeme'` secret fallback, the missing `sid`/`aud`/`iss` claims, and the wrong `pulsedb_session` cookie name. Returns `{user, token: null}` for X-API-Key callers. |
+| `backend/services/sessionService.ts` | `isSessionActive()` no longer swallows DB errors — it propagates, so `authenticate`'s documented fail-closed 503 path actually fires. `createSession()` sets `expires_at` explicitly (24h, `PULSEDB_SESSION_TTL_HOURS`). `revokeAllSessions()` now busts the cache. Adds `API_KEY_SCOPES`, `isValidApiKeyScope()`, `scopeAllowsMethod()`; `authenticateApiKey()` now returns the key's scope and prefix. |
 | `backend/middleware/authenticate.ts` | Enforces API-key scope: `read:all` (and any unknown/legacy scope) is restricted to GET/HEAD/OPTIONS, else 403 with an audit-grade WARN log. |
 | `backend/routes/sessionRoutes.ts` | Validates `scope` on key creation against the canonical list instead of storing arbitrary body input. |
 | `backend/db/migrations/0024_session_schema_reconcile.sql` | **New.** Idempotent, guarded reconcile: adds `revoked_at`/`revoked_by`, fixes the `expires_at` default, repairs already-broken rows, adds indexes, creates the missing `v_active_sessions` view. No-ops with a NOTICE if `user_sessions` is absent. |
@@ -235,7 +235,7 @@ than inferred:
 row is born expired, so the "sessions expire instantly" failure does not apply to it.
 The explicit set in `createSession()` remains correct as a portability fix.
 
-Also present: 8 legacy `fathom_*` tables in `public` (`alerts` exists in both `public`
+Also present: 8 legacy `pulsedb_*` tables in `public` (`alerts` exists in both `public`
 and `pgmonitoringtool`), and Supabase's own `auth` schema (23 tables, 1 user) which the
 application does not use.
 

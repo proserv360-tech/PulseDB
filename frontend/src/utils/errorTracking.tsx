@@ -28,12 +28,12 @@ async function getSentry() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 export async function initErrorTracking(cfg: ErrorTrackerConfig) {
     if (!cfg.enabled || !cfg.dsn) {
-        if (cfg.debug) console.log('[FATHOM] Error tracking disabled (no DSN or enabled=false)');
+        if (cfg.debug) console.log('[PulseDB] Error tracking disabled (no DSN or enabled=false)');
         return;
     }
     const Sentry = await getSentry();
     if (!Sentry) {
-        console.warn('[FATHOM] @sentry/react not installed — error tracking using console fallback');
+        console.warn('[PulseDB] @sentry/react not installed — error tracking using console fallback');
         return;
     }
     Sentry.init({
@@ -49,7 +49,7 @@ export async function initErrorTracking(cfg: ErrorTrackerConfig) {
         replaysSessionSampleRate: 0.05,
         replaysOnErrorSampleRate: 1.0,
     });
-    if (cfg.debug) console.log('[FATHOM] Sentry initialized', { env: cfg.environment, release: cfg.release });
+    if (cfg.debug) console.log('[PulseDB] Sentry initialized', { env: cfg.environment, release: cfg.release });
 }
 
 // ─── Capture helpers (fire-and-forget, safe to call before Sentry loads) ─────
@@ -61,7 +61,7 @@ export async function captureException(error: Error, context?: Record<string, un
             Sentry.captureException(error);
         });
     } else {
-        console.error('[FATHOM-ERROR]', error.message, context ?? '');
+        console.error('[PULSEDB-ERROR]', error.message, context ?? '');
     }
 }
 
@@ -71,7 +71,7 @@ export async function captureMessage(message: string, level: 'info' | 'warning' 
         Sentry.captureMessage(message, level);
     } else {
         const fn = level === 'info' ? 'log' : level === 'warning' ? 'warn' : 'error';
-        console[fn]('[FATHOM]', message);
+        console[fn]('[PulseDB]', message);
     }
 }
 

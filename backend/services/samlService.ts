@@ -2,7 +2,7 @@
 /**
  * services/samlService.js
  * ───────────────────────
- * SAML 2.0 SP-initiated SSO for FATHOM.
+ * SAML 2.0 SP-initiated SSO for PulseDB.
  *
  * This module intentionally relies on the battle-tested `@node-saml/node-saml`
  * package rather than hand-rolling XML/crypto. Install with:
@@ -217,7 +217,7 @@ export async function provisionUserFromAssertion(workspaceId, profile) {
     const groups = profile[groupsKey];
     const role = resolveRoleFromGroups(groups, cfg.default_role || 'viewer');
 
-    // Find or create the FATHOM user.
+    // Find or create the PulseDB user.
     const existing = await query(
         `SELECT id FROM pgmonitoringtool.users WHERE lower(email) = lower($1)`,
         [email]
@@ -252,19 +252,19 @@ export async function provisionUserFromAssertion(workspaceId, profile) {
 }
 
 /**
- * Map an IdP-provided group list onto a FATHOM role.
+ * Map an IdP-provided group list onto a PulseDB role.
  * Convention:
- *   fathom-owner   → owner
- *   fathom-admin   → admin
- *   fathom-editor  → editor
+ *   pulsedb-owner   → owner
+ *   pulsedb-admin   → admin
+ *   pulsedb-editor  → editor
  *   (anything else / missing) → fallback
  */
 function resolveRoleFromGroups(groups, fallback) {
     if (!groups) return fallback;
     const list = Array.isArray(groups) ? groups : [groups];
     const lc = list.map(g => String(g).toLowerCase());
-    if (lc.includes('fathom-owner')) return 'owner';
-    if (lc.includes('fathom-admin')) return 'admin';
-    if (lc.includes('fathom-editor')) return 'editor';
+    if (lc.includes('pulsedb-owner')) return 'owner';
+    if (lc.includes('pulsedb-admin')) return 'admin';
+    if (lc.includes('pulsedb-editor')) return 'editor';
     return fallback;
 }

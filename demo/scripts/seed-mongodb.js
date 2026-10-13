@@ -1,18 +1,18 @@
-// MongoDB FATHOM Demo Database Seed Script
+// MongoDB PulseDB Demo Database Seed Script
 // ================================================
-// This script creates and populates the FATHOM demo database with realistic sample data
+// This script creates and populates the PulseDB demo database with realistic sample data
 //
 // USAGE: mongosh < seed-mongodb.js
 // OR:    mongosh --file seed-mongodb.js
-// OR:    mongosh fathom_demo < seed-mongodb.js (if database already exists)
+// OR:    mongosh pulsedb_demo < seed-mongodb.js (if database already exists)
 //
 // CLEANUP: To remove the demo database, run in mongosh:
-//   use fathom_demo
+//   use pulsedb_demo
 //   db.dropDatabase()
 // ================================================
 
-// Switch to the fathom_demo database (creates if doesn't exist)
-use fathom_demo;
+// Switch to the pulsedb_demo database (creates if doesn't exist)
+use pulsedb_demo;
 
 // Clear existing collections if this is a re-run
 console.log("Clearing existing collections...");
@@ -1398,17 +1398,17 @@ console.log("=== Sharding Recommendations ===\n");
 console.log("For production scalability, consider these shard keys:\n");
 
 console.log("1. Orders Collection:");
-console.log("   sh.shardCollection('fathom_demo.orders', {customer_id: 'hashed'})");
+console.log("   sh.shardCollection('pulsedb_demo.orders', {customer_id: 'hashed'})");
 console.log("   - Distributes orders evenly across shards");
 console.log("   - Enables range queries by customer\n");
 
 console.log("2. Analytics Events Collection:");
-console.log("   sh.shardCollection('fathom_demo.analytics_events', {created_at: 1})");
+console.log("   sh.shardCollection('pulsedb_demo.analytics_events', {created_at: 1})");
 console.log("   - Good for time-series data");
 console.log("   - Enables efficient TTL index pruning per shard\n");
 
 console.log("3. Customers Collection:");
-console.log("   sh.shardCollection('fathom_demo.customers', {country: 1, _id: 'hashed'})");
+console.log("   sh.shardCollection('pulsedb_demo.customers', {country: 1, _id: 'hashed'})");
 console.log("   - Distributes by geography");
 console.log("   - Maintains locality of customer data\n");
 
@@ -1417,7 +1417,7 @@ console.log("   - Maintains locality of customer data\n");
 // ================================================
 
 console.log("=========================================");
-console.log("FATHOM Demo Database Created Successfully");
+console.log("PulseDB Demo Database Created Successfully");
 console.log("=========================================\n");
 
 // Display collection statistics
@@ -1427,5 +1427,5 @@ collections.forEach(collName => {
   console.log(`${collName.padEnd(25)}: ${count} documents`);
 });
 
-console.log("\nDatabase fathom_demo is ready for testing!");
-console.log("Connect: mongosh fathom_demo\n");
+console.log("\nDatabase pulsedb_demo is ready for testing!");
+console.log("Connect: mongosh pulsedb_demo\n");

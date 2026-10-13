@@ -1,9 +1,9 @@
-# Migrating the FATHOM control plane: Neon → Supabase
+# Migrating the PulseDB control plane: Neon → Supabase
 
-The FATHOM control-plane database (users, sessions, connection registry, audit
+The PulseDB control-plane database (users, sessions, connection registry, audit
 log, copilot history, cloud credentials, etc.) is plain PostgreSQL, so moving
 from Neon to Supabase is a logical dump/restore plus a connection-string swap.
-Everything lives in the `pgmonitoringtool` schema and a few `public.fathom_*`
+Everything lives in the `pgmonitoringtool` schema and a few `public.pulsedb_*`
 tables.
 
 Scripts referenced below live in `backend/scripts/`:
@@ -25,7 +25,7 @@ Scripts referenced below live in `backend/scripts/`:
 
 ## 1. Freeze writes (recommended)
 
-Stop the FATHOM backend (or put it in maintenance) so no new rows land in Neon
+Stop the PulseDB backend (or put it in maintenance) so no new rows land in Neon
 mid-dump. A few seconds of downtime avoids a row-count mismatch.
 
 ## 2. Dry-run dump (optional but smart)
@@ -37,7 +37,7 @@ TARGET_URL="postgresql://postgres:…@db.xxxx.supabase.co:5432/postgres" \
 DRY_RUN=true ./migrate-neon-to-supabase.sh
 ```
 
-This dumps to `fathom_cp_dump.dump` and stops, so you can inspect the artifact
+This dumps to `pulsedb_cp_dump.dump` and stops, so you can inspect the artifact
 before touching Supabase.
 
 ## 3. Migrate
@@ -85,7 +85,7 @@ Notes:
   string for the one-time `pg_restore` in step 3.
 - Supabase requires TLS. `DB_SSL=true` is enough; the default
   `rejectUnauthorized` is relaxed outside production. In production set a CA via
-  `FATHOM_TLS_CA_CERT` or keep `FATHOM_TLS_ALLOW_SELF_SIGNED` unset for strict
+  `PULSEDB_TLS_CA_CERT` or keep `PULSEDB_TLS_ALLOW_SELF_SIGNED` unset for strict
   verification.
 
 Restart the backend. Log in and confirm users/connections are present.
@@ -106,7 +106,7 @@ DATABASE_URL="postgresql://postgres:…@db.xxxx.supabase.co:5432/postgres" \
 DB_SSL=true ./migrate-schema-only.sh
 ```
 
-This runs FATHOM's own migrators (`npm run migrate` [+ `migrate:enterprise`]),
+This runs PulseDB's own migrators (`npm run migrate` [+ `migrate:enterprise`]),
 creating the schema and a one-time admin user whose password is printed **once**
 to stdout — record it immediately.
 

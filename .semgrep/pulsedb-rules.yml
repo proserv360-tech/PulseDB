@@ -1,0 +1,136 @@
+# .semgrep/pulsedb-rules.yml
+# ─────────────────────────
+# House SAST rules specific to PulseDB's architecture. Loaded by
+# .github/workflows/security.yml alongside Semgrep's public rulesets.
+#
+# Philosophy: flag patterns that are safe in most codebases but wrong in
+# ours — raw SQL concatenation of tenant IDs, missing pool-cleanup in async
+# handlers, hard-coded admin flags, etc.
+
+rules:
+  - id: pulsedb-no-raw-tenant-interpolation
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      Tenant IDs must be passed as query parameters ($1, $2, ...), never
+      interpolated into raw SQL strings. Interpolation bypasses the
+      parameterised-query protection in pg and is a multi-tenancy escape
+      risk. Use `pool.query('... WHERE tenant_id = $1', [tenantId])`.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              `... WHERE tenant_id = ${$T} ...`
+          - pattern: |
+              "... WHERE tenant_id = '" + $T + "' ..."
+
+  - id: pulsedb-scim-auth-required
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      SCIM routers must be wrapped with `createScimAuth(pool)` before being
+      mounted. An unauthenticated SCIM surface would leak directory data.
+    patterns:
+      - pattern: app.use('/scim/v2', $ROUTER)
+      - pattern-not: app.use('/scim/v2', scimAuth, ...)
+      - pattern-not: app.use('/scim/v2', gateRouter($POOL, $FEATURE, $ROUTER))
+
+  - id: pulsedb-audit-log-no-direct-insert
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Do not insert directly into audit_log_secure. Use appendAudit() from
+      services/auditLogSecure.js so the hash-chain is maintained.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $POOL.query(`INSERT INTO ... audit_log_secure ...`, ...)
+          - pattern: |
+              $POOL.query("INSERT INTO ... audit_log_secure ...", ...)
+    paths:
+      exclude:
+        - backend/services/auditLogSecure.js
+        - backend/tests/
+
+  - id: pulsedb-no-plaintext-token-logging
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      Do not log the plaintext form of a SCIM or API token. Only the
+      first 8 characters of the SHA-256 hash are safe to log. Check for
+      accidental `console.log(token)` or `logger.info({ token })`.
+    patterns:
+      - pattern-either:
+          - pattern: console.log(..., $TOKEN, ...)
+          - pattern: "logger.$METHOD({ ..., token: $TOKEN, ... }, ...)"
+      - metavariable-regex:
+          metavariable: $TOKEN
+          regex: '^(plaintext|rawToken|bearerToken|apiKey)$'
+
+  - id: pulsedb-no-hardcoded-admin-bypass
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      Admin bypass flags must be sourced from the users table, not
+      hard-coded in middleware. Hard-coded bypasses break SOC 2 CC6.2.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              if (req.user.email === "...") { ... req.isAdmin = true; ... }
+          - pattern: |
+              const SUPER_ADMINS = [ "..." ];
+
+  - id: pulsedb-pool-release-in-finally
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      When calling pool.connect(), the client must be released in a
+      finally block so errors thrown inside the try don't leak a
+      connection from the pool.
+    patterns:
+      - pattern: |
+          const $CLIENT = await $POOL.connect();
+          ...
+      - pattern-not-inside: |
+          try { ... } finally { $CLIENT.release(); }
+
+  - id: pulsedb-no-silent-error-swallow
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Empty catch handlers hide real failures. Against the deployed database
+      this pattern concealed four broken subsystems at once: audit writes,
+      session revocation (logout), alert creation and API-key auth were all
+      failing with 42703/42P01 while every request returned 200. The audit
+      table sat at 0 rows next to 55 recorded logins and nothing reported it.
+      Keep the non-throwing behaviour, lose the silence — use
+      `swallow(err, { component, op })` from services/errorHandling.ts.
+    patterns:
+      - pattern-either:
+          - pattern: $PROMISE.catch(() => {})
+          - pattern: $PROMISE.catch(() => null)
+          - pattern: |
+              try { ... } catch { }
+    paths:
+      exclude:
+        - "**/tests/**"
+        - "**/*.test.ts"
+
+  - id: pulsedb-no-raw-error-message-in-response
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Do not return raw error messages to clients — they leak Postgres
+      internals, table names and connection details to unauthenticated
+      callers. The global error handler in server.ts already returns a safe
+      body with a classified code and a correlation id. Either let the error
+      propagate (wrap the handler in `asyncRoute`) or respond via
+      `failSafe(res, err, { component, op })` from services/errorHandling.ts.
+    patterns:
+      - pattern-either:
+          - pattern: "$RES.status($CODE).json({ ..., error: $E.message, ... })"
+          - pattern: "$RES.json({ ..., error: $E.message, ... })"
+          - pattern: "$RES.status($CODE).json({ ..., detail: $E.message, ... })"
+    paths:
+      exclude:
+        - "**/tests/**"
+        - "**/*.test.ts"

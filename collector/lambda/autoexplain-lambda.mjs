@@ -14,9 +14,9 @@
  * No AWS SDK needed — the platform delivers the payload directly.
  *
  * Required env vars:
- *   FATHOM_URL            https://postgres-tool.vercel.app
- *   FATHOM_SDK_KEY        sk_...
- *   FATHOM_CONNECTION_ID  numeric connection id (e.g. 10)
+ *   PULSEDB_URL            https://postgres-tool.vercel.app
+ *   PULSEDB_SDK_KEY        sk_...
+ *   PULSEDB_CONNECTION_ID  numeric connection id (e.g. 10)
  *
  * Deploy: zip this file + autoexplain-parser.mjs together (see LAMBDA_SETUP.md).
  */
@@ -24,9 +24,9 @@
 import { gunzipSync } from 'node:zlib';
 import { parseAutoExplainMessage } from './autoexplain-parser.mjs';
 
-const FATHOM_URL = mustEnv('FATHOM_URL');
-const SDK_KEY = mustEnv('FATHOM_SDK_KEY');
-const CONNECTION_ID = Number(mustEnv('FATHOM_CONNECTION_ID'));
+const PULSEDB_URL = mustEnv('PULSEDB_URL');
+const SDK_KEY = mustEnv('PULSEDB_SDK_KEY');
+const CONNECTION_ID = Number(mustEnv('PULSEDB_CONNECTION_ID'));
 const BATCH_MAX = 500; // ingest hard cap
 
 function mustEnv(name) {
@@ -41,7 +41,7 @@ function log(level, msg, meta = {}) {
 }
 
 async function post(path, body) {
-    const res = await fetch(`${FATHOM_URL}${path}`, {
+    const res = await fetch(`${PULSEDB_URL}${path}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-sdk-key': SDK_KEY },
         body: JSON.stringify(body),
@@ -59,7 +59,7 @@ async function post(path, body) {
  */
 export async function handler(event) {
     if (!Number.isInteger(CONNECTION_ID) || CONNECTION_ID <= 0) {
-        throw new Error('FATHOM_CONNECTION_ID must be a positive integer');
+        throw new Error('PULSEDB_CONNECTION_ID must be a positive integer');
     }
     const payload = decodeCloudWatchLogsEvent(event);
     if (!payload) {

@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — Slack Bot API Service (two-way sync)
+//  PulseDB — Slack Bot API Service (two-way sync)
 //  Replaces the legacy incoming-webhook-only approach.
 //
 //  Required env vars:
@@ -135,11 +135,11 @@ export async function sendSlackAlert(alert, webhookUrl) {
     const time     = new Date(alert.timestamp || Date.now()).toUTCString();
 
     const payload = {
-        text: `${emoji} *Fathom Alert — ${severity}*: ${alert.message}`,
+        text: `${emoji} *PulseDB Alert — ${severity}*: ${alert.message}`,
         attachments: [{
             color,
             blocks: [
-                { type: 'header', text: { type: 'plain_text', text: `${emoji}  Fathom Alert — ${severity}`, emoji: true } },
+                { type: 'header', text: { type: 'plain_text', text: `${emoji}  PulseDB Alert — ${severity}`, emoji: true } },
                 { type: 'section', text: { type: 'mrkdwn', text: `*${alert.message}*` } },
                 {
                     type: 'section',
@@ -153,7 +153,7 @@ export async function sendSlackAlert(alert, webhookUrl) {
                 ...(alert.data && Object.keys(alert.data).length > 0
                     ? [{ type: 'section', text: { type: 'mrkdwn', text: `*Details*\n\`\`\`${JSON.stringify(alert.data, null, 2)}\`\`\`` } }]
                     : []),
-                { type: 'context', elements: [{ type: 'mrkdwn', text: ':bar_chart: Sent by *Fathom* — PostgreSQL Monitoring Platform' }] },
+                { type: 'context', elements: [{ type: 'mrkdwn', text: ':bar_chart: Sent by *PulseDB* — PostgreSQL Monitoring Platform' }] },
             ],
         }],
     };
@@ -198,12 +198,12 @@ export async function postAlertToSlack(alert) {
         attachments: [{
             color,
             fields: [
-                { title: 'Source',   value: alert.source   || alert.category || 'fathom', short: true },
+                { title: 'Source',   value: alert.source   || alert.category || 'pulsedb', short: true },
                 { title: 'Category', value: alert.category || 'general',                 short: true },
                 { title: 'Rule',     value: alert.rule     || alert.id       || 'N/A',   short: true },
                 { title: 'Alert ID', value: alert.id       || 'N/A',                     short: true },
             ],
-            footer: `FATHOM · ${new Date(alert.timestamp || Date.now()).toLocaleString()}`,
+            footer: `PulseDB · ${new Date(alert.timestamp || Date.now()).toLocaleString()}`,
         }],
     });
 
@@ -233,7 +233,7 @@ export async function updateAlertMessage(slackTs, alert) {
 }
 
 /**
- * Mirror a FATHOM comment to the corresponding Slack thread.
+ * Mirror a PulseDB comment to the corresponding Slack thread.
  *
  * @param {string} slackTs  - The ts of the parent alert message
  * @param {object} comment  - { author, text }

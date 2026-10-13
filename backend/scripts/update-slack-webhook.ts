@@ -19,7 +19,7 @@
  *   Options:
  *     --id <n>     destination id (default: the only enabled Slack one)
  *     --url <url>  the new incoming webhook URL
- *     --org <id>   organisation id (default: FATHOM_DEFAULT_ORG_ID, or 1)
+ *     --org <id>   organisation id (default: PULSEDB_DEFAULT_ORG_ID, or 1)
  *     --test       send a test alert through it afterwards
  *
  * Goes through destinationService rather than raw SQL so validation and the
@@ -53,7 +53,7 @@ function redact(url: string): string {
 }
 
 async function main() {
-    const orgId = Number(arg('org') || process.env.FATHOM_DEFAULT_ORG_ID || 1);
+    const orgId = Number(arg('org') || process.env.PULSEDB_DEFAULT_ORG_ID || 1);
     const url = arg('url');
 
     const existing = await listDestinations(pool, orgId);
@@ -120,9 +120,9 @@ async function main() {
         const [result] = await manager.dispatch({
             id: `webhook-update-${Date.now()}`,
             severity: 'warning',
-            title: 'FATHOM webhook updated',
+            title: 'PulseDB webhook updated',
             message: 'If you can read this, the new incoming webhook is live.',
-            source: 'fathom',
+            source: 'pulsedb',
             component: 'cli-test',
             timestamp: new Date().toISOString(),
             metadata: {},

@@ -6,9 +6,9 @@
  * deleting it. Raw otel_metrics are downsampled into hourly then daily buckets;
  * reads auto-select the coarsest tier that still covers the requested window.
  *
- *   raw (otel_metrics)  → kept FATHOM_METRICS_RAW_DAYS     (default 7)
- *   metric_rollups_1h   → kept FATHOM_METRICS_HOURLY_DAYS  (default 90)
- *   metric_rollups_1d   → kept FATHOM_METRICS_DAILY_DAYS   (default 730)
+ *   raw (otel_metrics)  → kept PULSEDB_METRICS_RAW_DAYS     (default 7)
+ *   metric_rollups_1h   → kept PULSEDB_METRICS_HOURLY_DAYS  (default 90)
+ *   metric_rollups_1d   → kept PULSEDB_METRICS_DAILY_DAYS   (default 730)
  *
  * Rollup upserts are incremental and idempotent (ON CONFLICT DO UPDATE), so a
  * re-run only re-aggregates recently-touched buckets and never double-counts.
@@ -16,9 +16,9 @@
 
 const S = 'pgmonitoringtool';
 
-export const RAW_DAYS = Number(process.env.FATHOM_METRICS_RAW_DAYS) || 7;
-export const HOUR_DAYS = Number(process.env.FATHOM_METRICS_HOURLY_DAYS) || 90;
-export const DAY_DAYS = Number(process.env.FATHOM_METRICS_DAILY_DAYS) || 730;
+export const RAW_DAYS = Number(process.env.PULSEDB_METRICS_RAW_DAYS) || 7;
+export const HOUR_DAYS = Number(process.env.PULSEDB_METRICS_HOURLY_DAYS) || 90;
+export const DAY_DAYS = Number(process.env.PULSEDB_METRICS_DAILY_DAYS) || 730;
 
 function log(level, message, meta = {}) {
     const fn = level === 'ERROR' ? console.error : level === 'WARN' ? console.warn : console.log;

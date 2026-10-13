@@ -8,7 +8,7 @@
  *   - error_rate < 0.5%
  *
  * Run:
- *   k6 run -e BASE_URL=http://localhost:5000 -e SDK_KEY=$FATHOM_SDK_KEY \
+ *   k6 run -e BASE_URL=http://localhost:5000 -e SDK_KEY=$PULSEDB_SDK_KEY \
  *          bench/k6/otlp_ingest.js
  */
 
@@ -71,16 +71,16 @@ function buildBatch() {
             startTimeUnixNano: String(startNs),
             endTimeUnixNano:   String(endNs),
             attributes: [
-                { key: 'service.name', value: { stringValue: 'fathom-bench' } },
+                { key: 'service.name', value: { stringValue: 'pulsedb-bench' } },
                 { key: 'op',           value: { stringValue: randomString(8) } },
             ],
         });
     }
     return {
         resourceSpans: [{
-            resource: { attributes: [{ key: 'service.name', value: { stringValue: 'fathom-bench' } }] },
+            resource: { attributes: [{ key: 'service.name', value: { stringValue: 'pulsedb-bench' } }] },
             scopeSpans: [{
-                scope: { name: 'fathom-bench-k6' },
+                scope: { name: 'pulsedb-bench-k6' },
                 spans,
             }],
         }],

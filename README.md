@@ -1,6 +1,6 @@
-# FATHOM
+# PulseDB
 
-FATHOM is a multi-tenant database monitoring and administration platform. It ships
+PulseDB is a multi-tenant database monitoring and administration platform. It ships
 a unified operator UI over PostgreSQL, MySQL/MariaDB, and MongoDB with live
 metrics, alerting, schema exploration, log analysis, and a lightweight SDK that
 customer apps can use to stream their own API logs, errors, and audit events
@@ -13,7 +13,7 @@ backend/    Node.js (Express 5) control-plane API and WebSocket server.
 frontend/   React 19 + Vite SPA.
 api/        Vercel serverless entrypoint that re-exports backend/server.js.
 python/     FastAPI analytics and ML worker.
-sdk/        Zero-dep JS client library (@fathom/sdk) for customer apps.
+sdk/        Zero-dep JS client library (@pulsedb/sdk) for customer apps.
 shared/     Cross-workspace types and contracts.
 demo/       Stand-alone demo app used by docs and screenshots.
 ```
@@ -26,7 +26,7 @@ scripts.
 
 - Node.js 18 or newer (Node 20 recommended; see `engines` in `sdk/package.json`).
 - Python 3.11+ for the analytics worker (`python/pyproject.toml`).
-- A PostgreSQL 14+ database for the FATHOM control plane (users, sessions,
+- A PostgreSQL 14+ database for the PulseDB control plane (users, sessions,
   connection metadata, audit log, feedback, etc.). Neon, Supabase, or any
   standard Postgres work. For Supabase use the **direct** connection (port
   `5432`) for migrations and the **transaction pooler** (port `6543`) for
@@ -43,17 +43,17 @@ Generate each one with a separate random source.
 
 | Name                                                         | Required | Purpose                                                                                                     |
 | ------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                               | yes      | Connection string for the FATHOM control-plane DB.                                                          |
+| `DATABASE_URL`                                               | yes      | Connection string for the PulseDB control-plane DB.                                                          |
 | `JWT_SECRET`                                                 | yes      | Signs session JWTs. At least 32 bytes of entropy.                                                           |
 | `ENCRYPTION_KEY`                                             | yes      | AES-256-GCM key used to encrypt connection secrets at rest. Must NOT equal `JWT_SECRET`.                    |
-| `JWT_AUDIENCE`                                               | no       | JWT `aud` claim (default `fathom-api`).                                                                     |
-| `JWT_ISSUER`                                                 | no       | JWT `iss` claim (default `fathom-auth`).                                                                    |
+| `JWT_AUDIENCE`                                               | no       | JWT `aud` claim (default `pulsedb-api`).                                                                     |
+| `JWT_ISSUER`                                                 | no       | JWT `iss` claim (default `pulsedb-auth`).                                                                    |
 | `CRON_SECRET`                                                | prod     | Bearer credential required by `/api/alerts/run-monitoring`. If unset, the cron endpoint is disabled.        |
-| `FATHOM_TLS_ALLOW_SELF_SIGNED`                               | no       | Set to `true` to accept self-signed TLS certs on user-added DB connections (default: strict in production). |
-| `FATHOM_TLS_CA_CERT`                                         | no       | Extra CA bundle (PEM) added to the trust store for DB TLS.                                                  |
-| `FATHOM_ANOMALY_MODE`                                        | no       | `off` (default), `suggest`, or `page`. Enables statistical anomaly alerts during monitoring.                |
-| `FATHOM_ANOMALY_TYPE`                                        | no       | Detector for anomaly mode: `zscore` (default), `ewma`, or `mad`.                                            |
-| `FATHOM_ANOMALY_WINDOW`                                      | no       | Rolling window size (samples) for the anomaly detector (default 60).                                        |
+| `PULSEDB_TLS_ALLOW_SELF_SIGNED`                               | no       | Set to `true` to accept self-signed TLS certs on user-added DB connections (default: strict in production). |
+| `PULSEDB_TLS_CA_CERT`                                         | no       | Extra CA bundle (PEM) added to the trust store for DB TLS.                                                  |
+| `PULSEDB_ANOMALY_MODE`                                        | no       | `off` (default), `suggest`, or `page`. Enables statistical anomaly alerts during monitoring.                |
+| `PULSEDB_ANOMALY_TYPE`                                        | no       | Detector for anomaly mode: `zscore` (default), `ewma`, or `mad`.                                            |
+| `PULSEDB_ANOMALY_WINDOW`                                      | no       | Rolling window size (samples) for the anomaly detector (default 60).                                        |
 | `COPILOT_PROVIDER`                                           | no       | `local` (default stub), `openai`, or `anthropic`. Enables real + streaming copilot completions.             |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`                       | no       | Provider key for the copilot when `COPILOT_PROVIDER` is set accordingly.                                    |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` | no       | Fallback RDS/Aurora CloudWatch creds when a workspace has no stored cloud credential.                       |
@@ -75,7 +75,7 @@ npm run dev                           # runs frontend + backend
 The first migration run creates an `admin` user with a randomly generated
 password, prints it ONCE to stdout, and sets `must_change_password=true`.
 Record the password immediately — it is not stored anywhere else. You can
-override it for automated CI setups via `FATHOM_INITIAL_ADMIN_PASSWORD`.
+override it for automated CI setups via `PULSEDB_INITIAL_ADMIN_PASSWORD`.
 
 ## Deployment
 
@@ -108,7 +108,7 @@ serverless function `maxDuration` to 30 s (audit PRF-04).
   [`backend/docs/BLOAT_WATCHER.md`](backend/docs/BLOAT_WATCHER.md).
 - **Multi-language SDKs** — the `sdk/` tree ships JS, Python, and Go clients
   at feature parity, driven by a shared OpenAPI contract at
-  `sdk/openapi/fathom-sdk.yaml`. The Go SDK ships Gin and `net/http`
+  `sdk/openapi/pulsedb-sdk.yaml`. The Go SDK ships Gin and `net/http`
   middlewares; the Python SDK ships FastAPI, Django, and WSGI integrations.
 - **Distributed tracing** — OTLP/HTTP ingest at `/api/otlp/v1/traces`,
   deterministic per-trace sampling, per-org retention, and pivots from any
@@ -135,9 +135,9 @@ serverless function `maxDuration` to 30 s (audit PRF-04).
   through the rolling z-score / EWMA / MAD detectors during each monitoring
   pass, catching values that are anomalous relative to their own baseline even
   when within static thresholds. Off by default; enable with
-  `FATHOM_ANOMALY_MODE=suggest|page` (`suggest` records an informational
+  `PULSEDB_ANOMALY_MODE=suggest|page` (`suggest` records an informational
   alert; `page` fires a warning that fans out to integrations). Tunable via
-  `FATHOM_ANOMALY_TYPE` (zscore|ewma|mad) and `FATHOM_ANOMALY_WINDOW`.
+  `PULSEDB_ANOMALY_TYPE` (zscore|ewma|mad) and `PULSEDB_ANOMALY_WINDOW`.
 - **Streaming AI copilot** — the SQL copilot and EXPLAIN-plan reviewer support
   token-by-token Server-Sent Events at `POST /api/copilot/sql/stream` and
   `POST /api/copilot/explain/stream` (OpenAI and Anthropic providers stream
@@ -162,8 +162,8 @@ serverless function `maxDuration` to 30 s (audit PRF-04).
   instead of deleting it. Raw `otel_metrics` are downsampled hourly then daily
   (`metric_rollups_1h` / `_1d`), and reads auto-select the coarsest tier that
   covers the requested window. Tiers are env-tunable
-  (`FATHOM_METRICS_RAW_DAYS`=7, `FATHOM_METRICS_HOURLY_DAYS`=90,
-  `FATHOM_METRICS_DAILY_DAYS`=730). Rollups run hourly and pruning daily; trigger
+  (`PULSEDB_METRICS_RAW_DAYS`=7, `PULSEDB_METRICS_HOURLY_DAYS`=90,
+  `PULSEDB_METRICS_DAILY_DAYS`=730). Rollups run hourly and pruning daily; trigger
   manually via `POST /api/retention/rollup` and read via
   `GET /api/retention/rollup/metrics?name=&from=&to=`.
 - **Point-in-time-recovery planning** — a catalog of base backups

@@ -53,7 +53,7 @@ import { closeAll as closeAllTunnels } from './services/sshTunnel.js';
 import { checkEncryptionConfig } from './services/systemDiagnostics.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FATHOM API server — bootstrap only.
+// PulseDB API server — bootstrap only.
 //
 // Shared state and helpers live in core/ (config, pools, connection store,
 // auth, alerting); HTTP middleware in middleware/; route handlers in
@@ -186,15 +186,15 @@ async function startup() {
                 '\n' +
                 '━'.repeat(72) +
                 '\n' +
-                `  FATHOM MISCONFIGURED — ${encCheck.code}\n` +
+                `  PulseDB MISCONFIGURED — ${encCheck.code}\n` +
                 `  ${encCheck.hint}\n` +
                 '━'.repeat(72);
-            if (IS_PROD && process.env.FATHOM_ALLOW_DEGRADED_BOOT !== 'true') {
+            if (IS_PROD && process.env.PULSEDB_ALLOW_DEGRADED_BOOT !== 'true') {
                 console.error(banner);
                 log(
                     'ERROR',
                     'Refusing to start in production without ENCRYPTION_KEY. ' +
-                        'Set FATHOM_ALLOW_DEGRADED_BOOT=true to override (not recommended).',
+                        'Set PULSEDB_ALLOW_DEGRADED_BOOT=true to override (not recommended).',
                 );
                 process.exit(78); // EX_CONFIG
             }
@@ -208,7 +208,7 @@ async function startup() {
                 log('INFO', 'Encryption self-test passed (AES-256-GCM)');
             } catch (encErr) {
                 log('ERROR', 'Encryption self-test failed despite config present: ' + encErr.message);
-                if (IS_PROD && process.env.FATHOM_ALLOW_DEGRADED_BOOT !== 'true') process.exit(78);
+                if (IS_PROD && process.env.PULSEDB_ALLOW_DEGRADED_BOOT !== 'true') process.exit(78);
             }
         }
 
@@ -278,7 +278,7 @@ async function startup() {
         });
 
         server.listen(CONFIG.PORT, '0.0.0.0', () => {
-            log('INFO', `🚀 FATHOM v3.0.0 running on port ${CONFIG.PORT}`);
+            log('INFO', `🚀 PulseDB v3.0.0 running on port ${CONFIG.PORT}`);
         });
 
         if (pool) {

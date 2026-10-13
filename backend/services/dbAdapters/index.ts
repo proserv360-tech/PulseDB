@@ -7,7 +7,7 @@
  * 2. Adapter instantiation for the appropriate database type
  * 3. Registry of supported databases
  *
- * The adapter pattern allows FATHOM to support multiple databases while maintaining
+ * The adapter pattern allows PulseDB to support multiple databases while maintaining
  * a unified monitoring interface across the frontend and backend.
  */
 
@@ -84,7 +84,7 @@ export function detectDbType(connectionString) {
     if (lower.startsWith('snowflake://')) {
         return 'snowflake';
     }
-    // BigQuery: `bigquery://project-id/dataset` (Fathom convention).
+    // BigQuery: `bigquery://project-id/dataset` (PulseDB convention).
     if (lower.startsWith('bigquery://')) {
         return 'bigquery';
     }
@@ -97,7 +97,7 @@ export function detectDbType(connectionString) {
     if (lower.startsWith('cassandra://') || lower.startsWith('scylla://')) {
         return 'cassandra';
     }
-    // DynamoDB: no native conn string — Fathom convention `dynamodb://region/table`.
+    // DynamoDB: no native conn string — PulseDB convention `dynamodb://region/table`.
     if (lower.startsWith('dynamodb://')) {
         return 'dynamodb';
     }

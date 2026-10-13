@@ -1,5 +1,5 @@
 /**
- * FATHOM Database Component Types
+ * PulseDB Database Component Types
  * ──────────────────────────────────────────────────────────────────────────
  * Comprehensive TypeScript type definitions for all database visualization
  * and analysis components. These types ensure type safety across the database

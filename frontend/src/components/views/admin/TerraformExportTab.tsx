@@ -128,7 +128,7 @@ export default function TerraformExportTab() {
         try {
             const data = await fetchData(`/api/export/bundle?format=${exportFormat}`);
             const code = data?.code || '';
-            const filename = `fathom-infrastructure.${exportFormat === 'hcl' ? 'tf' : 'json'}`;
+            const filename = `pulsedb-infrastructure.${exportFormat === 'hcl' ? 'tf' : 'json'}`;
             const element = document.createElement('a');
             element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(code)}`);
             element.setAttribute('download', filename);

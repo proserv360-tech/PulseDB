@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Organization Management View
+//  PulseDB — Organization Management View
 // ==========================================================================
 //  Organization management page: org details, member list, invite form
 // ==========================================================================

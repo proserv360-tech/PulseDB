@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  FATHOM — Verify Neon → Supabase migration
+#  PulseDB — Verify Neon → Supabase migration
 #  Compares per-table row counts between SOURCE (Neon) and TARGET (Supabase)
-#  for every table in the pgmonitoringtool schema + public.fathom_* tables.
+#  for every table in the pgmonitoringtool schema + public.pulsedb_* tables.
 #  Exits non-zero if any table's counts differ.
 #
 #  USAGE
@@ -21,7 +21,7 @@ LIST_SQL="
   FROM information_schema.tables
   WHERE table_type='BASE TABLE'
     AND (table_schema='pgmonitoringtool'
-         OR (table_schema='public' AND table_name LIKE 'fathom_%'))
+         OR (table_schema='public' AND table_name LIKE 'pulsedb_%'))
   ORDER BY 1;
 "
 mapfile -t TABLES < <(psql "$SOURCE_URL" -tAc "$LIST_SQL")

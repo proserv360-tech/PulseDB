@@ -1,4 +1,4 @@
-# FATHOM — TypeScript Migration Setup Guide
+# PulseDB — TypeScript Migration Setup Guide
 
 ## Quick Start
 
@@ -44,8 +44,8 @@ cd backend && npm run dev     # Backend on :5000 (TS mode via tsx)
 
 **Shared packages (new):**
 
-- `@fathom/types` — Shared TypeScript interfaces
-- `@fathom/validators` — Shared Zod schemas
+- `@pulsedb/types` — Shared TypeScript interfaces
+- `@pulsedb/validators` — Shared Zod schemas
 
 ### New Files Created
 
@@ -90,7 +90,7 @@ turbo.json            ← Turborepo task orchestration
 - `package.json` (root) — Added workspaces for `shared/*`, husky, lint-staged
 - `frontend/package.json` — Added typescript, zod, type-check script
 - `backend/package.json` — Added typescript, tsx, all @types, helmet, zod, drizzle
-- `frontend/vite.config.js` — Added path aliases for `@fathom/types` and `@fathom/validators`
+- `frontend/vite.config.js` — Added path aliases for `@pulsedb/types` and `@pulsedb/validators`
 - `.github/workflows/ci.yml` — Added TypeScript type-check job, updated Node to 22
 
 ## How to Use Types
@@ -99,7 +99,7 @@ turbo.json            ← Turborepo task orchestration
 
 ```typescript
 import { fetchData } from '@/utils/api';
-import type { Connection, Alert } from '@fathom/types';
+import type { Connection, Alert } from '@pulsedb/types';
 
 // Generic typed response — autocomplete works!
 const connections = await fetchData<Connection[]>('/api/connections');
@@ -113,7 +113,7 @@ alerts[0].severity; // ✅ "critical" | "warning" | "info"
 ### Backend — Zod Request Validation
 
 ```typescript
-import { CreateConnectionSchema } from '@fathom/validators';
+import { CreateConnectionSchema } from '@pulsedb/validators';
 
 app.post('/api/connections', authenticate, (req, res) => {
     const result = CreateConnectionSchema.safeParse(req.body);
@@ -150,7 +150,7 @@ The setup uses `allowJs: true` so all existing `.js`/`.jsx` files continue worki
 
 1. **Rename** `file.js` → `file.ts` (or `.jsx` → `.tsx`)
 2. **Add types** to function parameters and return values
-3. **Import** from `@fathom/types` for shared interfaces
+3. **Import** from `@pulsedb/types` for shared interfaces
 4. **Run** `npm run type-check` to verify
 
 Priority conversion order:

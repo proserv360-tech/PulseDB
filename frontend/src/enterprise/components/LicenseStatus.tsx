@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — License Status Badge Component
+//  PulseDB — License Status Badge Component
 // ==========================================================================
 //  Small status badge showing current license tier, expiry, usage stats
 // ==========================================================================

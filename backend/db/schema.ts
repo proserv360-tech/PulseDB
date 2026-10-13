@@ -96,7 +96,7 @@ export const passwordResetTokens = pgmonitoringtool.table(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const connections = pgmonitoringtool.table(
-  'fathom_connections',
+  'pulsedb_connections',
   {
     id: serial('id').primaryKey(),
     userId: integer('user_id').references(() => users.id),

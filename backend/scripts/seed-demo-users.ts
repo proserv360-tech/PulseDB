@@ -70,7 +70,7 @@ async function main() {
             username,
             password: DEMO_PASSWORD,
             name: `Demo User ${i}`,
-            email: `${username}@demo.fathom`,
+            email: `${username}@demo.pulsedb`,
             role: 'viewer',
             mfa: false, // demo accounts shouldn't require MFA
             dataAccess: 'internal',

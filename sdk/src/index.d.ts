@@ -1,18 +1,18 @@
 /**
- * FATHOM SDK TypeScript definitions
+ * PulseDB SDK TypeScript definitions
  *
  * NOTE: There are two distinct JS clients in this package — see ENTRYPOINTS.md.
- *   - `FathomSDK` (this file / src/index.js): the ingest/telemetry client.
+ *   - `PulseDBSDK` (this file / src/index.js): the ingest/telemetry client.
  *     Auth header `X-SDK-Key`, endpoints `/api/sdk/ingest`, `/api/sdk/heartbeat`,
  *     `/api/otlp/v1/traces`. This is the canonical client for app instrumentation.
- *   - `FathomClient` (src/core/client.js): the management/control-plane client.
+ *   - `PulseDBClient` (src/core/client.js): the management/control-plane client.
  *     Auth header `X-API-Key` (+ optional JWT refresh), endpoints `/api/v1/*`.
  * They are NOT interchangeable. Import the one matching your use case.
  */
 
 export const SDK_VERSION: string;
 
-declare class FathomSDK {
+declare class PulseDBSDK {
   apiKey: string;
   endpoint: string;
   environment: string;
@@ -23,7 +23,7 @@ declare class FathomSDK {
   queue: Event[];
   sessionId: string;
 
-  constructor(options: FathomOptions);
+  constructor(options: PulseDBOptions);
 
   trackAPI(options: TrackAPIOptions): void;
   trackError(options: TrackErrorOptions): void;
@@ -46,7 +46,7 @@ declare class FathomSDK {
   removeAllListeners(event?: string): this;
 }
 
-interface FathomOptions {
+interface PulseDBOptions {
   apiKey: string;
   endpoint: string;
   appName?: string;
@@ -108,5 +108,5 @@ interface Event {
   environment: string;
 }
 
-export default FathomSDK;
-export { FathomSDK };
+export default PulseDBSDK;
+export { PulseDBSDK };

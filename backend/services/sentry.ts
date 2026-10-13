@@ -26,7 +26,7 @@ try {
 export function initSentry() {
     if (!Sentry) {
         if (process.env.NODE_ENV !== 'test') {
-            console.warn('[FATHOM] @sentry/node not installed — error tracking disabled');
+            console.warn('[PulseDB] @sentry/node not installed — error tracking disabled');
         }
         return;
     }
@@ -40,7 +40,7 @@ export function initSentry() {
         tracesSampleRate: Number(process.env.SENTRY_TRACES_RATE ?? 0.05),
         integrations: [Sentry.httpIntegration({ breadcrumbs: true }), Sentry.expressIntegration()],
     });
-    console.log('[FATHOM] Sentry (Node) initialized', { env: process.env.NODE_ENV });
+    console.log('[PulseDB] Sentry (Node) initialized', { env: process.env.NODE_ENV });
 }
 
 /** Express middleware that attaches Sentry request context. Mount BEFORE routes. */

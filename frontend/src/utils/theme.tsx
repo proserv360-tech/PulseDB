@@ -211,8 +211,8 @@ export const useAdaptiveTheme = () => {
 export const useGlobalRefresh = (callback: () => void) => {
     React.useEffect(() => {
         const handler = () => callback();
-        window.addEventListener('fathom-refresh', handler);
-        return () => window.removeEventListener('fathom-refresh', handler);
+        window.addEventListener('pulsedb-refresh', handler);
+        return () => window.removeEventListener('pulsedb-refresh', handler);
     }, [callback]);
 };
 
@@ -415,7 +415,7 @@ import { KEYFRAMES_CSS } from '../config/animations';
 
 export const GlobalStyles = () => (
     <style>{`
-    /* ── Shared FATHOM Keyframes (from config/animations.ts) ── */
+    /* ── Shared PulseDB Keyframes (from config/animations.ts) ── */
     ${KEYFRAMES_CSS}
 
     /* ── Google Font Import ── */

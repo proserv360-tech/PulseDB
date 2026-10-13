@@ -1,6 +1,6 @@
-# FATHOM — Architecture
+# PulseDB — Architecture
 
-This document describes the current FATHOM process topology and the target
+This document describes the current PulseDB process topology and the target
 topology we are moving towards. It is the reference reviewers should cite
 when refusing PRs that put long-running or bursty work in the web tier.
 
@@ -10,7 +10,7 @@ Last updated: 2026-06-02 (Wave A, task A6).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                              FATHOM                                  │
+│                              PulseDB                                  │
 │                                                                      │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐   │
 │  │   Frontend      │    │    Backend      │    │  Python worker  │   │
@@ -158,7 +158,7 @@ deployment. It does not scale horizontally:
 ## Migration sequencing
 
 Mapped to the Wave plan in
-`FATHOM_Implementation_Plan_2026-06-02.docx`:
+`PULSEDB_Implementation_Plan_2026-06-02.docx`:
 
 1. **A1** — replace in-memory rate limiter with Redis-backed.
    _Unlocks the queue work that follows because Redis is now a hard

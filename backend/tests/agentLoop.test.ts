@@ -48,17 +48,17 @@ test('runAgentSweep writes a finding and an alert on anomaly', async () => {
     const fakePool = {
         query: async (sql: string, params?: any[]) => {
             executed.push(sql.trim().split(/\s+/).slice(0, 3).join(' '));
-            if (sql.includes('FROM fathom_metric_snapshots')) return { rows: buckets };
-            if (sql.includes('SELECT id FROM fathom_agent_findings')) return { rows: [] };
-            if (sql.includes('INSERT INTO fathom_agent_findings'))
+            if (sql.includes('FROM pulsedb_metric_snapshots')) return { rows: buckets };
+            if (sql.includes('SELECT id FROM pulsedb_agent_findings')) return { rows: [] };
+            if (sql.includes('INSERT INTO pulsedb_agent_findings'))
                 return { rows: [{ id: 1, detected_at: new Date() }] };
-            if (sql.includes('INSERT INTO fathom_alerts')) return { rows: [] };
+            if (sql.includes('INSERT INTO pulsedb_alerts')) return { rows: [] };
             return { rows: [] };
         },
     };
     const out = await runAgentSweep({ pool: fakePool });
     assert.ok(out.findings.length >= 1, 'expected at least one finding');
     assert.equal(out.findings[0].metric, 'qps');
-    assert.ok(executed.some((q) => q.startsWith('INSERT INTO fathom_agent_findings')));
-    assert.ok(executed.some((q) => q.startsWith('INSERT INTO fathom_alerts')));
+    assert.ok(executed.some((q) => q.startsWith('INSERT INTO pulsedb_agent_findings')));
+    assert.ok(executed.some((q) => q.startsWith('INSERT INTO pulsedb_alerts')));
 });

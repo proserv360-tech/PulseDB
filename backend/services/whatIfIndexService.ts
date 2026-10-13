@@ -5,7 +5,7 @@
  *
  * pganalyze's Indexing Engine evaluates hundreds of hypothetical index
  * combinations before recommending one. This service brings the same idea
- * to FATHOM using HypoPG when the extension is installed (zero-cost
+ * to PulseDB using HypoPG when the extension is installed (zero-cost
  * hypothetical indexes evaluated by the real planner), and falls back to a
  * planner-cost heuristic when it is not.
  *

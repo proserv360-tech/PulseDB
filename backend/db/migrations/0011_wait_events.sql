@@ -12,7 +12,7 @@
 --   wait_event_rollups_5m    — 14 days.   Pruned by retentionService.
 --
 -- This migration is idempotent: re-applying it is a no-op (IF NOT EXISTS
--- everywhere). Safe to run with FATHOM_INITIAL_SETUP unset.
+-- everywhere). Safe to run with PULSEDB_INITIAL_SETUP unset.
 
 CREATE TABLE IF NOT EXISTS pgmonitoringtool.wait_event_samples (
     connection_id    UUID         NOT NULL,

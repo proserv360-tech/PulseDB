@@ -2,7 +2,7 @@
 /**
  * routes/agentIngestRoutes.js
  *
- * C1 — endpoints the FATHOM managed agent posts to.
+ * C1 — endpoints the PulseDB managed agent posts to.
  *
  *   POST /api/agent/wait-events   { samples: [{...}, ...] }
  *   POST /api/agent/query-stats   { stats:   [{...}, ...] }

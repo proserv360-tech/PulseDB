@@ -1,16 +1,16 @@
 // ==========================================================================
-//  FATHOM — Organization Context
+//  PulseDB — Organization Context
 // ==========================================================================
 //  Manages multi-tenant organization state
 //  Fetches from GET /api/organizations on mount
-//  Persists active org in localStorage as 'fathom_active_org'
+//  Persists active org in localStorage as 'pulsedb_active_org'
 // ==========================================================================
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchData, postData } from '../../utils/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
-const STORAGE_KEY = 'fathom_active_org';
+const STORAGE_KEY = 'pulsedb_active_org';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  CONTEXT

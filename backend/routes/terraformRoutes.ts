@@ -33,7 +33,7 @@ export default function terraformRoutes(pool, authenticate, requireRole) {
             const tfContent = await generateTerraformBundle(pool);
 
             res.setHeader('Content-Type', 'text/plain');
-            res.setHeader('Content-Disposition', 'attachment; filename="fathom-config.tf"');
+            res.setHeader('Content-Disposition', 'attachment; filename="pulsedb-config.tf"');
             res.send(tfContent);
 
             log('INFO', 'Terraform bundle exported', { exportedBy: req.user?.username });
@@ -50,7 +50,7 @@ export default function terraformRoutes(pool, authenticate, requireRole) {
             const alertRules = await exportAlertRules(pool);
 
             res.setHeader('Content-Type', 'text/plain');
-            res.setHeader('Content-Disposition', 'attachment; filename="fathom-alerts.tf"');
+            res.setHeader('Content-Disposition', 'attachment; filename="pulsedb-alerts.tf"');
             res.send(alertRules);
 
             log('INFO', 'Alert rules exported as Terraform', { exportedBy: req.user?.username });
@@ -67,7 +67,7 @@ export default function terraformRoutes(pool, authenticate, requireRole) {
             const connections = await exportConnectionConfigs(pool);
 
             res.setHeader('Content-Type', 'text/plain');
-            res.setHeader('Content-Disposition', 'attachment; filename="fathom-connections.tf"');
+            res.setHeader('Content-Disposition', 'attachment; filename="pulsedb-connections.tf"');
             res.send(connections);
 
             log('INFO', 'Connections exported as Terraform', { exportedBy: req.user?.username });
@@ -84,7 +84,7 @@ export default function terraformRoutes(pool, authenticate, requireRole) {
             const jsonExport = await exportAsJSON(pool);
 
             res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Content-Disposition', 'attachment; filename="fathom-config.json"');
+            res.setHeader('Content-Disposition', 'attachment; filename="pulsedb-config.json"');
             res.json(jsonExport);
 
             log('INFO', 'Configuration exported as JSON', { exportedBy: req.user?.username });

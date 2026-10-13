@@ -113,13 +113,13 @@ class AwsKms {
 }
 
 /** Factory based on env + optional per-workspace override. */
-export function getKmsBackend({ backend = process.env.FATHOM_KMS_BACKEND || 'local', ...cfg } = {}) {
+export function getKmsBackend({ backend = process.env.PULSEDB_KMS_BACKEND || 'local', ...cfg } = {}) {
     switch (String(backend).toLowerCase()) {
         case 'aws-kms':
         case 'aws':
             return new AwsKms({
                 region: cfg.region || process.env.AWS_REGION,
-                keyId:  cfg.keyId  || process.env.FATHOM_KMS_KEY_ID,
+                keyId:  cfg.keyId  || process.env.PULSEDB_KMS_KEY_ID,
             });
         case 'local':
         case undefined:

@@ -17,7 +17,7 @@
 
 import type { Request, Response, CookieOptions } from 'express';
 
-export const AUTH_COOKIE_NAME = 'fathom_token';
+export const AUTH_COOKIE_NAME = 'pulsedb_token';
 
 /**
  * Cookie options for the auth token.

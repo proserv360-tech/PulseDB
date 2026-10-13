@@ -1,8 +1,8 @@
-# FATHOM SDK Framework - Build Summary
+# PulseDB SDK Framework - Build Summary
 
 ## Overview
 
-A complete, production-ready SDK framework for FATHOM (universal database monitoring tool) has been successfully created. The SDK provides plug-and-play connectors for external platforms including Salesforce, Mulesoft, and multi-database support.
+A complete, production-ready SDK framework for PulseDB (universal database monitoring tool) has been successfully created. The SDK provides plug-and-play connectors for external platforms including Salesforce, Mulesoft, and multi-database support.
 
 **Total Code: 3,529 lines**
 **Total Files: 10**
@@ -38,7 +38,7 @@ sdk/
 
 **Exports:**
 
-- FathomClient - Main API client
+- PulseDBClient - Main API client
 - SalesforceConnector - Salesforce integration
 - MulesoftConnector - Mulesoft integration
 - DatabaseConnector - Multi-database connector
@@ -48,11 +48,11 @@ sdk/
 
 ---
 
-### 2. FathomClient (src/core/client.js)
+### 2. PulseDBClient (src/core/client.js)
 
 **Features:**
 
-- REST API client for FATHOM backend
+- REST API client for PulseDB backend
 - Automatic retry logic with exponential backoff
 - OAuth 2.0 and API key authentication support
 - Event-driven architecture for real-time updates
@@ -83,7 +83,7 @@ await client.healthCheck(); // Verify API health
 
 ```javascript
 {
-  baseUrl: 'https://api.fathom.example.com',
+  baseUrl: 'https://api.pulsedb.example.com',
   apiKey: 'sk_test_...',
   orgId: 'org_123',
   options: {
@@ -199,7 +199,7 @@ emitter.eventNames(); // Get all event names
 - Setup audit trail tracking
 - Platform Events subscription
 - Automatic token refresh
-- Metrics sync to FATHOM
+- Metrics sync to PulseDB
 
 **Key Methods:**
 
@@ -211,7 +211,7 @@ await sfConnector.getObjects(); // List SObjects
 await sfConnector.getMetrics(); // Get API limits
 await sfConnector.getAuditTrail(options); // Get audit events
 sfConnector.subscribeToEvents(channel, callback); // Subscribe to events
-await sfConnector.syncToFathom(client, options); // Sync to FATHOM
+await sfConnector.syncToPulseDB(client, options); // Sync to PulseDB
 ```
 
 **Authentication Flows:**
@@ -230,7 +230,7 @@ await sfConnector.syncToFathom(client, options); // Sync to FATHOM
 
 - `authenticated` - Auth successful
 - `metrics_updated` - Metrics fetched
-- `synced_to_fathom` - Metrics synced
+- `synced_to_pulsedb` - Metrics synced
 - `error` - Error occurred
 
 ---
@@ -245,7 +245,7 @@ await sfConnector.syncToFathom(client, options); // Sync to FATHOM
 - Alert management
 - Audit log tracking
 - Multi-environment support
-- Metrics sync to FATHOM
+- Metrics sync to PulseDB
 
 **Key Methods:**
 
@@ -257,7 +257,7 @@ await muleConnector.getApiManagerApis(); // List APIs
 await muleConnector.getApiAnalytics(apiId, opt); // Get API analytics
 await muleConnector.getAlerts(options); // Get active alerts
 await muleConnector.getAuditLogs(options); // Get audit logs
-await muleConnector.syncToFathom(client, options); // Sync to FATHOM
+await muleConnector.syncToPulseDB(client, options); // Sync to PulseDB
 ```
 
 **Application Metrics:**
@@ -283,7 +283,7 @@ await muleConnector.syncToFathom(client, options); // Sync to FATHOM
 - `app_metrics_updated` - Metrics updated
 - `apis_fetched` - APIs retrieved
 - `alerts_fetched` - Alerts retrieved
-- `synced_to_fathom` - Metrics synced
+- `synced_to_pulsedb` - Metrics synced
 - `error` - Error occurred
 
 ---
@@ -369,7 +369,7 @@ dbConnector.getCachedMetrics(key); // Get cached metrics
 
 **Details:**
 
-- Package name: `@fathom/sdk`
+- Package name: `@pulsedb/sdk`
 - Version: 1.0.0
 - ES Module support
 - Multiple entry points for selective imports
@@ -380,13 +380,13 @@ dbConnector.getCachedMetrics(key); // Get cached metrics
 
 ```javascript
 // Main entry
-import { FathomClient, SalesforceConnector } from '@fathom/sdk';
+import { PulseDBClient, SalesforceConnector } from '@pulsedb/sdk';
 
 // Specific imports
-import { FathomClient } from '@fathom/sdk/client';
-import { SalesforceConnector } from '@fathom/sdk/salesforce';
-import { MulesoftConnector } from '@fathom/sdk/mulesoft';
-import { DatabaseConnector } from '@fathom/sdk/database';
+import { PulseDBClient } from '@pulsedb/sdk/client';
+import { SalesforceConnector } from '@pulsedb/sdk/salesforce';
+import { MulesoftConnector } from '@pulsedb/sdk/mulesoft';
+import { DatabaseConnector } from '@pulsedb/sdk/database';
 ```
 
 ---
@@ -488,16 +488,16 @@ Metrics are cached to reduce API calls and improve performance.
 ### Complete Integration Flow
 
 ```javascript
-import { FathomClient, SalesforceConnector, DatabaseConnector } from '@fathom/sdk';
+import { PulseDBClient, SalesforceConnector, DatabaseConnector } from '@pulsedb/sdk';
 
-// Initialize FATHOM client
-const client = new FathomClient({
-    baseUrl: 'https://api.fathom.example.com',
+// Initialize PulseDB client
+const client = new PulseDBClient({
+    baseUrl: 'https://api.pulsedb.example.com',
     apiKey: 'sk_test_...',
     orgId: 'org_123',
 });
 
-// Connect to FATHOM
+// Connect to PulseDB
 await client.connect();
 
 // Set up Salesforce connector
@@ -526,8 +526,8 @@ client.subscribe('alert', (alert) => {
     console.log('Alert:', alert);
 });
 
-// Sync metrics to FATHOM
-await sfConnector.syncToFathom(client);
+// Sync metrics to PulseDB
+await sfConnector.syncToPulseDB(client);
 await dbConnector.getPerformance();
 
 // Clean shutdown
@@ -543,7 +543,7 @@ await dbConnector.disconnect();
 | File                         | Lines     | Purpose                   |
 | ---------------------------- | --------- | ------------------------- |
 | src/index.js                 | 14        | Main export point         |
-| src/core/client.js           | 486       | FATHOM API client         |
+| src/core/client.js           | 486       | PulseDB API client         |
 | src/core/auth.js             | 255       | Authentication management |
 | src/core/logger.js           | 239       | Structured logging        |
 | src/core/events.js           | 199       | Event system              |
@@ -561,16 +561,16 @@ await dbConnector.disconnect();
 ### Install as npm package:
 
 ```bash
-npm install @fathom/sdk
+npm install @pulsedb/sdk
 ```
 
 ### Basic usage:
 
 ```javascript
-import { FathomClient } from '@fathom/sdk';
+import { PulseDBClient } from '@pulsedb/sdk';
 
-const client = new FathomClient({
-    baseUrl: 'https://api.fathom.example.com',
+const client = new PulseDBClient({
+    baseUrl: 'https://api.pulsedb.example.com',
     apiKey: 'your_api_key',
     orgId: 'your_org_id',
 });
@@ -612,9 +612,9 @@ await client.connect();
 
 ## Summary
 
-The FATHOM SDK framework is a complete, production-ready solution for universal database monitoring with external platform integration. It provides:
+The PulseDB SDK framework is a complete, production-ready solution for universal database monitoring with external platform integration. It provides:
 
-✓ Unified client for FATHOM API
+✓ Unified client for PulseDB API
 ✓ Salesforce integration with OAuth and SOQL
 ✓ Mulesoft integration with app and API metrics
 ✓ Multi-database support (PostgreSQL, MySQL, MongoDB, etc.)

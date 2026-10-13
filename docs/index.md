@@ -1,8 +1,8 @@
 ---
-title: FATHOM Documentation
+title: PulseDB Documentation
 ---
 
-# FATHOM Documentation
+# PulseDB Documentation
 
 Multi-engine database monitoring and administration platform.
 
@@ -35,7 +35,7 @@ Multi-engine database monitoring and administration platform.
 - Continuous query advisor — `GET /api/query-advisor/recommendations`, rewrite benchmark endpoint
 - Schema drift timeline — `GET /api/schema/track/timeline`
 - What-if index analysis — `POST /api/advisor/what-if` (HypoPG-aware)
-- Backup orchestration — schedules + pg_dump/mysqldump/mongodump executors (`FATHOM_BACKUPS_ENABLED=1`)
+- Backup orchestration — schedules + pg_dump/mysqldump/mongodump executors (`PULSEDB_BACKUPS_ENABLED=1`)
 - Top queries by load — `GET /api/agent/top-queries` over collector snapshots
 
 ## Operations

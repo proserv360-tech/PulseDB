@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Typography Scale (single source of truth for all text styles)
+//  PulseDB — Typography Scale (single source of truth for all text styles)
 // ==========================================================================
 //
 //  Usage:  import { TYPO } from '@/config/typography';

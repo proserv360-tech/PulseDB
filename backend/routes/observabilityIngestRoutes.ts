@@ -2,7 +2,7 @@
 /**
  * routes/observabilityIngestRoutes.js
  * ────────────────────────────────────
- * Ingest endpoints that complete FATHOM's "single pane of glass" surface:
+ * Ingest endpoints that complete PulseDB's "single pane of glass" surface:
  *
  *   POST /otlp/v1/logs             — OTLP LogRecord ingest (protobuf JSON form).
  *   POST /api/v1/errors            — application error events (Sentry-envelope subset).
@@ -13,7 +13,7 @@
  *
  * All endpoints persist into tables defined in migration
  * 0010_observability_ingest.sql. Each accepts a lightweight shared secret
- * (X-Fathom-Ingest-Token) so SDKs can push without a user JWT.
+ * (X-PulseDB-Ingest-Token) so SDKs can push without a user JWT.
  *
  * Design notes:
  *   • Tolerant of schema drift — unknown fields are dropped, not rejected.
@@ -27,7 +27,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 
 const ROUTER_JSON_LIMIT = '256kb';
-const INGEST_TOKEN_HEADER = 'x-fathom-ingest-token';
+const INGEST_TOKEN_HEADER = 'x-pulsedb-ingest-token';
 
 /** Utility — safe constant-time token comparison. */
 function safeEq(a, b) {
@@ -38,7 +38,7 @@ function safeEq(a, b) {
 /** Gate a handler on the shared ingest token, falling through to authenticate when unset. */
 function ingestGuard(authenticate) {
     return (req, res, next) => {
-        const expected = process.env.FATHOM_INGEST_TOKEN;
+        const expected = process.env.PULSEDB_INGEST_TOKEN;
         const provided = req.headers[INGEST_TOKEN_HEADER];
         if (expected && provided && safeEq(String(provided), expected)) {
             req.ingest = { via: 'token' };
@@ -140,7 +140,7 @@ export default function observabilityIngestRoutes(pool, authenticate) {
     });
 
     // ── Prometheus remote-write-compatible bulk metrics push ────────────────
-    // Accepts the simpler JSON form Fathom SDKs emit:
+    // Accepts the simpler JSON form PulseDB SDKs emit:
     //   { series: [{ name, labels, samples: [{ ts_ms, value }] }] }
     router.post('/api/v1/prom/metrics', ingestGuard(authenticate), async (req, res) => {
         try {

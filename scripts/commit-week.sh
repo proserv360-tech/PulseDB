@@ -31,10 +31,10 @@ git reset -q
 # ---------------------------------------------------------------------------
 git rm -r --cached -q --ignore-unmatch .turbo
 git rm --cached -q --ignore-unmatch \
-  'FATHOM_Competitive_Landscape.pptx' \
-  'FATHOM_Competitive_Landscape_v2.pptx' \
-  'FATHOM_Product_Walkthrough.pptx' \
-  'FATHOM_Product_Walkthrough_Detailed.pptx' \
+  'PULSEDB_Competitive_Landscape.pptx' \
+  'PULSEDB_Competitive_Landscape_v2.pptx' \
+  'PULSEDB_Product_Walkthrough.pptx' \
+  'PULSEDB_Product_Walkthrough_Detailed.pptx' \
   'Timesheet_Dilip_22-26Jun2026.docx' \
   'Timesheet_Dilip_22-26Jun2026_v2.docx'
 git add .gitignore .claude/settings.local.json
@@ -80,7 +80,7 @@ git add \
   frontend/src/components/auth/LoginPage.tsx \
   frontend/src/components/views/analytics/DemoSectionView.tsx \
   .github/workflows/ci.yml \
-  .semgrep/fathom-rules.yml \
+  .semgrep/pulsedb-rules.yml \
   scripts/verify-local.sh
 
 git commit -q -m "fix(auth): type the session path, cut silent failures, wire validation
@@ -114,7 +114,7 @@ git commit -q -m "docs: add auth review, database state review and code audit
 AUTH_REVIEW.md          — auth findings, with the P0 items marked as landed
 DB_STATE_AND_PLAN.md    — live inspection of the new org project: data migrated,
                           schema did not; most expected objects are missing
-docs/reports/FATHOM_Code_Audit_2026-07-24.md — full-repo re-measurement"
+docs/reports/PULSEDB_Code_Audit_2026-07-24.md — full-repo re-measurement"
 
 # ---------------------------------------------------------------------------
 # 5. Report — push is deliberately left to you

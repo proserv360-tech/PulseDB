@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — RepositoryTab  (v11 — FIXED API INTEGRATION)
+//  PulseDB — RepositoryTab  (v11 — FIXED API INTEGRATION)
 // ==========================================================================
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { THEME, useAdaptiveTheme, metricValue } from '../../../utils/theme';
@@ -947,7 +947,7 @@ const LocalRepoForm = ({ onConnect, onClose }) => {
                 </div>
                 <div>
                     <div style={{ fontSize:14.5, fontWeight:800, color:THEME.textMain }}>Connect Local Path</div>
-                    <div style={{ fontSize:11, color:THEME.textDim, marginTop:2 }}>Fathom will read files via Browser File System Access API</div>
+                    <div style={{ fontSize:11, color:THEME.textDim, marginTop:2 }}>PulseDB will read files via Browser File System Access API</div>
                 </div>
             </div>
 
@@ -1057,8 +1057,8 @@ const RepositoryTab = () => {
     const [showAdd, setShowAdd] = useState(false);
     const [search, setSearch] = useState('');
 
-    useEffect(() => { try { const s=localStorage.getItem('fathom_repos_v10'); if(s) setRepos(JSON.parse(s)); } catch {} }, []);
-    useEffect(() => { try { localStorage.setItem('fathom_repos_v10', JSON.stringify(repos)); } catch {} }, [repos]);
+    useEffect(() => { try { const s=localStorage.getItem('pulsedb_repos_v10'); if(s) setRepos(JSON.parse(s)); } catch {} }, []);
+    useEffect(() => { try { localStorage.setItem('pulsedb_repos_v10', JSON.stringify(repos)); } catch {} }, [repos]);
 
     const handleAdd = useCallback(data => { setRepos(prev=>[{ id:Date.now(), ...data }, ...prev]); setShowAdd(false); }, []);
     const handleDelete = useCallback(id => setRepos(prev=>prev.filter(r=>r.id!==id)), []);

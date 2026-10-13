@@ -4,7 +4,7 @@
  * Measures alert engine median dispatch time.
  *
  * Run:
- *   k6 run -e BASE_URL=... -e CRON_SECRET=$FATHOM_CRON_SECRET bench/k6/alerts_fire.js
+ *   k6 run -e BASE_URL=... -e CRON_SECRET=$PULSEDB_CRON_SECRET bench/k6/alerts_fire.js
  *
  * Target: median < 2 s; p95 < 5 s.
  */

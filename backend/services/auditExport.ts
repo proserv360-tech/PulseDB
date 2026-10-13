@@ -8,7 +8,7 @@
  *
  * Export format: newline-delimited JSON (`.ndjson`), one event per line,
  * gzipped. One object per hour:
- *   s3://<bucket>/fathom/audit/<workspace_slug>/yyyy=YYYY/mm=MM/dd=DD/HH.ndjson.gz
+ *   s3://<bucket>/pulsedb/audit/<workspace_slug>/yyyy=YYYY/mm=MM/dd=DD/HH.ndjson.gz
  *
  * The <workspace_slug> segment names the object only — audit_log carries no
  * workspace_id, so rows are not partitioned by tenant. See runAuditExport().
@@ -27,7 +27,7 @@ import { query } from '../db.js';
 const DEFAULTS = {
     bucket:       process.env.AUDIT_EXPORT_BUCKET,
     region:       process.env.AUDIT_EXPORT_REGION || 'us-east-1',
-    prefix:       process.env.AUDIT_EXPORT_PREFIX || 'fathom/audit',
+    prefix:       process.env.AUDIT_EXPORT_PREFIX || 'pulsedb/audit',
     endpoint:     process.env.AUDIT_EXPORT_ENDPOINT, // set for R2/B2/MinIO
     accessKey:    process.env.AUDIT_EXPORT_ACCESS_KEY,
     secretKey:    process.env.AUDIT_EXPORT_SECRET_KEY,
@@ -174,11 +174,11 @@ export async function runAuditExport({ fromTs, toTs, workspaceId = 0 } = {}) {
         // B2) still surface the hashes in the response headers.
         ChecksumSHA256: Buffer.from(gzSha, 'hex').toString('base64'),
         Metadata: {
-            'fathom-workspace-id':   String(workspaceId),
-            'fathom-event-count':    String(events.length),
-            'fathom-content-sha256': plainSha,
-            'fathom-gzip-sha256':    gzSha,
-            'fathom-schema-version': '1',
+            'pulsedb-workspace-id':   String(workspaceId),
+            'pulsedb-event-count':    String(events.length),
+            'pulsedb-content-sha256': plainSha,
+            'pulsedb-gzip-sha256':    gzSha,
+            'pulsedb-schema-version': '1',
         },
     }));
 

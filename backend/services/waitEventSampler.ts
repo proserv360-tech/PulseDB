@@ -28,7 +28,7 @@
 
 import { query } from '../db.js';
 
-const SAMPLE_INTERVAL_MS = Number(process.env.FATHOM_WAIT_EVENT_INTERVAL_MS) || 1000;
+const SAMPLE_INTERVAL_MS = Number(process.env.PULSEDB_WAIT_EVENT_INTERVAL_MS) || 1000;
 const ROLLUP_INTERVAL_MS = 5 * 60_000;
 const POLL_TIMEOUT_MS    = 2_000;
 
@@ -124,7 +124,7 @@ async function pollOne(connectionId, getPool) {
 }
 
 /**
- * The connections table is `fathom_connections`, not `connections` — the latter
+ * The connections table is `pulsedb_connections`, not `connections` — the latter
  * has never existed. This queried it once a second, hit 42P01, and the catch
  * below translated "the table is missing" into "there are no connections", so
  * the sampler has been running against nothing since it was written while still
@@ -139,7 +139,7 @@ async function listActiveConnections(pool) {
     try {
         const { rows } = await pool.query(
             `SELECT id::text AS id
-               FROM pgmonitoringtool.fathom_connections
+               FROM pgmonitoringtool.pulsedb_connections
               WHERE COALESCE(connection_type, 'postgresql') IN ('postgresql', 'postgres')`
         );
         return rows.map(r => r.id);

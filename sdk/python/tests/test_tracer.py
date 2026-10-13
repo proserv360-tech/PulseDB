@@ -1,9 +1,9 @@
-"""Tests for FathomSDK Tracer."""
+"""Tests for PulseDBSDK Tracer."""
 
 import pytest
 import asyncio
 from unittest.mock import Mock, MagicMock, patch
-from fathom_sdk.tracer import FathomTracer, Span, SpanKind, StatusCode, _active_span
+from pulsedb_sdk.tracer import PulseDBTracer, Span, SpanKind, StatusCode, _active_span
 
 
 class TestSpan:
@@ -123,13 +123,13 @@ class TestSpan:
         assert any(a["key"] == "user.id" for a in otlp["attributes"])
 
 
-class TestFathomTracer:
-    """Tests for FathomTracer."""
+class TestPulseDBTracer:
+    """Tests for PulseDBTracer."""
 
     def test_start_span(self):
         """start_span creates span with valid IDs."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         span = tracer.start_span(
             "test-op",
@@ -146,7 +146,7 @@ class TestFathomTracer:
     def test_start_span_detects_parent(self):
         """start_span auto-detects parent span from context."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         parent_span = tracer.start_span("parent")
         token = _active_span.set(parent_span)
@@ -162,7 +162,7 @@ class TestFathomTracer:
     def test_inject_headers(self):
         """inject_headers adds W3C traceparent."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         span = tracer.start_span("op")
         headers = {}
@@ -180,7 +180,7 @@ class TestFathomTracer:
     def test_extract_context(self):
         """extract_context parses W3C traceparent."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         headers = {
             "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
@@ -196,7 +196,7 @@ class TestFathomTracer:
     def test_extract_context_missing(self):
         """extract_context returns None if traceparent missing."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         ctx = tracer.extract_context({})
 
@@ -205,7 +205,7 @@ class TestFathomTracer:
     def test_extract_context_invalid(self):
         """extract_context returns None for invalid format."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         ctx = tracer.extract_context({"traceparent": "invalid"})
 
@@ -218,7 +218,7 @@ class TestWithSpan:
     def test_with_span_sets_context(self):
         """with_span sets active span context."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         span = tracer.start_span("test-op")
 
@@ -231,7 +231,7 @@ class TestWithSpan:
     def test_with_span_nested(self):
         """with_span supports nesting."""
         mock_client = Mock()
-        tracer = FathomTracer(mock_client)
+        tracer = PulseDBTracer(mock_client)
 
         parent = tracer.start_span("parent")
         with tracer.with_span(parent):

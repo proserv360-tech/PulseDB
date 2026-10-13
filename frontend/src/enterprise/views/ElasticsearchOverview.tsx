@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Elasticsearch Overview View
+//  PulseDB — Elasticsearch Overview View
 // ==========================================================================
 //  Cluster-level health + per-index summary. Served by
 //  /api/enterprise/elasticsearch/health + /indices.

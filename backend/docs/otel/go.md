@@ -1,4 +1,4 @@
-# Go — OTel to FATHOM
+# Go — OTel to PulseDB
 
 Targets `pgx` v5 (native) and `database/sql`-wrapped drivers. Requires
 `go.opentelemetry.io/otel` ≥ 1.24.
@@ -57,7 +57,7 @@ query := core.AddComment(ctx, "SELECT * FROM orders WHERE id = $1",
 rows, err := pool.Query(ctx, query, id)
 ```
 
-The comment shape matches what FATHOM's log parser expects:
+The comment shape matches what PulseDB's log parser expects:
 
 ```sql
 /*traceparent='00-...-...-01'*/ SELECT * FROM orders WHERE id = $1
@@ -79,5 +79,5 @@ SELECT application_name, pid, state
  WHERE usename = current_user;
 ```
 
-`application_name` should begin with `traceparent:`. Then in FATHOM →
+`application_name` should begin with `traceparent:`. Then in PulseDB →
 Query Details, slow queries will render a "Trace" column link.

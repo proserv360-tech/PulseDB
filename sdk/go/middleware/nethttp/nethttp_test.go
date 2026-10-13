@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fathom/fathom-go"
+	"github.com/pulsedb/pulsedb-go"
 )
 
 func TestMiddlewareTracksRequest(t *testing.T) {
@@ -40,7 +40,7 @@ func TestMiddlewareTracksRequest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := fathom.New(fathom.Config{
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -101,7 +101,7 @@ func TestMiddlewareRecordsStatusCode(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -155,7 +155,7 @@ func TestMiddlewareRecordsMethod(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -209,7 +209,7 @@ func TestMiddlewareRecordsDuration(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,

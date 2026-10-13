@@ -1,6 +1,6 @@
-# Fathom Go SDK
+# PulseDB Go SDK
 
-Production-quality Go SDK for FATHOM observability platform. Zero external dependencies in the core module, with optional middleware for net/http and Gin.
+Production-quality Go SDK for PulseDB observability platform. Zero external dependencies in the core module, with optional middleware for net/http and Gin.
 
 ## Features
 
@@ -16,7 +16,7 @@ Production-quality Go SDK for FATHOM observability platform. Zero external depen
 ## Installation
 
 ```bash
-go get github.com/fathom/fathom-go
+go get github.com/pulsedb/pulsedb-go
 ```
 
 ## Quick Start
@@ -31,14 +31,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/fathom/fathom-go"
+	"github.com/pulsedb/pulsedb-go"
 )
 
 func main() {
 	// Initialize the client
-	client, err := fathom.New(fathom.Config{
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:      "sk_live_your_api_key",
-		Endpoint:    "https://api.fathom.example.com",
+		Endpoint:    "https://api.pulsedb.example.com",
 		AppName:     "my-app",
 		Environment: "production",
 	})
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	// Track an audit event
-	client.TrackAudit("User Deleted", fathom.AuditOpts{
+	client.TrackAudit("User Deleted", pulsedb.AuditOpts{
 		Message: "User ID 123 deleted by admin",
 		Severity: "info",
 	})
@@ -93,15 +93,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fathom/fathom-go"
-	"github.com/fathom/fathom-go/middleware/nethttp"
+	"github.com/pulsedb/pulsedb-go"
+	"github.com/pulsedb/pulsedb-go/middleware/nethttp"
 )
 
 func main() {
-	// Initialize Fathom
-	client, err := fathom.New(fathom.Config{
+	// Initialize PulseDB
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:   "sk_live_your_api_key",
-		Endpoint: "https://api.fathom.example.com",
+		Endpoint: "https://api.pulsedb.example.com",
 		AppName:  "my-api",
 	})
 	if err != nil {
@@ -115,7 +115,7 @@ func main() {
 		w.Write([]byte("Hello"))
 	})
 
-	// Wrap with Fathom middleware
+	// Wrap with PulseDB middleware
 	wrappedHandler := nethttp.Middleware(client)(handler)
 
 	// Use in your server
@@ -131,16 +131,16 @@ package main
 import (
 	"log"
 
-	"github.com/fathom/fathom-go"
-	"github.com/fathom/fathom-go/middleware/gin"
+	"github.com/pulsedb/pulsedb-go"
+	"github.com/pulsedb/pulsedb-go/middleware/gin"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Initialize Fathom
-	client, err := fathom.New(fathom.Config{
+	// Initialize PulseDB
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:   "sk_live_your_api_key",
-		Endpoint: "https://api.fathom.example.com",
+		Endpoint: "https://api.pulsedb.example.com",
 		AppName:  "my-api",
 	})
 	if err != nil {
@@ -151,7 +151,7 @@ func main() {
 	// Create router
 	router := gin.Default()
 
-	// Use Fathom middleware
+	// Use PulseDB middleware
 	router.Use(gin.Middleware(client))
 
 	// Define routes
@@ -208,7 +208,7 @@ client.TrackErrorTitle(title, severity, metadata)
 For audit logging.
 
 ```go
-client.TrackAudit(title, fathom.AuditOpts{
+client.TrackAudit(title, pulsedb.AuditOpts{
 	Message: "optional message",
 	Severity: "info",
 	Metadata: map[string]interface{}{...},

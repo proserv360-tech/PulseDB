@@ -24,7 +24,7 @@
 >    not used, removing the dependency closes both outright.
 
 
-Closes action item 2 of `FATHOM_Code_Audit_2026-07-24.md`, which asked for the
+Closes action item 2 of `PULSEDB_Code_Audit_2026-07-24.md`, which asked for the
 high-severity advisories to be triaged and noted that the 2 July attempt was
 reverted because it could not be build-tested.
 

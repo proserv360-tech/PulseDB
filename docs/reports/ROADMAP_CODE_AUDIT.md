@@ -1,4 +1,4 @@
-# FATHOM Roadmap — Code Audit
+# PulseDB Roadmap — Code Audit
 
 Independent review of every file added or modified during the Wave 1–3
 roadmap implementation. Scope is limited to the diff introduced by the
@@ -106,18 +106,18 @@ including for owners. The feature is dead on arrival.
 **Fix** — insert `resolveWorkspace` between `authenticate` and
 `requireWorkspaceRole('owner')`.
 
-### HIGH-2 — Copilot schema context queries the FATHOM control-plane DB
+### HIGH-2 — Copilot schema context queries the PulseDB control-plane DB
 
 **File** — `backend/services/copilotService.js`, `buildSchemaContext`
 
 `generateSql` receives the server-wide `pool` and passes it to
 `buildSchemaContext`, which queries `information_schema` on that pool.
-That is FATHOM's **own** metadata DB — not the customer's monitored DB.
+That is PulseDB's **own** metadata DB — not the customer's monitored DB.
 Two problems:
 
 1. The copilot produces SQL against the wrong schema, so it is never
    useful.
-2. We ship the FATHOM schema (including internal table shapes like
+2. We ship the PulseDB schema (including internal table shapes like
    `scim_tokens`, `saml_configs`) to whichever third-party LLM
    provider is configured. Information-disclosure risk.
 

@@ -47,13 +47,13 @@ newer generation that was never applied anywhere.
 
 | Table | In code, not in DB | In DB, not in code |
 |---|---|---|
-| `fathom_connections` | `password_encrypted`, `color`, `connection_type`, `environment`, `region`, `notes`, `health_status`, `last_health_check`, `updated_at` | `password`, `db_type`, `status`, `last_tested`, `ssh_*` (8 cols) |
+| `pulsedb_connections` | `password_encrypted`, `color`, `connection_type`, `environment`, `region`, `notes`, `health_status`, `last_health_check`, `updated_at` | `password`, `db_type`, `status`, `last_tested`, `ssh_*` (8 cols) |
 | `alerts` | `type`, `status`, `details`, `connection_id`, `resolved_at` | `title`, `fingerprint`, `source`, `acknowledged` |
 | `audit_log` | `details`, `timestamp` | `detail`, `ip`, `level`, `actor_id`, `resource_type`, `created_at` |
 | `password_reset_tokens` | `used_at` (timestamp) | `used` (boolean) |
 | `user_sessions` | `revoked_at`, `revoked_by` | — |
 
-Note `fathom_connections.password` vs `password_encrypted` is a **naming** difference
+Note `pulsedb_connections.password` vs `password_encrypted` is a **naming** difference
 only — the stored value is 90 chars and colon-delimited (IV:ciphertext:tag), and
 `server.ts:1618` calls `encrypt()` before writing. The secret is encrypted at rest. The
 column is just named as though it weren't.
@@ -76,7 +76,7 @@ expired, so the "sessions expire instantly" failure does not apply to this datab
 - `pgmonitoringtool` has **no grants** to `anon` / `authenticated`. It is not reachable
   through PostgREST or the anon key. RLS being off inside it is therefore acceptable —
   the app connects as `postgres`.
-- The 8 legacy `fathom_*` tables in `public` have RLS **on with zero policies**, which
+- The 8 legacy `pulsedb_*` tables in `public` have RLS **on with zero policies**, which
   denies all non-owner access. `public.alerts` holds 7 rows but is not readable via the
   API roles.
 - Supabase's own `auth` schema exists (23 tables, 1 user) and is unused by the
@@ -84,7 +84,7 @@ expired, so the "sessions expire instantly" failure does not apply to this datab
 
 ## 5. Leftovers worth cleaning
 
-- 8 `fathom_*` tables in `public`, only `public.alerts` non-empty (7 rows). Duplicates
+- 8 `pulsedb_*` tables in `public`, only `public.alerts` non-empty (7 rows). Duplicates
   the app's alerts concept; decide whether to migrate those rows or drop.
 - `pgmonitoringtool.vigil_connections` exists but is referenced nowhere in the code.
 - 11 stale sessions flagged active but expired.
@@ -123,7 +123,7 @@ answers to the same question.
 
 ### Step 3 — Decide the canonical generation
 
-For each drifted table, pick one shape and converge. `fathom_connections` and `alerts`
+For each drifted table, pick one shape and converge. `pulsedb_connections` and `alerts`
 are the two where code and DB genuinely disagree about the design, not just names. This
 needs a product decision, not just a migration.
 
@@ -139,4 +139,4 @@ migrations are written against a known baseline.
 - Reconnect the Supabase connector to the org account so this project is reachable
   through tooling rather than a raw connection string.
 - Normalise `super_admin` vs `superadmin` and add a CHECK constraint on `users.role`.
-- Rename `fathom_connections.password` → `password_encrypted` to match what it holds.
+- Rename `pulsedb_connections.password` → `password_encrypted` to match what it holds.

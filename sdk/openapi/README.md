@@ -1,6 +1,6 @@
-# FATHOM SDK OpenAPI Specification
+# PulseDB SDK OpenAPI Specification
 
-This directory contains the **source of truth** for FATHOM SDK wire formats and contracts across all client implementations:
+This directory contains the **source of truth** for PulseDB SDK wire formats and contracts across all client implementations:
 
 - **JavaScript SDK**
 - **Python SDK**
@@ -9,7 +9,7 @@ This directory contains the **source of truth** for FATHOM SDK wire formats and 
 
 ## Overview
 
-`fathom-sdk.yaml` is an OpenAPI 3.0.3 specification that defines:
+`pulsedb-sdk.yaml` is an OpenAPI 3.0.3 specification that defines:
 
 1. **Three public endpoints**:
     - `POST /api/sdk/ingest` — batch event ingest with authentication
@@ -36,17 +36,17 @@ To regenerate typed client code from this spec, use OpenAPI Generator:
 
 ```bash
 openapi-generator-cli generate \
-  -i fathom-sdk.yaml \
+  -i pulsedb-sdk.yaml \
   -g javascript \
   -o ../clients/javascript
 
 openapi-generator-cli generate \
-  -i fathom-sdk.yaml \
+  -i pulsedb-sdk.yaml \
   -g python \
   -o ../clients/python
 
 openapi-generator-cli generate \
-  -i fathom-sdk.yaml \
+  -i pulsedb-sdk.yaml \
   -g go \
   -o ../clients/go
 ```
@@ -57,8 +57,8 @@ Adjust the `-g` (generator) flag and `-o` (output path) for each language.
 
 **Any change to the SDK wire contract MUST:**
 
-1. Update `fathom-sdk.yaml` first
-2. Validate the spec with `openapi-spec-validator fathom-sdk.yaml`
+1. Update `pulsedb-sdk.yaml` first
+2. Validate the spec with `openapi-spec-validator pulsedb-sdk.yaml`
 3. Regenerate typed clients for all SDKs
 4. Only then update SDK implementations
 
@@ -70,13 +70,13 @@ Ensure the spec is valid before committing:
 
 ```bash
 pip install openapi-spec-validator
-openapi-spec-validator fathom-sdk.yaml
+openapi-spec-validator pulsedb-sdk.yaml
 ```
 
 Or, minimal YAML check:
 
 ```bash
-python3 -c "import yaml; yaml.safe_load(open('fathom-sdk.yaml'))"
+python3 -c "import yaml; yaml.safe_load(open('pulsedb-sdk.yaml'))"
 ```
 
 ## Specification Design Notes

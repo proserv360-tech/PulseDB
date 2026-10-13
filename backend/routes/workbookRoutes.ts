@@ -6,7 +6,7 @@
  *   app.use(prefix, workbookRoutes(pool, authenticate, getPool));
  *
  * RBAC: editor role required for create/add-variant/run; viewer can read.
- * Schemas live in @fathom/validators (CreateWorkbookSchema, AddVariantSchema,
+ * Schemas live in @pulsedb/validators (CreateWorkbookSchema, AddVariantSchema,
  * RunVariantsParamsSchema).
  */
 

@@ -1,6 +1,6 @@
 /**
- * DatabaseConnector - Generic database connector wrapper for FATHOM
- * Supports multiple database types through FATHOM's native integration
+ * DatabaseConnector - Generic database connector wrapper for PulseDB
+ * Supports multiple database types through PulseDB's native integration
  */
 
 import { EventEmitter } from '../core/events.js';

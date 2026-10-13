@@ -3445,7 +3445,7 @@ const DeepAIPanel = ({ view, data, rows }) => {
                     }}
                 >
                     <span style={{ color: cfg.color }}>●</span>
-                    <span>Model: fathom-dba-v5 · updated {new Date().toISOString().slice(0, 10)}</span>
+                    <span>Model: pulsedb-dba-v5 · updated {new Date().toISOString().slice(0, 10)}</span>
                 </div>
             </div>
         </Card>
@@ -4034,7 +4034,7 @@ export default function IndexIntelligence() {
                                         textTransform: 'uppercase',
                                     }}
                                 >
-                                    FATHOM · v5.0 · PostgreSQL 14+
+                                    PulseDB · v5.0 · PostgreSQL 14+
                                 </M>
                             </div>
                         </div>

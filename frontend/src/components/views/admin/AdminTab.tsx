@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — AdminTab (v7 — ADVANCED VISUAL EDITION)
+//  PulseDB — AdminTab (v7 — ADVANCED VISUAL EDITION)
 // ==========================================================================
 import React, { useState, useEffect, useMemo, useCallback, useRef, useReducer } from 'react';
 import { THEME, useAdaptiveTheme, metricValue } from '../../../utils/theme';
@@ -4159,7 +4159,7 @@ const SettingsView = ({
                                 const u = URL.createObjectURL(b);
                                 const a = document.createElement('a');
                                 a.href = u;
-                                a.download = `fathom-config-${new Date().toISOString().slice(0, 10)}.json`;
+                                a.download = `pulsedb-config-${new Date().toISOString().slice(0, 10)}.json`;
                                 a.click();
                             }}
                             className="adm-btn"

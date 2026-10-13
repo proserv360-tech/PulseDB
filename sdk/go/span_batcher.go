@@ -1,4 +1,4 @@
-package fathom
+package pulsedb
 
 import (
 	"bytes"
@@ -239,7 +239,7 @@ func (sb *SpanBatcher) buildOtlpPayload(spans []*Span) map[string]interface{} {
 				"scopeSpans": []map[string]interface{}{
 					{
 						"scope": map[string]interface{}{
-							"name":    "@fathom/sdk",
+							"name":    "@pulsedb/sdk",
 							"version": "1.0.0",
 						},
 						"spans": otlpSpans,

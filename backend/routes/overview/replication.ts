@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/replication
+//  PulseDB — /api/overview/replication
 //  Returns: primary info, replica list with lag, lock stats, blocked queries
 // ==========================================================================
 

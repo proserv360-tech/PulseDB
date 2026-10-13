@@ -60,7 +60,7 @@ export const ThemeProvider = ({ children }) => {
     useEffect(() => {
         try {
             // Normalize any previously-stored light/dark preference.
-            localStorage.setItem('fathom_theme', 'midnight');
+            localStorage.setItem('pulsedb_theme', 'midnight');
         } catch {}
         document.documentElement.setAttribute('data-theme', 'midnight');
         document.body.style.backgroundColor = tokens.bg;

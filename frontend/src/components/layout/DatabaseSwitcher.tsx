@@ -134,7 +134,7 @@ const DatabaseSwitcher = () => {
                     setSearch('');
                     // Force every dashboard query to refetch against the new database.
                     invalidateCache();
-                    window.dispatchEvent(new CustomEvent('fathom-refresh'));
+                    window.dispatchEvent(new CustomEvent('pulsedb-refresh'));
                 } else {
                     setError(res?.error ?? 'Switch failed');
                 }

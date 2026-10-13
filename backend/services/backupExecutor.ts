@@ -4,7 +4,7 @@
  * Backup orchestration v1 (gap-analysis P0-3) — completes the B8 scaffold.
  *
  * Logical Postgres backups via pg_dump (custom format, compressed), stored
- * under FATHOM_BACKUP_DIR (default ./backups). Schedules and run history
+ * under PULSEDB_BACKUP_DIR (default ./backups). Schedules and run history
  * come from backupService (pgmonitoringtool.backup_schedules / backup_runs);
  * this module adds the execution layer:
  *
@@ -14,7 +14,7 @@
  *   runDueBackups({ schedules, resolveConn }) — sweep for worker/cron
  *   restoreCommandFor(run, conn)         — pg_restore command generation
  *
- * Stays inert unless FATHOM_BACKUPS_ENABLED=1 (same flag as the scaffold).
+ * Stays inert unless PULSEDB_BACKUPS_ENABLED=1 (same flag as the scaffold).
  * MySQL/Mongo executors can register later via the same interface.
  */
 
@@ -35,10 +35,10 @@ const recordRun = _recordRun as (args: {
 import { log } from './logger.js';
 import { swallow } from './errorHandling.js';
 
-const BACKUP_DIR = process.env.FATHOM_BACKUP_DIR || path.resolve(process.cwd(), 'backups');
+const BACKUP_DIR = process.env.PULSEDB_BACKUP_DIR || path.resolve(process.cwd(), 'backups');
 // Keep this many most-recent artifacts per schedule (audit 2026-06-10, LOW-2:
-// unbounded disk growth). Override with FATHOM_BACKUP_KEEP.
-const BACKUP_KEEP = Math.max(1, Number(process.env.FATHOM_BACKUP_KEEP) || 7);
+// unbounded disk growth). Override with PULSEDB_BACKUP_KEEP.
+const BACKUP_KEEP = Math.max(1, Number(process.env.PULSEDB_BACKUP_KEEP) || 7);
 
 const CADENCE_MS: Record<string, number> = {
     hourly: 60 * 60 * 1000,
@@ -133,7 +133,7 @@ function artifactNameFor(conn: { database?: string }, scheduleId: number | strin
  * password, ssl }). Records a run row either way; returns the outcome.
  */
 export async function runBackup({ conn, schedule }: any) {
-    if (!isEnabled()) return { status: 'skipped', reason: 'FATHOM_BACKUPS_ENABLED != 1' };
+    if (!isEnabled()) return { status: 'skipped', reason: 'PULSEDB_BACKUPS_ENABLED != 1' };
 
     await mkdir(BACKUP_DIR, { recursive: true });
     const started = new Date();

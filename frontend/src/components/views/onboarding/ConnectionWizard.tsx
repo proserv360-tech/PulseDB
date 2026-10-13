@@ -113,12 +113,12 @@ const ENGINE_HINTS: Record<string, string> = {
     `• Host: SQL Server hostname or instance (e.g. sql.prod.acme)
 • Port: 1433 (default) or your configured port
 • Username / Password: SQL login, or use integrated auth via connection string
-• Database: target database name (e.g. fathom_prod)`,
+• Database: target database name (e.g. pulsedb_prod)`,
   oracle:
     `• Host: Oracle listener host
 • Port: 1521 (default)
 • Username / Password: Oracle user credentials
-• Database: Service name or SID (e.g. FATHOM_PDB)`,
+• Database: Service name or SID (e.g. PULSEDB_PDB)`,
   redis:
     `• Host: Redis primary hostname
 • Port: 6379 (default) or 6380 for TLS
@@ -134,23 +134,23 @@ const ENGINE_HINTS: Record<string, string> = {
     `• Host: your Snowflake account identifier (e.g. acme-analytics.us-east-1.snowflakecomputing.com)
 • Port: 443 (HTTPS)
 • Username / Password: Snowflake user credentials (or key-pair via connection string)
-• Database: target database name (e.g. FATHOM_PROD) — configure warehouse + role post-connect`,
+• Database: target database name (e.g. PULSEDB_PROD) — configure warehouse + role post-connect`,
   bigquery:
     `• Host: GCP project ID (e.g. acme-analytics)
 • Port: 443 (HTTPS)
 • Username: service account email
 • Password: paste the service account key JSON as the password value (or use connection string)
-• Database: dataset or dataset:location (e.g. fathom_prod or fathom_prod:US)`,
+• Database: dataset or dataset:location (e.g. pulsedb_prod or pulsedb_prod:US)`,
   redshift:
-    `• Host: your cluster endpoint (e.g. fathom.abc.us-east-1.redshift.amazonaws.com)
+    `• Host: your cluster endpoint (e.g. pulsedb.abc.us-east-1.redshift.amazonaws.com)
 • Port: 5439 (default)
 • Username / Password: Redshift user credentials
-• Database: target database name (e.g. fathom_prod)`,
+• Database: target database name (e.g. pulsedb_prod)`,
   cassandra:
     `• Host: any contact point in the cluster (e.g. cass-1.prod.acme)
 • Port: 9042 (default native CQL port)
 • Username / Password: credentials (blank if PasswordAuthenticator is not enabled)
-• Database: default keyspace (e.g. fathom_app). Override the local datacenter via connection string.`,
+• Database: default keyspace (e.g. pulsedb_app). Override the local datacenter via connection string.`,
   dynamodb:
     `• Host: AWS region (e.g. us-east-1) — DynamoDB has no traditional host
 • Port: 443 (HTTPS)
@@ -1239,7 +1239,7 @@ const ConnectionWizard = () => {
         {step === 4 && (
           <>
             <h2 style={styles.title}>Test Connection</h2>
-            <p style={styles.description}>Verify that FATHOM can connect to your database.</p>
+            <p style={styles.description}>Verify that PulseDB can connect to your database.</p>
 
             <div style={{ marginBottom: '24px' }}>
               <div
@@ -1341,7 +1341,7 @@ const ConnectionWizard = () => {
             <div style={styles.successIcon}>✨</div>
             <h2 style={styles.title}>Connection Established!</h2>
             <p style={styles.description}>
-              Your database connection is ready. You can now start monitoring your database with FATHOM.
+              Your database connection is ready. You can now start monitoring your database with PulseDB.
             </p>
 
             <button

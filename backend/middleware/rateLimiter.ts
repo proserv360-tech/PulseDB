@@ -81,7 +81,7 @@ export function rateLimiter(opts: Record<string, any> = {}) {
     const windowMs = opts.windowMs || 60000;
     const maxDefault = opts.maxRequests || 300;
     const keyFn = opts.keyFn || ((req: any) => (req.user && req.user.id) || req.ip || 'anonymous');
-    const prefix = opts.prefix || 'fathom:rl';
+    const prefix = opts.prefix || 'pulsedb:rl';
     const errorBudget = opts.errorBudget || 5;
     const cooldownMs = opts.cooldownMs || 30000;
 

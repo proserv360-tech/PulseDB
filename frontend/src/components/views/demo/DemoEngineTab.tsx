@@ -856,7 +856,7 @@ function renderSubstitutes(spec: EngineDemoSpec) {
         <Panel title="Engine-native substitutes" icon={Info} accentColor={spec.accentColor}>
             <div style={{ padding: 16 }}>
                 <p style={{ fontSize: 13, color: THEME.textDim, marginTop: 0 }}>
-                    For panels where {spec.name} does not have a direct analog, FATHOM surfaces the closest actionable
+                    For panels where {spec.name} does not have a direct analog, PulseDB surfaces the closest actionable
                     signal in the same panel. These are the substitutions in use:
                 </p>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>

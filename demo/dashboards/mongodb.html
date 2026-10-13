@@ -619,11 +619,11 @@ html,body{height:100%;margin:0;padding:0}
         <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Active alerts</div>
         <div class="anomaly-alert" style="background:rgba(255,181,71,.07);border-color:rgba(255,181,71,.2)">
           <div class="anomaly-icon">⚠</div>
-          <div><div class="anomaly-title" style="color:var(--amber)">High scan ratio</div><div class="anomaly-desc">fathom.api_monitoring_payload — 14× scanned/returned</div><div class="anomaly-time">2 min ago</div></div>
+          <div><div class="anomaly-title" style="color:var(--amber)">High scan ratio</div><div class="anomaly-desc">pulsedb.api_monitoring_payload — 14× scanned/returned</div><div class="anomaly-time">2 min ago</div></div>
         </div>
         <div class="anomaly-alert">
           <div class="anomaly-icon">🔴</div>
-          <div><div class="anomaly-title">Sort spill to disk</div><div class="anomaly-desc">fathom.user — 3 sorts exceeded memory limit</div><div class="anomaly-time">8 min ago</div></div>
+          <div><div class="anomaly-title">Sort spill to disk</div><div class="anomaly-desc">pulsedb.user — 3 sorts exceeded memory limit</div><div class="anomaly-time">8 min ago</div></div>
         </div>
         <div style="font-size:11px;color:var(--green);margin-top:8px">✓ 129 metrics nominal</div>
       </div>
@@ -635,7 +635,7 @@ html,body{height:100%;margin:0;padding:0}
     <div class="grid-2" style="margin-bottom:14px;align-items:start">
       <div class="card">
         <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Run a query explain</div>
-        <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Collection</div><input type="text" value="fathom.api_monitoring_payload" id="ep-coll"></div>
+        <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Collection</div><input type="text" value="pulsedb.api_monitoring_payload" id="ep-coll"></div>
         <div style="margin-bottom:10px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Filter query</div><textarea id="ep-filter" style="height:65px">{ "project_id": "abc123", "status": "error" }</textarea></div>
         <button class="btn btn-green" onclick="runExplain()">▶ Explain query</button>
       </div>
@@ -695,7 +695,7 @@ html,body{height:100%;margin:0;padding:0}
     <div class="sec-title">Recommended indexes — sorted by impact</div>
     <div class="idx-suggestion">
       <div class="idx-header">
-        <div class="idx-title">fathom.api_monitoring_payload</div>
+        <div class="idx-title">pulsedb.api_monitoring_payload</div>
         <div class="idx-impact">
           <div style="font-size:11px;color:var(--text3)">Impact:</div>
           <div class="impact-bar"><div class="impact-fill" style="width:96%"></div></div>
@@ -709,7 +709,7 @@ html,body{height:100%;margin:0;padding:0}
     </div>
     <div class="idx-suggestion" style="border-left-color:var(--amber)">
       <div class="idx-header">
-        <div class="idx-title">fathom.user_metadata</div>
+        <div class="idx-title">pulsedb.user_metadata</div>
         <div class="idx-impact">
           <div class="impact-bar"><div class="impact-fill" style="width:74%"></div></div>
           <div style="font-size:11px;color:var(--amber);font-weight:600">74%</div>
@@ -721,7 +721,7 @@ html,body{height:100%;margin:0;padding:0}
     </div>
     <div class="idx-suggestion" style="border-left-color:var(--blue)">
       <div class="idx-header">
-        <div class="idx-title">fathom.environment</div>
+        <div class="idx-title">pulsedb.environment</div>
         <div class="idx-impact">
           <div class="impact-bar"><div class="impact-fill" style="width:52%"></div></div>
           <div style="font-size:11px;color:var(--blue);font-weight:600">52%</div>
@@ -792,7 +792,7 @@ html,body{height:100%;margin:0;padding:0}
       <div class="chart-wrap h260"><canvas id="anomaly-chart"></canvas></div>
     </div>
     <div class="sec-title">Detected anomalies</div>
-    <div class="anomaly-alert"><div class="anomaly-icon">🔴</div><div><div class="anomaly-title">Latency spike — 14× baseline</div><div class="anomaly-desc">fathom.api_monitoring_payload · avg read jumped from 28ms to 392ms for 4 minutes</div><div class="anomaly-time">14 min ago · Duration: 4m · Auto-resolved</div></div></div>
+    <div class="anomaly-alert"><div class="anomaly-icon">🔴</div><div><div class="anomaly-title">Latency spike — 14× baseline</div><div class="anomaly-desc">pulsedb.api_monitoring_payload · avg read jumped from 28ms to 392ms for 4 minutes</div><div class="anomaly-time">14 min ago · Duration: 4m · Auto-resolved</div></div></div>
     <div class="anomaly-alert"><div class="anomaly-icon">🔴</div><div><div class="anomaly-title">Connection surge</div><div class="anomaly-desc">Connections jumped from 412 to 749 (82% of max) — possible connection leak</div><div class="anomaly-time">1h 22min ago · Duration: 12m</div></div></div>
     <div class="anomaly-alert" style="background:rgba(255,181,71,.07);border-color:rgba(255,181,71,.2)"><div class="anomaly-icon">⚠</div><div><div class="anomaly-title" style="color:var(--amber)">Replication lag increase</div><div class="anomaly-desc">Secondary mongo-03 lag climbed from 1.1s to 8.4s — primary under high write load</div><div class="anomaly-time">3h ago · Duration: 22m · Resolved</div></div></div>
     <div class="anomaly-alert" style="background:rgba(255,181,71,.07);border-color:rgba(255,181,71,.2)"><div class="anomaly-icon">⚠</div><div><div class="anomaly-title" style="color:var(--amber)">Cache dirty ratio elevated</div><div class="anomaly-desc">WiredTiger dirty cache hit 34% (baseline: 8%) — eviction pressure detected</div><div class="anomaly-time">6h ago · Duration: 8m · Resolved</div></div></div>
@@ -879,12 +879,12 @@ html,body{height:100%;margin:0;padding:0}
   <!-- ═══════ SCHEMA ANALYZER ═══════ -->
   <div class="page" id="page-schema-page">
     <div style="display:flex;gap:8px;margin-bottom:14px">
-      <input type="text" value="fathom.api_monitoring_payload" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">
+      <input type="text" value="pulsedb.api_monitoring_payload" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12.5px;font-family:inherit;outline:none">
       <button class="btn btn-green">Analyze schema (1000 docs)</button>
     </div>
     <div class="grid-2" style="align-items:start">
       <div class="card">
-        <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Field analysis — fathom.api_monitoring_payload</div>
+        <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Field analysis — pulsedb.api_monitoring_payload</div>
         <div id="schema-fields"></div>
       </div>
       <div>
@@ -913,10 +913,10 @@ html,body{height:100%;margin:0;padding:0}
       <textarea id="nl-input" style="height:70px;margin-bottom:10px" placeholder="e.g. Find all API errors in the last 7 days for project abc123, grouped by endpoint, sorted by error count descending"></textarea>
       <div style="display:flex;gap:8px;align-items:center">
         <select style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
-          <option>fathom.api_monitoring_payload</option>
-          <option>fathom.user</option>
-          <option>fathom.project</option>
-          <option>fathom.organization</option>
+          <option>pulsedb.api_monitoring_payload</option>
+          <option>pulsedb.user</option>
+          <option>pulsedb.project</option>
+          <option>pulsedb.organization</option>
         </select>
         <button class="btn btn-green" onclick="runNLQuery()">✨ Generate query</button>
         <div class="nl-loading" id="nl-loading"><div class="spinner"></div>Generating with Claude AI...</div>
@@ -1038,7 +1038,7 @@ html,body{height:100%;margin:0;padding:0}
           <div style="font-size:12.5px;color:var(--text2)">Drop JSON / CSV file here</div>
           <div style="font-size:11px;color:var(--text3);margin-top:4px">or click to browse</div>
         </div>
-        <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Target collection</div><input type="text" value="fathom.api_monitoring_payload"></div>
+        <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Target collection</div><input type="text" value="pulsedb.api_monitoring_payload"></div>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked> Validate schema</label>
           <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox"> Upsert on _id</label>
@@ -1049,7 +1049,7 @@ html,body{height:100%;margin:0;padding:0}
         <div style="font-size:13px;font-weight:600;margin-bottom:12px">Export data</div>
         <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Collection</div>
           <select style="width:100%;padding:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
-            <option>fathom.api_monitoring_payload</option><option>fathom.user</option><option>fathom.project</option>
+            <option>pulsedb.api_monitoring_payload</option><option>pulsedb.user</option><option>pulsedb.project</option>
           </select>
         </div>
         <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Filter query (optional)</div><input type="text" placeholder='{ "status": "error" }'></div>
@@ -1062,7 +1062,7 @@ html,body{height:100%;margin:0;padding:0}
         </div>
         <div style="margin-bottom:10px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Limit</div><input type="text" value="10000"></div>
         <button class="btn btn-blue" style="width:100%">↓ Export</button>
-        <div style="margin-top:12px;font-size:11px;color:var(--text3)">Last export: fathom.user — 82K docs — 2h ago (JSON, 24 MB)</div>
+        <div style="margin-top:12px;font-size:11px;color:var(--text3)">Last export: pulsedb.user — 82K docs — 2h ago (JSON, 24 MB)</div>
       </div>
     </div>
   </div>
@@ -1074,7 +1074,7 @@ html,body{height:100%;margin:0;padding:0}
         <div class="card" style="margin-bottom:12px">
           <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Estimate query cost before running</div>
           <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Collection</div>
-            <input type="text" value="fathom.api_monitoring_payload">
+            <input type="text" value="pulsedb.api_monitoring_payload">
           </div>
           <div style="margin-bottom:10px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Query filter</div>
             <textarea style="height:65px">{ "status": "error", "ts": { "$gte": ISODate("2026-03-16") } }</textarea>
@@ -1236,8 +1236,8 @@ html,body{height:100%;margin:0;padding:0}
       <div>
         <div class="card" style="margin-bottom:10px">
           <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Connection string</div>
-          <div style="font-family:'SF Mono',monospace;font-size:11px;background:var(--bg3);padding:10px;border-radius:6px;color:var(--blue);word-break:break-all;line-height:1.6">mongodb://admin:***@localhost:27017/fathom?authSource=admin&replicaSet=rs0&readPreference=primaryPreferred</div>
-          <button class="btn" style="margin-top:8px;font-size:11px" onclick="navigator.clipboard?.writeText('mongodb://admin:***@localhost:27017/fathom');toast('Copied')">📋 Copy (masked)</button>
+          <div style="font-family:'SF Mono',monospace;font-size:11px;background:var(--bg3);padding:10px;border-radius:6px;color:var(--blue);word-break:break-all;line-height:1.6">mongodb://admin:***@localhost:27017/pulsedb?authSource=admin&replicaSet=rs0&readPreference=primaryPreferred</div>
+          <button class="btn" style="margin-top:8px;font-size:11px" onclick="navigator.clipboard?.writeText('mongodb://admin:***@localhost:27017/pulsedb');toast('Copied')">📋 Copy (masked)</button>
         </div>
         <div class="card">
           <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Cluster nodes</div>
@@ -1316,7 +1316,7 @@ html,body{height:100%;margin:0;padding:0}
       <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">All databases</div>
       <table><thead><tr><th>Database</th><th>Collections</th><th>Data size</th><th>Index size</th><th>Storage size</th><th>Indexes</th><th>Actions</th></tr></thead>
       <tbody>
-        <tr><td style="font-weight:500;color:var(--blue)">fathom</td><td>8</td><td>17.2 GB</td><td>1.6 GB</td><td>6.8 GB</td><td>34</td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="exploreDB(this)">Explore</button></td></tr>
+        <tr><td style="font-weight:500;color:var(--blue)">pulsedb</td><td>8</td><td>17.2 GB</td><td>1.6 GB</td><td>6.8 GB</td><td>34</td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="exploreDB(this)">Explore</button></td></tr>
         <tr><td style="font-weight:500;color:var(--blue)">admin</td><td>3</td><td>640 KB</td><td>48 KB</td><td>248 KB</td><td>3</td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="exploreDB(this)">Explore</button></td></tr>
         <tr><td style="font-weight:500;color:var(--blue)">config</td><td>7</td><td>280 KB</td><td>80 KB</td><td>196 KB</td><td>12</td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="exploreDB(this)">Explore</button></td></tr>
         <tr><td style="font-weight:500;color:var(--blue)">local</td><td>4</td><td>1.1 GB</td><td>84 KB</td><td>420 MB</td><td>4</td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="exploreDB(this)">Explore</button></td></tr>
@@ -1325,7 +1325,7 @@ html,body{height:100%;margin:0;padding:0}
       </tbody></table>
     </div>
     <div class="card" style="margin-top:12px">
-      <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Collections in fathom</div>
+      <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Collections in pulsedb</div>
       <table><thead><tr><th>Collection</th><th>Documents</th><th>Avg doc size</th><th>Data size</th><th>Index size</th><th>Capped</th></tr></thead>
       <tbody>
         <tr><td class="mono">api_monitoring_payload</td><td>4,200,000</td><td>4.2 KB</td><td>12.1 GB</td><td>840 MB</td><td>No</td></tr>
@@ -1449,12 +1449,12 @@ html,body{height:100%;margin:0;padding:0}
       <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Top slow queries</div>
       <table><thead><tr><th>Namespace</th><th>Avg ms</th><th>Max ms</th><th>Count</th><th>Plan</th><th>Scanned</th><th>Returned</th></tr></thead>
       <tbody>
-        <tr><td class="mono">fathom.api_monitoring_payload</td><td style="color:var(--red)">284</td><td style="color:var(--red)">4,200</td><td>38</td><td><span class="badge badge-red">COLLSCAN</span></td><td>2.4M</td><td>312</td></tr>
-        <tr><td class="mono">fathom.user</td><td style="color:var(--amber)">142</td><td>840</td><td>12</td><td><span class="badge badge-amber">IXSCAN+FETCH</span></td><td>82,000</td><td>1,200</td></tr>
-        <tr><td class="mono">fathom.project</td><td>88</td><td>320</td><td>8</td><td><span class="badge badge-green">IXSCAN</span></td><td>1,840</td><td>240</td></tr>
-        <tr><td class="mono">fathom.audit_log</td><td>210</td><td>1,840</td><td>14</td><td><span class="badge badge-red">COLLSCAN</span></td><td>1.8M</td><td>4,200</td></tr>
-        <tr><td class="mono">fathom.environment</td><td>72</td><td>420</td><td>5</td><td><span class="badge badge-green">IXSCAN</span></td><td>48,000</td><td>1,800</td></tr>
-        <tr><td class="mono">fathom.organization</td><td>118</td><td>680</td><td>3</td><td><span class="badge badge-amber">IXSCAN+SORT</span></td><td>3,400</td><td>3,400</td></tr>
+        <tr><td class="mono">pulsedb.api_monitoring_payload</td><td style="color:var(--red)">284</td><td style="color:var(--red)">4,200</td><td>38</td><td><span class="badge badge-red">COLLSCAN</span></td><td>2.4M</td><td>312</td></tr>
+        <tr><td class="mono">pulsedb.user</td><td style="color:var(--amber)">142</td><td>840</td><td>12</td><td><span class="badge badge-amber">IXSCAN+FETCH</span></td><td>82,000</td><td>1,200</td></tr>
+        <tr><td class="mono">pulsedb.project</td><td>88</td><td>320</td><td>8</td><td><span class="badge badge-green">IXSCAN</span></td><td>1,840</td><td>240</td></tr>
+        <tr><td class="mono">pulsedb.audit_log</td><td>210</td><td>1,840</td><td>14</td><td><span class="badge badge-red">COLLSCAN</span></td><td>1.8M</td><td>4,200</td></tr>
+        <tr><td class="mono">pulsedb.environment</td><td>72</td><td>420</td><td>5</td><td><span class="badge badge-green">IXSCAN</span></td><td>48,000</td><td>1,800</td></tr>
+        <tr><td class="mono">pulsedb.organization</td><td>118</td><td>680</td><td>3</td><td><span class="badge badge-amber">IXSCAN+SORT</span></td><td>3,400</td><td>3,400</td></tr>
       </tbody></table>
     </div>
   </div>
@@ -1479,12 +1479,12 @@ html,body{height:100%;margin:0;padding:0}
       <div style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.005em">Recent profile entries (system.profile)</div>
       <table><thead><tr><th>ts</th><th>op</th><th>ns</th><th>millis</th><th>docsExamined</th><th>keysExamined</th><th>planSummary</th></tr></thead>
       <tbody>
-        <tr><td style="font-size:10px;color:var(--text3)">23:14:08.421</td><td><span class="badge badge-blue">query</span></td><td class="mono">fathom.api_monitoring_payload</td><td style="color:var(--red)">284</td><td>2,400,000</td><td>0</td><td><span class="badge badge-red">COLLSCAN</span></td></tr>
-        <tr><td style="font-size:10px;color:var(--text3)">23:14:05.102</td><td><span class="badge badge-amber">update</span></td><td class="mono">fathom.user</td><td style="color:var(--amber)">142</td><td>82,400</td><td>82,400</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
-        <tr><td style="font-size:10px;color:var(--text3)">23:14:01.844</td><td><span class="badge badge-blue">query</span></td><td class="mono">fathom.audit_log</td><td style="color:var(--red)">210</td><td>1,800,000</td><td>0</td><td><span class="badge badge-red">COLLSCAN</span></td></tr>
-        <tr><td style="font-size:10px;color:var(--text3)">23:13:58.301</td><td><span class="badge badge-blue">query</span></td><td class="mono">fathom.project</td><td>88</td><td>1,840</td><td>1,840</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
-        <tr><td style="font-size:10px;color:var(--text3)">23:13:52.018</td><td><span class="badge badge-green">insert</span></td><td class="mono">fathom.api_monitoring_payload</td><td>108</td><td>0</td><td>0</td><td>INSERT</td></tr>
-        <tr><td style="font-size:10px;color:var(--text3)">23:13:48.774</td><td><span class="badge badge-blue">query</span></td><td class="mono">fathom.environment</td><td>72</td><td>48,000</td><td>48,000</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:14:08.421</td><td><span class="badge badge-blue">query</span></td><td class="mono">pulsedb.api_monitoring_payload</td><td style="color:var(--red)">284</td><td>2,400,000</td><td>0</td><td><span class="badge badge-red">COLLSCAN</span></td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:14:05.102</td><td><span class="badge badge-amber">update</span></td><td class="mono">pulsedb.user</td><td style="color:var(--amber)">142</td><td>82,400</td><td>82,400</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:14:01.844</td><td><span class="badge badge-blue">query</span></td><td class="mono">pulsedb.audit_log</td><td style="color:var(--red)">210</td><td>1,800,000</td><td>0</td><td><span class="badge badge-red">COLLSCAN</span></td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:13:58.301</td><td><span class="badge badge-blue">query</span></td><td class="mono">pulsedb.project</td><td>88</td><td>1,840</td><td>1,840</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:13:52.018</td><td><span class="badge badge-green">insert</span></td><td class="mono">pulsedb.api_monitoring_payload</td><td>108</td><td>0</td><td>0</td><td>INSERT</td></tr>
+        <tr><td style="font-size:10px;color:var(--text3)">23:13:48.774</td><td><span class="badge badge-blue">query</span></td><td class="mono">pulsedb.environment</td><td>72</td><td>48,000</td><td>48,000</td><td><span class="badge badge-green">IXSCAN</span></td></tr>
       </tbody></table>
     </div>
   </div>
@@ -1508,7 +1508,7 @@ html,body{height:100%;margin:0;padding:0}
           <tr><td>Database read</td><td>1,980,400</td><td>880</td><td><span class="badge badge-amber">0.04%</span></td></tr>
           <tr><td>Collection write</td><td>840,100</td><td>3,200</td><td><span class="badge badge-red">0.38%</span></td></tr>
         </tbody></table>
-        <div style="margin-top:10px;padding:8px 12px;background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2);border-radius:6px;font-size:11.5px;color:var(--amber)">⚠ Collection-level write lock wait 0.38% — monitor for growth. May indicate hot collection contention on fathom.api_monitoring_payload.</div>
+        <div style="margin-top:10px;padding:8px 12px;background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.2);border-radius:6px;font-size:11.5px;color:var(--amber)">⚠ Collection-level write lock wait 0.38% — monitor for growth. May indicate hot collection contention on pulsedb.api_monitoring_payload.</div>
       </div>
     </div>
   </div>
@@ -1516,7 +1516,7 @@ html,body{height:100%;margin:0;padding:0}
   <!-- ═══════ COLLECTION STATS ═══════ -->
   <div class="page" id="pg-collstats">
     <div class="grid-4" style="margin-bottom:14px">
-      <div class="kpi"><div class="lbl">Collections</div><div class="val">8</div><div class="sub">in fathom DB</div></div>
+      <div class="kpi"><div class="lbl">Collections</div><div class="val">8</div><div class="sub">in pulsedb DB</div></div>
       <div class="kpi"><div class="lbl">Total docs</div><div class="val">6.4M</div></div>
       <div class="kpi"><div class="lbl">Total data</div><div class="val">17.2 GB</div></div>
       <div class="kpi"><div class="lbl">Total indexes</div><div class="val">34</div></div>
@@ -1619,7 +1619,7 @@ html,body{height:100%;margin:0;padding:0}
   <div class="page" id="pg-doceditor">
     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
       <select style="padding:7px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
-        <option>fathom.api_monitoring_payload</option><option>fathom.user</option><option>fathom.project</option><option>fathom.organization</option>
+        <option>pulsedb.api_monitoring_payload</option><option>pulsedb.user</option><option>pulsedb.project</option><option>pulsedb.organization</option>
       </select>
       <input type="text" placeholder='{ "status": "error" }' style="flex:1;padding:7px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
       <button class="btn btn-green">Find</button>
@@ -1816,12 +1816,12 @@ html,body{height:100%;margin:0;padding:0}
       <table><thead><tr><th>Username</th><th>Role</th><th>Auth DB</th><th>Last login</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         <tr><td style="font-weight:500">admin</td><td><span class="badge badge-red">root</span></td><td class="mono">admin</td><td>10 min ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
-        <tr><td style="font-weight:500">fathom_app</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">fathom</td><td>2 min ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
+        <tr><td style="font-weight:500">pulsedb_app</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">pulsedb</td><td>2 min ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
         <tr><td style="font-weight:500">monitoring</td><td><span class="badge badge-blue">read</span></td><td class="mono">admin</td><td>30 sec ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
         <tr><td style="font-weight:500">backup_agent</td><td><span class="badge badge-purple">backup</span></td><td class="mono">admin</td><td>2h ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
-        <tr><td style="font-weight:500">dev_dilip</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">fathom</td><td>1h ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
-        <tr><td style="font-weight:500">readonly_user</td><td><span class="badge badge-blue">read</span></td><td class="mono">fathom</td><td>3d ago</td><td><span class="badge badge-gray">Idle</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
-        <tr><td style="font-weight:500">old_service</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">fathom</td><td>42d ago</td><td><span class="badge badge-red">Inactive</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px;color:var(--red)" onclick="revokeUser(this)">Revoke</button></td></tr>
+        <tr><td style="font-weight:500">dev_dilip</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">pulsedb</td><td>1h ago</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
+        <tr><td style="font-weight:500">readonly_user</td><td><span class="badge badge-blue">read</span></td><td class="mono">pulsedb</td><td>3d ago</td><td><span class="badge badge-gray">Idle</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td></tr>
+        <tr><td style="font-weight:500">old_service</td><td><span class="badge badge-amber">readWrite</span></td><td class="mono">pulsedb</td><td>42d ago</td><td><span class="badge badge-red">Inactive</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px;color:var(--red)" onclick="revokeUser(this)">Revoke</button></td></tr>
       </tbody></table>
     </div>
     <div class="card" style="margin-top:12px">
@@ -1829,8 +1829,8 @@ html,body{height:100%;margin:0;padding:0}
       <table><thead><tr><th>Role</th><th>Database</th><th>Privileges</th><th>Assigned to</th></tr></thead>
       <tbody>
         <tr><td class="mono">root</td><td class="mono">admin</td><td>All privileges</td><td>1 user</td></tr>
-        <tr><td class="mono">readWrite</td><td class="mono">fathom</td><td>read, insert, update, delete</td><td>3 users</td></tr>
-        <tr><td class="mono">read</td><td class="mono">fathom</td><td>find, aggregate, listCollections</td><td>2 users</td></tr>
+        <tr><td class="mono">readWrite</td><td class="mono">pulsedb</td><td>read, insert, update, delete</td><td>3 users</td></tr>
+        <tr><td class="mono">read</td><td class="mono">pulsedb</td><td>find, aggregate, listCollections</td><td>2 users</td></tr>
         <tr><td class="mono">backup</td><td class="mono">admin</td><td>mongodump, fsync, listDatabases</td><td>1 user</td></tr>
         <tr><td class="mono">monitoring</td><td class="mono">admin</td><td>serverStatus, replSetGetStatus, dbStats</td><td>1 user</td></tr>
       </tbody></table>
@@ -1899,7 +1899,7 @@ LIMIT 10</textarea>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <select style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--font);outline:none">
-            <option>fathom.api_monitoring_payload</option><option>fathom.user</option><option>fathom.project</option>
+            <option>pulsedb.api_monitoring_payload</option><option>pulsedb.user</option><option>pulsedb.project</option>
           </select>
           <button class="btn btn-green" onclick="translateSQL()">⟹ Translate to MongoDB</button>
         </div>
@@ -1934,11 +1934,11 @@ LIMIT 10</textarea>
   <div class="page" id="pg-schema-compare">
     <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
       <select id="sc-left" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--font);outline:none">
-        <option>fathom.api_monitoring_payload (Local Dev)</option><option>fathom.user (Local Dev)</option>
+        <option>pulsedb.api_monitoring_payload (Local Dev)</option><option>pulsedb.user (Local Dev)</option>
       </select>
       <div style="font-size:12px;color:var(--text3);font-weight:600">⇔</div>
       <select id="sc-right" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--font);outline:none">
-        <option>fathom.api_monitoring_payload (Production)</option><option>fathom.user (Production)</option>
+        <option>pulsedb.api_monitoring_payload (Production)</option><option>pulsedb.user (Production)</option>
       </select>
       <button class="btn btn-green" onclick="runSchemaCompare()">Compare schemas</button>
     </div>
@@ -1968,7 +1968,7 @@ LIMIT 10</textarea>
           </div>
         </div>
         <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Collection</div>
-          <input type="text" value="fathom.locations" id="geo-coll">
+          <input type="text" value="pulsedb.locations" id="geo-coll">
         </div>
         <div style="margin-bottom:8px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Center point (lng, lat)</div>
           <div style="display:flex;gap:6px">
@@ -2043,7 +2043,7 @@ LIMIT 10</textarea>
     <div class="card">
       <div class="card-title">MongoDB slow log → request correlation</div>
       <div style="font-size:11.5px;color:var(--text2);margin-bottom:10px;line-height:1.6">Paste a slow query log line to auto-match to app request IDs in your trace data.</div>
-      <textarea style="height:60px;font-family:var(--mono);font-size:11px" placeholder='{"t":{"$date":"2026-03-23T23:14:08.421Z"},"s":"I","c":"COMMAND","attr":{"durationMillis":284,"ns":"fathom.api_monitoring_payload"}}'>
+      <textarea style="height:60px;font-family:var(--mono);font-size:11px" placeholder='{"t":{"$date":"2026-03-23T23:14:08.421Z"},"s":"I","c":"COMMAND","attr":{"durationMillis":284,"ns":"pulsedb.api_monitoring_payload"}}'>
 </textarea>
       <button class="btn btn-green" style="margin-top:8px" onclick="correlateLog()">Correlate with traces</button>
       <div id="correlate-result" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
@@ -2623,11 +2623,11 @@ if(document.getElementById('rto-chart')){
 // ── ACTIVE OPERATIONS ─────────────────────────────────────────
 function refreshOps(){
   const ops=[
-    {id:12841,type:'query',ns:'fathom.api_monitoring_payload',ms:284,client:'10.0.1.42:52841',q:'{"status":"error"}'},
-    {id:12840,type:'insert',ns:'fathom.api_monitoring_payload',ms:12,client:'10.0.1.44:52210',q:'{"ts":ISODate(...)}'},
-    {id:12839,type:'query',ns:'fathom.user',ms:142,client:'10.0.1.42:52838',q:'{"email":"user@..."}'},
-    {id:12838,type:'update',ns:'fathom.project',ms:8,client:'10.0.2.18:41200',q:'{"_id":ObjectId(...)}'},
-    {id:12835,type:'query',ns:'fathom.environment',ms:18,client:'10.0.1.58:39881',q:'{"project_id":"..."}'},
+    {id:12841,type:'query',ns:'pulsedb.api_monitoring_payload',ms:284,client:'10.0.1.42:52841',q:'{"status":"error"}'},
+    {id:12840,type:'insert',ns:'pulsedb.api_monitoring_payload',ms:12,client:'10.0.1.44:52210',q:'{"ts":ISODate(...)}'},
+    {id:12839,type:'query',ns:'pulsedb.user',ms:142,client:'10.0.1.42:52838',q:'{"email":"user@..."}'},
+    {id:12838,type:'update',ns:'pulsedb.project',ms:8,client:'10.0.2.18:41200',q:'{"_id":ObjectId(...)}'},
+    {id:12835,type:'query',ns:'pulsedb.environment',ms:18,client:'10.0.1.58:39881',q:'{"project_id":"..."}'},
   ];
   document.getElementById('ao-body').innerHTML = ops.map(o=>`
     <tr>
@@ -2703,7 +2703,7 @@ if(dl){
 // ── AI HINTS ─────────────────────────────────────────────────
 const hints=[
   {icon:'🔴',sev:'CRITICAL',title:'Add compound index on api_monitoring_payload',body:'Detected 38 COLLSCAN queries/hour. Adding index { project_id: 1, status: 1, ts: -1 } will reduce avg latency from 284ms to ~4ms. Estimated 96% improvement.',cmd:'db.api_monitoring_payload.createIndex({ project_id: 1, status: 1, ts: -1 })'},
-  {icon:'🔴',sev:'CRITICAL',title:'Sort spill to disk on fathom.user',body:'3 queries exceeded sort memory (100MB). Add index on sort fields or increase allowDiskUseByDefault.',cmd:'db.user.createIndex({ org_id: 1, created_at: -1 })'},
+  {icon:'🔴',sev:'CRITICAL',title:'Sort spill to disk on pulsedb.user',body:'3 queries exceeded sort memory (100MB). Add index on sort fields or increase allowDiskUseByDefault.',cmd:'db.user.createIndex({ org_id: 1, created_at: -1 })'},
   {icon:'🟠',sev:'HIGH',title:'Drop 5 unused indexes',body:'5 indexes have 0 ops since last restart. They consume 502 MB and slow down every write. Review and drop candidates.',cmd:'db.api_monitoring_payload.dropIndex("status_1_createdAt_-1")'},
   {icon:'🟠',sev:'HIGH',title:'Increase oplog size',body:'Current oplog window is 48h but replication lag reached 8.4s recently. For safety, increase oplog to maintain 72h+ window.',cmd:'db.adminCommand({ replSetResizeOplog: 1, size: 4096 })'},
   {icon:'🟡',sev:'MEDIUM',title:'Enable compression on audit_log',body:'audit_log has 3.96 GB uncompressed. Enabling snappy compression could reduce to ~1.6 GB and improve I/O.',cmd:'// Requires collection rebuild with storageEngine option'},
@@ -2761,7 +2761,7 @@ if(document.getElementById('shard-bar')){
 // ── OPLOG TAIL ────────────────────────────────────────────────
 const oplogStream=document.getElementById('oplog-stream');
 const oplogOps=['insert','update','delete'];
-const oplogNs=['fathom.api_monitoring_payload','fathom.user','fathom.project','fathom.environment','fathom.audit_log'];
+const oplogNs=['pulsedb.api_monitoring_payload','pulsedb.user','pulsedb.project','pulsedb.environment','pulsedb.audit_log'];
 const oplogColors={insert:C.green,update:C.amber,delete:C.red};
 let oplogTick=0;
 function addOplogEntry(){
@@ -2804,14 +2804,14 @@ if(dashList){dashboards.forEach(d=>{
 // ── AUDIT LOG ─────────────────────────────────────────────────
 const auditBody=document.getElementById('audit-body');
 const auditEvents=[
-  {ts:'23:14:02',user:'fathom_app',action:'query',ns:'fathom.api_monitoring_payload',detail:'filter:{status:"error"}',ip:'10.0.1.42'},
-  {ts:'23:12:44',user:'dev_dilip',action:'createIndex',ns:'fathom.user',detail:'{ email: 1 }',ip:'10.0.1.58'},
-  {ts:'23:10:18',user:'admin',action:'dropIndex',ns:'fathom.api_monitoring_payload',detail:'legacy_meta_1',ip:'127.0.0.1'},
-  {ts:'22:58:03',user:'backup_agent',action:'mongodump',ns:'fathom.*',detail:'full backup initiated',ip:'10.0.2.18'},
+  {ts:'23:14:02',user:'pulsedb_app',action:'query',ns:'pulsedb.api_monitoring_payload',detail:'filter:{status:"error"}',ip:'10.0.1.42'},
+  {ts:'23:12:44',user:'dev_dilip',action:'createIndex',ns:'pulsedb.user',detail:'{ email: 1 }',ip:'10.0.1.58'},
+  {ts:'23:10:18',user:'admin',action:'dropIndex',ns:'pulsedb.api_monitoring_payload',detail:'legacy_meta_1',ip:'127.0.0.1'},
+  {ts:'22:58:03',user:'backup_agent',action:'mongodump',ns:'pulsedb.*',detail:'full backup initiated',ip:'10.0.2.18'},
   {ts:'22:41:20',user:'unknown',action:'authFailure',ns:'admin',detail:'SCRAM-SHA-256 failed',ip:'203.0.113.42'},
   {ts:'22:38:55',user:'unknown',action:'authFailure',ns:'admin',detail:'SCRAM-SHA-256 failed',ip:'203.0.113.42'},
-  {ts:'22:30:11',user:'fathom_app',action:'insert',ns:'fathom.audit_log',detail:'1,840 documents',ip:'10.0.1.44'},
-  {ts:'21:44:08',user:'dev_dilip',action:'collMod',ns:'fathom.sessions',detail:'expireAfterSeconds: 86400',ip:'10.0.1.58'},
+  {ts:'22:30:11',user:'pulsedb_app',action:'insert',ns:'pulsedb.audit_log',detail:'1,840 documents',ip:'10.0.1.44'},
+  {ts:'21:44:08',user:'dev_dilip',action:'collMod',ns:'pulsedb.sessions',detail:'expireAfterSeconds: 86400',ip:'10.0.1.58'},
 ];
 if(auditBody){auditEvents.forEach(e=>{
   const isBad=e.action.includes('Failure');
@@ -2959,7 +2959,7 @@ async function handleButtonByText(txt, btn) {
     '↺  Refresh data': () => refreshAll(),
     '↓  Export JSON': () => exportJSON(),
     '＋  Add cluster': () => addCluster(),
-    '📋 Copy (masked)': () => { navigator.clipboard?.writeText('mongodb://admin:***@localhost:27017/fathom?authSource=admin&replicaSet=rs0'); toast('Connection string copied to clipboard'); },
+    '📋 Copy (masked)': () => { navigator.clipboard?.writeText('mongodb://admin:***@localhost:27017/pulsedb?authSource=admin&replicaSet=rs0'); toast('Connection string copied to clipboard'); },
     '📋 Copy': () => { const t = document.getElementById('nl-output'); if(t) { navigator.clipboard?.writeText(t.textContent); toast('Query copied'); } },
     '▶ Explain query': () => runExplain(),
     '▶ Run query': () => runQueryFromNL(),
@@ -3183,7 +3183,7 @@ function insertDoc() {
     'Insert document',
     'Insert a new document into the selected collection.',
     `<div class="modal-label">Collection</div>
-     <select class="modal-input" style="margin-bottom:10px;padding:7px 10px"><option>fathom.api_monitoring_payload</option><option>fathom.user</option><option>fathom.project</option></select>
+     <select class="modal-input" style="margin-bottom:10px;padding:7px 10px"><option>pulsedb.api_monitoring_payload</option><option>pulsedb.user</option><option>pulsedb.project</option></select>
      <div class="modal-label">Document (JSON)</div>
      <textarea class="modal-input" id="insert-doc" style="height:140px;font-family:monospace;font-size:11px">{
   "project_id": "proj_new",
@@ -3286,7 +3286,7 @@ async function runImport() {
   await simulateDelay(400);
   showModal(
     'Import data',
-    'Simulating file import into fathom.api_monitoring_payload',
+    'Simulating file import into pulsedb.api_monitoring_payload',
     `<div class="op-log" id="import-log"></div>
      <div class="progress-bar"><div class="progress-fill" id="import-bar" style="width:0%"></div></div>`,
     `<button class="btn" onclick="closeModal()">Close</button>`
@@ -3310,7 +3310,7 @@ async function runExport() {
   await simulateDelay(1200);
   const data = [{_id:'64a2f3b8...',project_id:'proj_8a2f',status:'error',duration_ms:284},{_id:'64a2f3c1...',project_id:'proj_3c1e',status:'success',duration_ms:42}];
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'fathom_export.json'});
+  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'pulsedb_export.json'});
   a.click();
   toast('Exported 2 documents as JSON', 'success');
 }
@@ -3411,7 +3411,7 @@ function addUser() {
      </div>
      <div style="margin-bottom:10px">
        <div class="modal-label">Database</div>
-       <select class="modal-input" style="padding:7px 10px"><option>fathom</option><option>admin</option><option>all databases</option></select>
+       <select class="modal-input" style="padding:7px 10px"><option>pulsedb</option><option>admin</option><option>all databases</option></select>
      </div>
      <div style="margin-bottom:10px">
        <div class="modal-label">Role</div>
@@ -3430,7 +3430,7 @@ window.confirmAddUser = async function() {
   const tb = document.querySelector('#pg-users table tbody');
   if(tb){
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="font-weight:500">${u}</td><td><span class="badge badge-blue">read</span></td><td style="font-family:monospace;font-size:11px;color:#4f8ef7">fathom</td><td>just now</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td>`;
+    tr.innerHTML=`<td style="font-weight:500">${u}</td><td><span class="badge badge-blue">read</span></td><td style="font-family:monospace;font-size:11px;color:#4f8ef7">pulsedb</td><td>just now</td><td><span class="badge badge-green">Active</span></td><td><button class="btn" style="font-size:10px;padding:3px 10px" onclick="editUser(this)">Edit</button></td>`;
     tb.prepend(tr);
   }
 };
@@ -3885,7 +3885,7 @@ function buildGeoQuery() {
   const lng = document.getElementById('geo-lng')?.value || '-13.6729';
   const lat = document.getElementById('geo-lat')?.value || '9.6412';
   const dist = document.getElementById('geo-dist')?.value || '5000';
-  const coll = document.getElementById('geo-coll')?.value || 'fathom.locations';
+  const coll = document.getElementById('geo-coll')?.value || 'pulsedb.locations';
   const out = document.getElementById('geo-output');
   if(!out) return;
   const queries = {
@@ -4110,7 +4110,7 @@ async function correlateLog() {
   result.textContent = 'Correlating...';
   result.style.color = 'var(--text3)';
   await new Promise(r => setTimeout(r, 800));
-  result.innerHTML = '<div style="padding:10px 12px;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.2);border-radius:6px"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:4px">✓ Matched to request req_8a2f41</div><div style="font-size:11px;color:var(--text2)">ns: fathom.api_monitoring_payload · 284ms · COLLSCAN · User: fathom_app · Client: 10.0.1.42:52841</div></div>';
+  result.innerHTML = '<div style="padding:10px 12px;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.2);border-radius:6px"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:4px">✓ Matched to request req_8a2f41</div><div style="font-size:11px;color:var(--text2)">ns: pulsedb.api_monitoring_payload · 284ms · COLLSCAN · User: pulsedb_app · Client: 10.0.1.42:52841</div></div>';
   toast('Log entry correlated to trace req_8a2f41', 'success');
 }
 

@@ -290,8 +290,8 @@ const BQ_DEMO_DATA = {
         },
     ],
     datasets: [
-        { name: 'fathom_prod', location: 'US', tables: 42, size_gb: 14_200, last_modified_days: 0 },
-        { name: 'fathom_staging', location: 'US', tables: 18, size_gb: 2_420, last_modified_days: 0 },
+        { name: 'pulsedb_prod', location: 'US', tables: 42, size_gb: 14_200, last_modified_days: 0 },
+        { name: 'pulsedb_staging', location: 'US', tables: 18, size_gb: 2_420, last_modified_days: 0 },
         { name: 'marketing_eu', location: 'EU', tables: 12, size_gb: 1_020, last_modified_days: 2 },
         { name: 'ml_features', location: 'US', tables: 8, size_gb: 482, last_modified_days: 0 },
     ],
@@ -897,7 +897,7 @@ LIMIT 1000`,
             <Panel title="Dry-Run Cost Estimator" icon={Calculator} accentColor={BQ_BLUE}>
                 <div style={{ padding: 16 }}>
                     <div style={{ fontSize: 12, color: THEME.textMuted, marginBottom: 8 }}>
-                        Paste a BigQuery SQL query. FATHOM submits it with <code>dryRun: true</code>, reads the returned{' '}
+                        Paste a BigQuery SQL query. PulseDB submits it with <code>dryRun: true</code>, reads the returned{' '}
                         <code>totalBytesProcessed</code> + <code>referencedTables</code>, and computes cost at the
                         on-demand rate ($5 / TB).
                     </div>

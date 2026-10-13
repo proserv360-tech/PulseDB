@@ -1,5 +1,5 @@
 /**
- * FATHOM — Client-side Encryption Utility
+ * PulseDB — Client-side Encryption Utility
  *
  * Uses the Web Crypto API (RSA-OAEP) to encrypt sensitive connection fields
  * BEFORE sending them to the backend. The backend returns its RSA public key
@@ -90,7 +90,7 @@ export async function encryptConnectionFields(apiBase, authToken, formData) {
     // If Web Crypto is not available (e.g. non-HTTPS localhost), skip encryption.
     // The backend will still accept plaintext and encrypt with AES for storage.
     if (!crypto?.subtle) {
-        console.warn('[FATHOM] Web Crypto unavailable — passwords sent over HTTPS only');
+        console.warn('[PulseDB] Web Crypto unavailable — passwords sent over HTTPS only');
         return formData;
     }
 
@@ -108,7 +108,7 @@ export async function encryptConnectionFields(apiBase, authToken, formData) {
         return encrypted;
     } catch (err) {
         // If handshake fails (e.g. old backend), fall back gracefully
-        console.warn('[FATHOM] Client-side encryption unavailable:', err.message);
+        console.warn('[PulseDB] Client-side encryption unavailable:', err.message);
         return formData;
     }
 }

@@ -188,7 +188,7 @@ function DBPreviewPanel() {
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: THEME.warning }} />
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#27c93f' }} />
                 <span style={{ marginLeft: 8, fontSize: 11, color: THEME.textDim, letterSpacing: 0.5 }}>
-                    fathom — production-fleet
+                    pulsedb — production-fleet
                 </span>
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div
@@ -361,7 +361,7 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
         if (onEnterDemo) {
             onEnterDemo();
         } else {
-            window.dispatchEvent(new CustomEvent('fathom:enter-demo'));
+            window.dispatchEvent(new CustomEvent('pulsedb:enter-demo'));
         }
     };
 
@@ -402,12 +402,12 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
         { label: 'Queries analyzed', value: 4200000000, suffix: '+' },
         { label: 'Incidents prevented', value: 18400, suffix: '+' },
         { label: 'Avg latency reduction', value: 60, suffix: '%' },
-        { label: 'Teams using Fathom', value: 2100, suffix: '+' },
+        { label: 'Teams using PulseDB', value: 2100, suffix: '+' },
     ];
 
     // Fonts injection
     useEffect(() => {
-        const id = 'fathom-landing-fonts';
+        const id = 'pulsedb-landing-fonts';
         if (!document.getElementById(id)) {
             const link = document.createElement('link');
             link.id = id;
@@ -478,7 +478,7 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
                     >
                         <Database size={14} color="#fff" />
                     </div>
-                    <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 2, color: THEME.textMain }}>FATHOM</span>
+                    <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 2, color: THEME.textMain }}>PulseDB</span>
                 </div>
 
                 {/* Nav links */}
@@ -832,7 +832,7 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
                     >
                         <Database size={11} color="#fff" />
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: THEME.textDim }}>FATHOM</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: THEME.textDim }}>PulseDB</span>
                 </div>
                 <div style={{ display: 'flex', gap: 24 }}>
                     {['Privacy', 'Terms', 'Docs', 'Status', 'GitHub'].map((l) => (
@@ -850,7 +850,7 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
                         </span>
                     ))}
                 </div>
-                <span style={{ fontSize: 11, color: THEME.textDim }}>© 2024 Fathom. Built for engineers.</span>
+                <span style={{ fontSize: 11, color: THEME.textDim }}>© 2024 PulseDB. Built for engineers.</span>
             </footer>
         </div>
     );

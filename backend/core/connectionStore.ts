@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 
-// Persistence for saved connections (pgmonitoringtool.fathom_connections) and the in-memory cache.
+// Persistence for saved connections (pgmonitoringtool.pulsedb_connections) and the in-memory cache.
 // Extracted from server.ts.
 
 import { decrypt, encrypt, isEncrypted } from '../services/encryptionService.js';
@@ -8,12 +8,12 @@ import { log } from '../services/logger.js';
 import { pool } from './adminPool.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONNECTIONS — persisted in the app database (fathom_connections table)
+// CONNECTIONS — persisted in the app database (pulsedb_connections table)
 // Using the DB instead of a JSON file ensures data survives Vercel cold-starts,
 // is scoped per-user, and is never accidentally recreated after deletion.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Ensure the fathom_connections table exists (idempotent) */
+/** Ensure the pulsedb_connections table exists (idempotent) */
 export async function ensureConnectionsTable() {
     if (!pool) throw new Error('Admin database not configured');
     // 1. Guarantee the schema exists before touching any table inside it.
@@ -23,7 +23,7 @@ export async function ensureConnectionsTable() {
     //    when the users table hasn't been provisioned yet.  The FK is added as a
     //    separate best-effort step below so it never blocks table creation.
     await pool.query(`
-        CREATE TABLE IF NOT EXISTS pgmonitoringtool.fathom_connections (
+        CREATE TABLE IF NOT EXISTS pgmonitoringtool.pulsedb_connections (
             id          SERIAL      PRIMARY KEY,
             user_id     INTEGER,
             name        TEXT        NOT NULL,
@@ -51,7 +51,7 @@ export async function ensureConnectionsTable() {
 
     // 3. Best-effort: attach FK to users only when that table already exists.
     //    A missing users table (fresh DB, different init order) must never
-    //    prevent fathom_connections from being usable.
+    //    prevent pulsedb_connections from being usable.
     try {
         await pool.query(`
             DO $$ BEGIN
@@ -61,12 +61,12 @@ export async function ensureConnectionsTable() {
                 ) AND NOT EXISTS (
                     SELECT 1 FROM information_schema.table_constraints
                     WHERE table_schema   = 'pgmonitoringtool'
-                      AND table_name     = 'fathom_connections'
+                      AND table_name     = 'pulsedb_connections'
                       AND constraint_type = 'FOREIGN KEY'
-                      AND constraint_name = 'fathom_connections_user_id_fkey'
+                      AND constraint_name = 'pulsedb_connections_user_id_fkey'
                 ) THEN
-                    ALTER TABLE pgmonitoringtool.fathom_connections
-                        ADD CONSTRAINT fathom_connections_user_id_fkey
+                    ALTER TABLE pgmonitoringtool.pulsedb_connections
+                        ADD CONSTRAINT pulsedb_connections_user_id_fkey
                         FOREIGN KEY (user_id)
                         REFERENCES pgmonitoringtool.users(id)
                         ON DELETE CASCADE;
@@ -80,7 +80,7 @@ export async function ensureConnectionsTable() {
     // 4. Add db_type column if it doesn't exist (backward compatibility)
     try {
         await pool.query(`
-            ALTER TABLE pgmonitoringtool.fathom_connections
+            ALTER TABLE pgmonitoringtool.pulsedb_connections
             ADD COLUMN IF NOT EXISTS db_type TEXT NOT NULL DEFAULT 'postgresql'
         `);
     } catch {
@@ -150,7 +150,7 @@ export async function dbLoadConnections(userId, role) {
     // Always scope to the user's own connections — admins see all connections
     // only through the /api/admin/connections endpoint, not in their personal pool
     const { rows } = await pool.query(
-        'SELECT * FROM pgmonitoringtool.fathom_connections WHERE user_id = $1 ORDER BY id',
+        'SELECT * FROM pgmonitoringtool.pulsedb_connections WHERE user_id = $1 ORDER BY id',
         [userId],
     );
     return rows.map(rowToConn);
@@ -158,7 +158,7 @@ export async function dbLoadConnections(userId, role) {
 
 /** Admin-only: load ALL connections across all users (for admin panel) */
 async function dbLoadAllConnections() {
-    const { rows } = await pool.query('SELECT * FROM pgmonitoringtool.fathom_connections ORDER BY id');
+    const { rows } = await pool.query('SELECT * FROM pgmonitoringtool.pulsedb_connections ORDER BY id');
     return rows.map(rowToConn);
 }
 
@@ -172,7 +172,7 @@ export async function dbInsertConnection(conn) {
 
     const { rows } = await pool.query(
         `
-        INSERT INTO pgmonitoringtool.fathom_connections
+        INSERT INTO pgmonitoringtool.pulsedb_connections
             (user_id, name, host, port, db_name, username, password, ssl,
              ssh_enabled, ssh_host, ssh_port, ssh_user, ssh_auth_type,
              ssh_private_key, ssh_passphrase, ssh_password, is_default, status, last_tested, db_type)
@@ -218,7 +218,7 @@ export async function dbUpdateConnection(id, fields) {
 
     const { rows } = await pool.query(
         `
-        UPDATE pgmonitoringtool.fathom_connections SET
+        UPDATE pgmonitoringtool.pulsedb_connections SET
             name        = COALESCE($2, name),
             host        = COALESCE($3, host),
             port        = COALESCE($4, port),
@@ -271,7 +271,7 @@ export async function dbUpdateConnection(id, fields) {
 export async function dbDeleteConnection(id, userId) {
     // Safety: always scope delete by user_id to prevent cross-user deletion
     const result = await pool.query(
-        'DELETE FROM pgmonitoringtool.fathom_connections WHERE id = $1 AND user_id = $2 RETURNING id',
+        'DELETE FROM pgmonitoringtool.pulsedb_connections WHERE id = $1 AND user_id = $2 RETURNING id',
         [id, userId],
     );
     if (result.rowCount === 0) {
@@ -282,7 +282,7 @@ export async function dbDeleteConnection(id, userId) {
 /** Clear is_default for all connections belonging to a user, then set one */
 export async function dbSetDefault(userId, role, newDefaultId) {
     // Always scope by user_id — each user manages their own default connection
-    await pool.query('UPDATE pgmonitoringtool.fathom_connections SET is_default = (id = $1) WHERE user_id = $2', [
+    await pool.query('UPDATE pgmonitoringtool.pulsedb_connections SET is_default = (id = $1) WHERE user_id = $2', [
         newDefaultId,
         userId,
     ]);
@@ -296,7 +296,7 @@ let CONNECTIONS = [];
 export async function syncConnectionsCache() {
     if (!pool) return; // no admin DB — nothing to sync
     try {
-        const { rows } = await pool.query('SELECT * FROM pgmonitoringtool.fathom_connections ORDER BY id');
+        const { rows } = await pool.query('SELECT * FROM pgmonitoringtool.pulsedb_connections ORDER BY id');
         CONNECTIONS = rows.map(rowToConn);
     } catch {
         /* DB not reachable yet — leave cache as-is */

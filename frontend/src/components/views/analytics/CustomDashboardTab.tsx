@@ -627,10 +627,10 @@ export default function CustomDashboardTab() {
     useAdaptiveTheme();
     const [widgets, setWidgets] = useState(() => {
         try {
-            const saved = localStorage.getItem('fathom_custom_dashboards');
+            const saved = localStorage.getItem('pulsedb_custom_dashboards');
             if (saved) {
                 const dashboards = JSON.parse(saved);
-                const activeName = localStorage.getItem('fathom_active_dashboard');
+                const activeName = localStorage.getItem('pulsedb_active_dashboard');
                 const active = dashboards.find((d) => d.name === activeName);
                 return active ? active.widgets : [];
             }
@@ -715,8 +715,8 @@ export default function CustomDashboardTab() {
 
     const saveDashboard = () => {
         try {
-            const dashboards = localStorage.getItem('fathom_custom_dashboards')
-                ? JSON.parse(localStorage.getItem('fathom_custom_dashboards'))
+            const dashboards = localStorage.getItem('pulsedb_custom_dashboards')
+                ? JSON.parse(localStorage.getItem('pulsedb_custom_dashboards'))
                 : [];
 
             const existingIndex = dashboards.findIndex((d) => d.name === dashboardName);
@@ -728,8 +728,8 @@ export default function CustomDashboardTab() {
                 dashboards.push(dashboard);
             }
 
-            localStorage.setItem('fathom_custom_dashboards', JSON.stringify(dashboards));
-            localStorage.setItem('fathom_active_dashboard', dashboardName);
+            localStorage.setItem('pulsedb_custom_dashboards', JSON.stringify(dashboards));
+            localStorage.setItem('pulsedb_active_dashboard', dashboardName);
             alert('Dashboard saved successfully');
         } catch (e) {
             alert('Failed to save dashboard: ' + e.message);

@@ -2,11 +2,11 @@
 /**
  * services/copilotService.js
  * ──────────────────────────
- * Schema-aware SQL copilot for FATHOM.
+ * Schema-aware SQL copilot for PulseDB.
  *
  * Capabilities
  *   1. Generate SQL from natural language (NL → SQL) using a live schema
- *      snapshot of the MONITORED database (not the FATHOM control plane).
+ *      snapshot of the MONITORED database (not the PulseDB control plane).
  *   2. Explain a query plan in plain English and call out risky nodes.
  *   3. Draft incident RCA narratives from metric / alert / plan context.
  *
@@ -457,7 +457,7 @@ export async function* streamExplain(_ignoredPool, { plan, sql }) {
 // High-level calls
 // ─────────────────────────────────────────────────────────────────────────────
 const NL_TO_SQL_SYSTEM = `
-You are FATHOM's SQL copilot. Translate the user's question into a single
+You are PulseDB's SQL copilot. Translate the user's question into a single
 PostgreSQL SELECT statement using ONLY the tables and columns listed in the
 provided schema. Return ONLY the SQL — no backticks, no prose, no explanation.
 If the question cannot be answered from the schema, return a SQL comment
@@ -468,7 +468,7 @@ Use LIMIT 100 by default unless the user asks for something else.
 `.trim();
 
 const EXPLAIN_SYSTEM = `
-You are FATHOM's performance coach. Given a PostgreSQL EXPLAIN (ANALYZE, BUFFERS)
+You are PulseDB's performance coach. Given a PostgreSQL EXPLAIN (ANALYZE, BUFFERS)
 plan in JSON, write a short (<=6 bullet) review: (1) the dominant cost driver,
 (2) whether statistics look stale (rows vs actual), (3) the 1-2 highest-value
 fixes (indexes, predicate pushdown, rewrite), (4) a concrete next step. Keep
@@ -476,7 +476,7 @@ each bullet under 25 words. No marketing tone.
 `.trim();
 
 const RCA_SYSTEM = `
-You are FATHOM's incident writer. Given metric, alert, and plan context, draft
+You are PulseDB's incident writer. Given metric, alert, and plan context, draft
 a Root Cause Analysis note with these sections, each 2-3 sentences:
 Impact, Trigger, Root cause, Mitigation, Follow-ups. Be specific. If the data
 is insufficient, say so in that section.
@@ -543,12 +543,12 @@ export async function saveConversationTurn({ workspaceId, userId, kind, input, o
 // time-bounded retention is the second layer that limits exposure if a
 // regulated identifier slips through.
 //
-// Default: 30 days. Override via FATHOM_COPILOT_HISTORY_DAYS.
+// Default: 30 days. Override via PULSEDB_COPILOT_HISTORY_DAYS.
 // The cron is registered in server.js and runs once a day at 04:00 UTC.
 // User-initiated purges go through routes/copilotRoutes.js.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const COPILOT_HISTORY_MAX_AGE_DAYS = Math.max(1, Number(process.env.FATHOM_COPILOT_HISTORY_DAYS) || 30);
+export const COPILOT_HISTORY_MAX_AGE_DAYS = Math.max(1, Number(process.env.PULSEDB_COPILOT_HISTORY_DAYS) || 30);
 
 /**
  * Delete copilot_turns older than maxAgeDays. Returns the rowCount.

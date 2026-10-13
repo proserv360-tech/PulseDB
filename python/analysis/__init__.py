@@ -1,5 +1,5 @@
 """
-FATHOM Database Analysis Module
+PulseDB Database Analysis Module
 
 Provides analysis tools for SQL queries, table statistics, and performance metrics.
 """

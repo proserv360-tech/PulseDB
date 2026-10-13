@@ -54,7 +54,7 @@ const SEVERITY_EMOJI = {
  *     "webhookUrl": "https://hooks.slack.com/services/…",
  *     "template": {
  *       "header":   "{emoji}  {brand} — {severity}",
- *       "brand":    "FATHOM",
+ *       "brand":    "PulseDB",
  *       "fields":   ["component", "source", "id", "when"],
  *       "showMetadata": true,
  *       "colors":   { "critical": "#B91C1C" }
@@ -68,7 +68,7 @@ const SEVERITY_EMOJI = {
  * ──────────────────────────────────────────────────────────────────────────── */
 
 export const DEFAULT_TEMPLATE = {
-    brand: 'FATHOM',
+    brand: 'PulseDB',
     header: '{emoji}  {brand} — {severity}',
     title: '*{title}*',
     fallback: '{emoji} {brand} {severity}: {title}',

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  FATHOM — Control-plane migration: Neon → Supabase
-#  Dumps the FATHOM control-plane DB from Neon and restores it into Supabase.
+#  PulseDB — Control-plane migration: Neon → Supabase
+#  Dumps the PulseDB control-plane DB from Neon and restores it into Supabase.
 #  Both are PostgreSQL, so this is a straight logical dump/restore.
 #
 #  USAGE
@@ -10,7 +10,7 @@
 #    ./migrate-neon-to-supabase.sh
 #
 #  Optional env:
-#    DUMP_FILE   path for the intermediate dump (default: ./fathom_cp_dump.sql)
+#    DUMP_FILE   path for the intermediate dump (default: ./pulsedb_cp_dump.sql)
 #    DRY_RUN     "true" → dump only, do not restore
 #    NO_OWNER    "true" (default) → strip ownership/privilege so it restores
 #                clean under Supabase's 'postgres' role
@@ -22,12 +22,12 @@ set -euo pipefail
 
 : "${SOURCE_URL:?Set SOURCE_URL to the Neon connection string}"
 : "${TARGET_URL:?Set TARGET_URL to the Supabase connection string}"
-DUMP_FILE="${DUMP_FILE:-./fathom_cp_dump.dump}"
+DUMP_FILE="${DUMP_FILE:-./pulsedb_cp_dump.dump}"
 DRY_RUN="${DRY_RUN:-false}"
 NO_OWNER="${NO_OWNER:-true}"
 
-# FATHOM control-plane lives in the pgmonitoringtool schema plus a handful of
-# public.fathom_* tables. We dump the whole database (excluding nothing) so
+# PulseDB control-plane lives in the pgmonitoringtool schema plus a handful of
+# public.pulsedb_* tables. We dump the whole database (excluding nothing) so
 # nothing is missed; restore is additive into an empty Supabase DB.
 say() { printf '\033[36m[migrate]\033[0m %s\n' "$*"; }
 err() { printf '\033[31m[migrate] ERROR:\033[0m %s\n' "$*" >&2; }
@@ -75,7 +75,7 @@ say "Restoring into Supabase…"
 RESTORE_FLAGS=(--no-acl --dbname="$TARGET_URL" --verbose)
 [ "$NO_OWNER" = "true" ] && RESTORE_FLAGS+=(--no-owner)
 set +e
-pg_restore "${RESTORE_FLAGS[@]}" "$DUMP_FILE" 2> >(tee /tmp/fathom_restore.log >&2)
+pg_restore "${RESTORE_FLAGS[@]}" "$DUMP_FILE" 2> >(tee /tmp/pulsedb_restore.log >&2)
 RC=$?
 set -e
 # pg_restore exits non-zero on any ignorable warning; treat as soft unless the
@@ -83,7 +83,7 @@ set -e
 TBLS=$(psql "$TARGET_URL" -tAc \
   "SELECT count(*) FROM information_schema.tables WHERE table_schema='pgmonitoringtool'")
 if [ "${TBLS:-0}" -eq 0 ]; then
-  err "Restore failed — no tables in pgmonitoringtool on Supabase. See /tmp/fathom_restore.log"
+  err "Restore failed — no tables in pgmonitoringtool on Supabase. See /tmp/pulsedb_restore.log"
   exit 1
 fi
 say "Restore landed ${TBLS} tables in pgmonitoringtool (pg_restore rc=$RC, warnings tolerated)."

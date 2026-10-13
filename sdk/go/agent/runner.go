@@ -15,14 +15,14 @@ import (
 type Runner struct {
 	Cfg     Config
 	DB      *sql.DB
-	Forward Forwarder // injected — typically wraps fathom.Transport
+	Forward Forwarder // injected — typically wraps pulsedb.Transport
 
 	stopOnce sync.Once
 	stop     chan struct{}
 }
 
 // Forwarder is the agent's transport abstraction. The default
-// implementation in cmd/fathom-agent wraps fathom.Transport so this
+// implementation in cmd/pulsedb-agent wraps pulsedb.Transport so this
 // package stays free of SDK imports (and therefore easy to unit-test).
 type Forwarder interface {
 	SendWaitEvents(ctx context.Context, samples []any) error
@@ -70,7 +70,7 @@ func (r *Runner) Stop() {
 // never bring the runner down. A persistent failure surfaces in the
 // backend as a gap in the wait_event_rollups_5m table.
 func (r *Runner) collectWaitEvents(ctx context.Context) {
-	// Stub — wired in cmd/fathom-agent where the collector type is in
+	// Stub — wired in cmd/pulsedb-agent where the collector type is in
 	// scope. Keeping the runner package free of the collector import
 	// keeps test seams clean.
 }

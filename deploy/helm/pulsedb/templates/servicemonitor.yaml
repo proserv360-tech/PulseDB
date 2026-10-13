@@ -1,0 +1,17 @@
+{{- if and .Values.observability.prometheusScrape (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1/ServiceMonitor") }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "pulsedb.fullname" . }}
+  labels:
+    {{- include "pulsedb.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "pulsedb.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+{{- end -}}

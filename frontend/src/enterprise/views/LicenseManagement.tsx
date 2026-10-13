@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — License Management View
+//  PulseDB — License Management View
 // ==========================================================================
 //  Full license management page (admin only)
 //  Shows: current license details, tier comparison table, activation form
@@ -257,7 +257,7 @@ const LicenseManagement = () => {
         <div style={styles.container}>
             <div style={styles.header}>
                 <h1 style={styles.title}>License Management</h1>
-                <p style={styles.subtitle}>View and manage your FATHOM license</p>
+                <p style={styles.subtitle}>View and manage your PulseDB license</p>
             </div>
 
             {/* Current License */}
@@ -390,7 +390,7 @@ const LicenseManagement = () => {
                     Contact our support team for license questions or to purchase an upgrade.
                 </p>
                 <a
-                    href="mailto:license@fathom.dev"
+                    href="mailto:license@pulsedb.dev"
                     style={{
                         ...styles.button,
                         display: 'inline-flex',

@@ -3,13 +3,13 @@
  * ingest-load.js
  * ──────────────
  * Measures sustained SDK event-ingest throughput + latency against a
- * running FATHOM backend. Uses autocannon for the load generator and
+ * running PulseDB backend. Uses autocannon for the load generator and
  * reports autocannon's native latency histogram.
  *
  * Usage:
  *   node scripts/bench/ingest-load.js \
  *       --url http://localhost:4000 --duration 60 --concurrency 200 \
- *       --api-key fathom_live_xxx
+ *       --api-key pulsedb_live_xxx
  */
 
 import { parseArgs } from 'node:util';
@@ -22,7 +22,7 @@ const { values } = parseArgs({
         duration:    { type: 'string', default: '30' },
         concurrency: { type: 'string', default: '100' },
         pipelining:  { type: 'string', default: '10' },
-        'api-key':   { type: 'string', default: process.env.FATHOM_API_KEY || '' },
+        'api-key':   { type: 'string', default: process.env.PULSEDB_API_KEY || '' },
     },
 });
 

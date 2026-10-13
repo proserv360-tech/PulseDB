@@ -101,10 +101,10 @@ function mockRes() {
 
 // ── Token issuance ───────────────────────────────────────────────────────
 describe('issueScimToken', () => {
-    it('returns a fathom_scim_-prefixed plaintext', async () => {
+    it('returns a pulsedb_scim_-prefixed plaintext', async () => {
         const pool = createMockPool();
         const r = await issueScimToken(pool, 'tenant-1', 'okta-prod');
-        assert.match(r.plaintext, /^fathom_scim_[A-Za-z0-9_-]{40,}$/);
+        assert.match(r.plaintext, /^pulsedb_scim_[A-Za-z0-9_-]{40,}$/);
     });
 
     it('stores only the hash, never the plaintext', async () => {
@@ -115,7 +115,7 @@ describe('issueScimToken', () => {
         const [, storedHash] = insert.params;
         assert.match(storedHash, /^[0-9a-f]{64}$/);
         // The plaintext minus the prefix hashes to the stored value.
-        const secret = r.plaintext.slice('fathom_scim_'.length);
+        const secret = r.plaintext.slice('pulsedb_scim_'.length);
         assert.equal(storedHash, sha256Hex(secret));
     });
 
@@ -201,7 +201,7 @@ describe('createScimAuth middleware', () => {
         const mw = createScimAuth(pool);
         const res = mockRes();
         await mw(
-            { headers: { authorization: 'Bearer fathom_scim_deadbeef' } },
+            { headers: { authorization: 'Bearer pulsedb_scim_deadbeef' } },
             res,
             () => {},
         );
@@ -235,10 +235,10 @@ describe('createScimAuth middleware', () => {
         assert.equal(res.statusCode, 401);
     });
 
-    it('tolerates tokens sent without the fathom_scim_ prefix', async () => {
+    it('tolerates tokens sent without the pulsedb_scim_ prefix', async () => {
         const pool = createMockPool();
         const issued = await issueScimToken(pool, 'tenant-1', 'ok');
-        const raw = issued.plaintext.replace(/^fathom_scim_/, '');
+        const raw = issued.plaintext.replace(/^pulsedb_scim_/, '');
         const mw = createScimAuth(pool);
         const res = mockRes();
         const req = { headers: { authorization: `Bearer ${raw}` } };

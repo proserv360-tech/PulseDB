@@ -3,5 +3,5 @@ SELECT id, name,
             WHEN length(password) > 40 AND password LIKE '%:%' THEN 'encrypted (' || length(password) || ' chars)'
             ELSE 'plaintext or short' END AS password_state,
        host, port, database, username
-FROM pgmonitoringtool.fathom_connections
+FROM pgmonitoringtool.pulsedb_connections
 ORDER BY id;

@@ -67,9 +67,9 @@ function fmtHour(iso: string) {
 // ─────────────────────────────────────────────────────────────────────────
 const OR = {
     identity: {
-        instance: 'FATHOM_PRIMARY',
+        instance: 'PULSEDB_PRIMARY',
         cdb: 'CDB$ROOT',
-        pdb: 'FATHOM_PDB',
+        pdb: 'PULSEDB_PDB',
         version: 'Oracle 23ai Enterprise Edition',
         platform: 'Linux x86-64',
         role: 'PRIMARY',
@@ -95,24 +95,24 @@ const OR = {
         {
             sql_id: '8gnxhpxp1k5u2',
             hash: '2841847432',
-            text: 'SELECT /*+ PARALLEL(8) */ * FROM fathom_app.transactions WHERE ts > :b1',
+            text: 'SELECT /*+ PARALLEL(8) */ * FROM pulsedb_app.transactions WHERE ts > :b1',
             execs: 48_210,
             elapsed_sec: 1_842,
             cpu_sec: 1_241,
             buffer_gets: 842_102_104,
             disk_reads: 142_211,
-            user: 'FATHOM_APP',
+            user: 'PULSEDB_APP',
         },
         {
             sql_id: '2bngjshd5mtz4',
             hash: '1847419021',
-            text: 'MERGE INTO fathom_app.inventory i USING (SELECT ...) src ON (i.sku=src.sku)',
+            text: 'MERGE INTO pulsedb_app.inventory i USING (SELECT ...) src ON (i.sku=src.sku)',
             execs: 1_820,
             elapsed_sec: 842,
             cpu_sec: 412,
             buffer_gets: 182_012_842,
             disk_reads: 42_012,
-            user: 'FATHOM_APP',
+            user: 'PULSEDB_APP',
         },
         {
             sql_id: '4kbnhrpqtd9mw',
@@ -128,13 +128,13 @@ const OR = {
         {
             sql_id: '7xjnhrtd9mw2k',
             hash: '9827419821',
-            text: 'SELECT COUNT(*) FROM fathom_report.mv_daily_kpi WHERE dt = TRUNC(SYSDATE)',
+            text: 'SELECT COUNT(*) FROM pulsedb_report.mv_daily_kpi WHERE dt = TRUNC(SYSDATE)',
             execs: 8_420,
             elapsed_sec: 412,
             cpu_sec: 142,
             buffer_gets: 82_012_804,
             disk_reads: 4_201,
-            user: 'FATHOM_REPORT',
+            user: 'PULSEDB_REPORT',
         },
     ],
     awrSnapshots: [
@@ -191,7 +191,7 @@ const OR = {
     ],
     dataGuard: {
         primary: {
-            name: 'FATHOM_PRIMARY',
+            name: 'PULSEDB_PRIMARY',
             role: 'PRIMARY',
             db_role: 'PRIMARY',
             mode: 'MAXIMUM AVAILABILITY',
@@ -201,7 +201,7 @@ const OR = {
         },
         standbys: [
             {
-                name: 'FATHOM_DR',
+                name: 'PULSEDB_DR',
                 role: 'PHYSICAL STANDBY',
                 db_role: 'PHYSICAL STANDBY',
                 mode: 'SYNC',
@@ -210,7 +210,7 @@ const OR = {
                 redo_rate_kbps: 24_000,
             },
             {
-                name: 'FATHOM_LOGIC',
+                name: 'PULSEDB_LOGIC',
                 role: 'LOGICAL STANDBY',
                 db_role: 'LOGICAL STANDBY',
                 mode: 'ASYNC',
@@ -232,9 +232,9 @@ const OR = {
         { name: 'SYSTEM', size_gb: 8, used_gb: 4, pct: 50, autoextend: 'YES', growth_day_gb: 0.02 },
         { name: 'SYSAUX', size_gb: 16, used_gb: 11, pct: 69, autoextend: 'YES', growth_day_gb: 0.08 },
         { name: 'USERS', size_gb: 4, used_gb: 2, pct: 50, autoextend: 'YES', growth_day_gb: 0.01 },
-        { name: 'FATHOM_DATA', size_gb: 840, used_gb: 692, pct: 82, autoextend: 'YES', growth_day_gb: 2.8 },
-        { name: 'FATHOM_IDX', size_gb: 180, used_gb: 124, pct: 69, autoextend: 'YES', growth_day_gb: 0.42 },
-        { name: 'FATHOM_LOB', size_gb: 420, used_gb: 384, pct: 91, autoextend: 'YES', growth_day_gb: 1.6, warn: true },
+        { name: 'PULSEDB_DATA', size_gb: 840, used_gb: 692, pct: 82, autoextend: 'YES', growth_day_gb: 2.8 },
+        { name: 'PULSEDB_IDX', size_gb: 180, used_gb: 124, pct: 69, autoextend: 'YES', growth_day_gb: 0.42 },
+        { name: 'PULSEDB_LOB', size_gb: 420, used_gb: 384, pct: 91, autoextend: 'YES', growth_day_gb: 1.6, warn: true },
         { name: 'UNDOTBS1', size_gb: 42, used_gb: 14, pct: 33, autoextend: 'YES', growth_day_gb: 0.01 },
         { name: 'TEMP', size_gb: 32, used_gb: 8, pct: 25, autoextend: 'YES', growth_day_gb: 0.04 },
     ],
@@ -243,7 +243,7 @@ const OR = {
             {
                 sid: 142,
                 serial: 4812,
-                user: 'FATHOM_APP',
+                user: 'PULSEDB_APP',
                 object: 'TRANSACTIONS',
                 sql_id: '8gnxhpxp1k5u2',
                 lock_type: 'TX',
@@ -253,7 +253,7 @@ const OR = {
                     {
                         sid: 221,
                         serial: 1821,
-                        user: 'FATHOM_APP',
+                        user: 'PULSEDB_APP',
                         object: 'TRANSACTIONS',
                         sql_id: '2bngjshd5mtz4',
                         lock_type: 'TX',
@@ -263,7 +263,7 @@ const OR = {
                             {
                                 sid: 284,
                                 serial: 881,
-                                user: 'FATHOM_REPORT',
+                                user: 'PULSEDB_REPORT',
                                 object: 'TRANSACTIONS',
                                 sql_id: '7xjnhrtd9mw2k',
                                 lock_type: 'TX',
@@ -276,7 +276,7 @@ const OR = {
                     {
                         sid: 318,
                         serial: 402,
-                        user: 'FATHOM_APP',
+                        user: 'PULSEDB_APP',
                         object: 'TRANSACTIONS',
                         sql_id: '8gnxhpxp1k5u2',
                         lock_type: 'TX',
@@ -297,11 +297,11 @@ const OR = {
         },
         {
             severity: 'warning',
-            title: 'FATHOM_LOB tablespace 91% — autoextend enabled',
+            title: 'PULSEDB_LOB tablespace 91% — autoextend enabled',
             time: '18m ago',
             source: 'tablespace',
         },
-        { severity: 'warning', title: 'FATHOM_LOGIC standby lag 18.4s', time: '12m ago', source: 'data-guard' },
+        { severity: 'warning', title: 'PULSEDB_LOGIC standby lag 18.4s', time: '12m ago', source: 'data-guard' },
     ],
 };
 
@@ -908,7 +908,7 @@ export default function DemoOracleFullTab({ subTabId }: { subTabId?: string } = 
     return (
         <DemoLayout
             title="Oracle Database"
-            subtitle="23ai Enterprise · FATHOM_PDB on FATHOM_PRIMARY"
+            subtitle="23ai Enterprise · PULSEDB_PDB on PULSEDB_PRIMARY"
             accentColor={catalog.accentColor}
             connectionBarMeta={{ lastSync: '8s', refreshInterval: '30s' }}
             titleIcon={Database}

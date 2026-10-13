@@ -198,9 +198,9 @@ export default function integrationsRoutes(pool, authenticate, tenantIsolationMw
             const testAlert = {
                 id: `test-${Date.now()}`,
                 severity: req.body?.severity || 'warning',
-                title: 'FATHOM integration test',
+                title: 'PulseDB integration test',
                 message: 'This is a test alert. If you see it, your destination is wired up.',
-                source: 'fathom',
+                source: 'pulsedb',
                 component: 'integration-test',
                 timestamp: new Date().toISOString(),
                 metadata: { test: true, actor: req.user?.username || 'unknown' },

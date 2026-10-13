@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — SqlConsoleTab  (v6 — Maximum Power Edition)
+//  PulseDB — SqlConsoleTab  (v6 — Maximum Power Edition)
 // ==========================================================================
 import React, {
     useState, useEffect, useMemo, useRef, useCallback,
@@ -1231,7 +1231,7 @@ const SqlConsoleTab = () => {
         }
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([content], { type:mime }));
-        a.download = `fathom-export-${Date.now()}.${ext}`; a.click();
+        a.download = `pulsedb-export-${Date.now()}.${ext}`; a.click();
         notify(`Exported ${result.rows.length} rows as ${ext.toUpperCase()}`);
     }, [result, notify]);
 

@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Auth Context  (v2.0 — aligned with actual server.js)
+//  PulseDB — Auth Context  (v2.0 — aligned with actual server.js)
 // ==========================================================================
 //  Server endpoints used:
 //    • POST /api/auth/login → { user, token }
@@ -24,18 +24,18 @@ const API_BASE =
         return '';
     })();
 const STORAGE_KEYS = {
-    TOKEN: 'fathom_token',
-    USER: 'fathom_user',
+    TOKEN: 'pulsedb_token',
+    USER: 'pulsedb_user',
     // Why the user is looking at the login page. Written on the way out, read
     // once by LoginPage, then cleared. Survives the unmount that React state
     // would not: logout() clears currentUser, which immediately routes to
     // /login and destroys the provider's in-memory reason before anything
     // renders it.
-    EXIT_REASON: 'fathom_exit_reason',
+    EXIT_REASON: 'pulsedb_exit_reason',
     // Last username to sign in successfully. Deliberately NOT cleared on
     // logout — someone signing out is usually about to sign back in, often as
     // a different person, and retyping the address is the tax on that.
-    LAST_USER: 'fathom_last_username',
+    LAST_USER: 'pulsedb_last_username',
 };
 
 // Exit reasons, in ascending order of "this was not your fault".
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     const [authLoading, setAuthLoading] = useState(false); // login in progress
     const [error, setError] = useState(null);
     const [mustChangePassword, setMustChangePassword] = useState(
-        () => secureStorage.getItem('fathom_must_change_password') === 'true',
+        () => secureStorage.getItem('pulsedb_must_change_password') === 'true',
     );
 
     // ── Restore session on mount ───────────────────────────────────────────
@@ -237,12 +237,12 @@ export const AuthProvider = ({ children }) => {
             const prevParsed = prevUser ? JSON.parse(prevUser) : null;
             if (!prevParsed || prevParsed.username !== data.user.username) {
                 secureStorage.removeItem('pg_monitor_active_tab');
-                secureStorage.removeItem('fathom_active_connection_id');
-                secureStorage.removeItem('fathom_custom_dashboards');
-                secureStorage.removeItem('fathom_active_dashboard');
-                secureStorage.removeItem('fathom_repos_v10');
-                secureStorage.removeItem('fathom_recent_tabs');
-                secureStorage.removeItem('fathom_last_feedback');
+                secureStorage.removeItem('pulsedb_active_connection_id');
+                secureStorage.removeItem('pulsedb_custom_dashboards');
+                secureStorage.removeItem('pulsedb_active_dashboard');
+                secureStorage.removeItem('pulsedb_repos_v10');
+                secureStorage.removeItem('pulsedb_recent_tabs');
+                secureStorage.removeItem('pulsedb_last_feedback');
             }
 
             secureStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
@@ -253,10 +253,10 @@ export const AuthProvider = ({ children }) => {
             secureStorage.removeItem(STORAGE_KEYS.EXIT_REASON);
             _consumedExitReason = null;
             if (data.mustChangePassword) {
-                secureStorage.setItem('fathom_must_change_password', 'true');
+                secureStorage.setItem('pulsedb_must_change_password', 'true');
                 setMustChangePassword(true);
             } else {
-                secureStorage.removeItem('fathom_must_change_password');
+                secureStorage.removeItem('pulsedb_must_change_password');
                 setMustChangePassword(false);
             }
             setCurrentUser(data.user);
@@ -291,12 +291,12 @@ export const AuthProvider = ({ children }) => {
             : null;
         if (!prevParsed || prevParsed.username !== user.username) {
             secureStorage.removeItem('pg_monitor_active_tab');
-            secureStorage.removeItem('fathom_active_connection_id');
-            secureStorage.removeItem('fathom_custom_dashboards');
-            secureStorage.removeItem('fathom_active_dashboard');
-            secureStorage.removeItem('fathom_repos_v10');
-            secureStorage.removeItem('fathom_recent_tabs');
-            secureStorage.removeItem('fathom_last_feedback');
+            secureStorage.removeItem('pulsedb_active_connection_id');
+            secureStorage.removeItem('pulsedb_custom_dashboards');
+            secureStorage.removeItem('pulsedb_active_dashboard');
+            secureStorage.removeItem('pulsedb_repos_v10');
+            secureStorage.removeItem('pulsedb_recent_tabs');
+            secureStorage.removeItem('pulsedb_last_feedback');
         }
         secureStorage.setItem(STORAGE_KEYS.TOKEN, token);
         secureStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
@@ -324,9 +324,9 @@ export const AuthProvider = ({ children }) => {
         // endSession() leaves them alone, because a timeout is not a request
         // to be put back at the beginning.
         secureStorage.removeItem('pg_monitor_active_tab');
-        secureStorage.removeItem('fathom_active_connection_id');
+        secureStorage.removeItem('pulsedb_active_connection_id');
         // Clear password-change flag so it's re-evaluated on next login
-        secureStorage.removeItem('fathom_must_change_password');
+        secureStorage.removeItem('pulsedb_must_change_password');
         secureStorage.setItem(STORAGE_KEYS.EXIT_REASON, EXIT_REASONS.SIGNED_OUT);
         setMustChangePassword(false);
         setCurrentUser(null);
@@ -392,7 +392,7 @@ export const AuthProvider = ({ children }) => {
     // ── Context value ──────────────────────────────────────────────────────
     // Allow external code (e.g. ForcePasswordChangeModal) to clear the flag
     const clearMustChangePassword = useCallback(() => {
-        secureStorage.removeItem('fathom_must_change_password');
+        secureStorage.removeItem('pulsedb_must_change_password');
         setMustChangePassword(false);
     }, []);
 

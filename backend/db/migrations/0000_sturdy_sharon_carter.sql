@@ -55,7 +55,7 @@ CREATE TABLE "pgmonitoringtool"."audit_log" (
 	"timestamp" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "pgmonitoringtool"."fathom_connections" (
+CREATE TABLE "pgmonitoringtool"."pulsedb_connections" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer,
 	"name" text NOT NULL,
@@ -132,7 +132,7 @@ CREATE TABLE "pgmonitoringtool"."users" (
 --> statement-breakpoint
 ALTER TABLE "pgmonitoringtool"."alert_rules" ADD CONSTRAINT "alert_rules_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pgmonitoringtool"."user_api_keys" ADD CONSTRAINT "user_api_keys_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "pgmonitoringtool"."fathom_connections" ADD CONSTRAINT "fathom_connections_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "pgmonitoringtool"."pulsedb_connections" ADD CONSTRAINT "pulsedb_connections_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pgmonitoringtool"."feedback" ADD CONSTRAINT "feedback_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pgmonitoringtool"."user_login_activity" ADD CONSTRAINT "user_login_activity_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pgmonitoringtool"."user_sessions" ADD CONSTRAINT "user_sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "pgmonitoringtool"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -142,7 +142,7 @@ CREATE INDEX "alerts_created_idx" ON "pgmonitoringtool"."alerts" USING btree ("c
 CREATE INDEX "apikeys_user_idx" ON "pgmonitoringtool"."user_api_keys" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "apikeys_hash_unique" ON "pgmonitoringtool"."user_api_keys" USING btree ("key_hash");--> statement-breakpoint
 CREATE INDEX "audit_timestamp_idx" ON "pgmonitoringtool"."audit_log" USING btree ("timestamp");--> statement-breakpoint
-CREATE INDEX "connections_user_idx" ON "pgmonitoringtool"."fathom_connections" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "connections_user_idx" ON "pgmonitoringtool"."pulsedb_connections" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "login_activity_user_day" ON "pgmonitoringtool"."user_login_activity" USING btree ("user_id","day");--> statement-breakpoint
 CREATE INDEX "sessions_user_idx" ON "pgmonitoringtool"."user_sessions" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "sessions_active_idx" ON "pgmonitoringtool"."user_sessions" USING btree ("is_active");--> statement-breakpoint

@@ -109,7 +109,7 @@ gives an immediate and large payload win with no behavioural change.
 ## 8. Two API-access patterns coexist in the frontend
 
 - 46 raw `fetch(` calls alongside 78 files importing `utils/api`
-- **14** direct `localStorage.getItem('fathom_token')` reads that bypass `utils/authToken.ts`
+- **14** direct `localStorage.getItem('pulsedb_token')` reads that bypass `utils/authToken.ts`
 
 That second number matters beyond consistency: `authToken.ts` exists specifically so the
 localStorage branch can be deleted in one place once the httpOnly cookie migration
@@ -131,7 +131,7 @@ The real problem: `quoteIdent()` exists in **both** `services/indexAdvisor.ts` a
 security primitive is how one of them ends up subtly wrong.
 
 **Do:** one shared `quoteIdent` in a util module, delete both copies. Then add a semgrep
-rule to `.semgrep/fathom-rules.yml` (already present) flagging new interpolation into
+rule to `.semgrep/pulsedb-rules.yml` (already present) flagging new interpolation into
 query strings so this surface stops growing unreviewed.
 
 ## 10. Input validation covers 21 of 59 route files

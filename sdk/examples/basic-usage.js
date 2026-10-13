@@ -1,23 +1,23 @@
 /**
- * Example: Basic usage of FATHOM SDK
+ * Example: Basic usage of PulseDB SDK
  * Demonstrates core tracking methods
  */
-import FathomSDK from '../src/index.js';
+import PulseDBSDK from '../src/index.js';
 
 // Initialize
-const fathom = new FathomSDK({
+const pulsedb = new PulseDBSDK({
   apiKey: 'sk_live_your_api_key',
-  endpoint: 'https://fathom.example.com',
+  endpoint: 'https://pulsedb.example.com',
   appName: 'my-service',
   environment: 'production',
   debug: true,
 });
 
 // Start auto-flush
-fathom.start();
+pulsedb.start();
 
 // Track an API call
-fathom.trackAPI({
+pulsedb.trackAPI({
   method: 'GET',
   endpoint: '/api/products',
   statusCode: 200,
@@ -29,7 +29,7 @@ fathom.trackAPI({
 try {
   throw new Error('Database connection failed');
 } catch (error) {
-  fathom.trackError({
+  pulsedb.trackError({
     error,
     severity: 'critical',
     metadata: { database: 'postgres', host: 'db.example.com' },
@@ -37,14 +37,14 @@ try {
 }
 
 // Track an audit event
-fathom.trackAudit({
+pulsedb.trackAudit({
   title: 'Admin Login',
   message: 'Administrator logged in from new IP',
   metadata: { adminId: 'admin_123', ip: '203.0.113.42' },
 });
 
 // Track a metric
-fathom.trackMetric({
+pulsedb.trackMetric({
   title: 'Database Connection Pool',
   value: 45,
   unit: '%',
@@ -52,7 +52,7 @@ fathom.trackMetric({
 });
 
 // Track a custom event
-fathom.track('payment.processed', {
+pulsedb.track('payment.processed', {
   title: 'Payment Processed',
   severity: 'info',
   message: 'Payment of $99.99 was successful',
@@ -67,5 +67,5 @@ fathom.track('payment.processed', {
 // Graceful shutdown
 setTimeout(async () => {
   console.log('Shutting down...');
-  await fathom.shutdown();
+  await pulsedb.shutdown();
 }, 5000);

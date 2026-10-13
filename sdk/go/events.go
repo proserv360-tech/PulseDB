@@ -1,4 +1,4 @@
-package fathom
+package pulsedb
 
 import (
 	"crypto/rand"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// SdkEvent represents a single event to be sent to FATHOM
+// SdkEvent represents a single event to be sent to PulseDB
 // All fields use camelCase to match the server wire format exactly
 type SdkEvent struct {
 	Type        string                 `json:"type"`

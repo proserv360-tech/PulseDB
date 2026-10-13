@@ -144,8 +144,8 @@ export function buildAuthenticate(pool: any, config: any) {
         let payload: any;
         try {
             payload = jwt.verify(rawToken, config.JWT_SECRET, {
-                audience: config.JWT_AUDIENCE || 'fathom-api',
-                issuer: config.JWT_ISSUER || 'fathom-auth',
+                audience: config.JWT_AUDIENCE || 'pulsedb-api',
+                issuer: config.JWT_ISSUER || 'pulsedb-auth',
             });
         } catch {
             return res.status(401).json({ error: 'Invalid or expired token' });
@@ -228,7 +228,7 @@ const PASSWORD_CHANGE_BYPASS = new Set([
  * one more request through before the TTL expires — the change-password
  * endpoints are on the bypass list anyway, so they can still act on it.
  */
-const PWCHANGE_CACHE_TTL_MS = Number(process.env.FATHOM_PWCHANGE_CACHE_TTL_MS) || 30_000;
+const PWCHANGE_CACHE_TTL_MS = Number(process.env.PULSEDB_PWCHANGE_CACHE_TTL_MS) || 30_000;
 const _mustChangeCache = new Map<number, { mustChange: boolean; expiresAt: number }>();
 
 export function invalidatePasswordChangeCache(userId?: number | null): void {

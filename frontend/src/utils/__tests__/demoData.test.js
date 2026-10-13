@@ -1,6 +1,6 @@
 /**
  * Demo Data Test Suite
- * Tests the FATHOM demo data provider and route matching for all key API endpoints
+ * Tests the PulseDB demo data provider and route matching for all key API endpoints
  */
 
 import { describe, it, expect } from 'vitest';
@@ -266,7 +266,7 @@ describe('demoData', () => {
     });
 
     describe('Route patterns coverage', () => {
-        it('should handle common FATHOM routes', () => {
+        it('should handle common PulseDB routes', () => {
             const routes = [
                 '/api/overview',
                 '/api/performance',

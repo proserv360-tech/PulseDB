@@ -2,7 +2,7 @@
  * autoexplain-parser.mjs
  *
  * Shared parser for RDS PostgreSQL `auto_explain` log lines (log_format=json).
- * Imported by both the polling shipper (fathom-autoexplain-shipper.mjs) and the
+ * Imported by both the polling shipper (pulsedb-autoexplain-shipper.mjs) and the
  * push-based Lambda (lambda/autoexplain-lambda.mjs) so the parsing logic lives
  * in exactly one place.
  *

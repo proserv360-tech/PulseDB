@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Redis Overview View
+//  PulseDB — Redis Overview View
 // ==========================================================================
 //  Read-only overview of a Redis target: INFO sections, keyspace counts,
 //  replication role. Data is served by /api/enterprise/redis/info.

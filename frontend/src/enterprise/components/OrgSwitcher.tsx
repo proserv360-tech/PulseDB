@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Organization Switcher Component
+//  PulseDB — Organization Switcher Component
 // ==========================================================================
 //  Organization selector dropdown for multi-tenant users
 //  Shows current org name with a dropdown to switch

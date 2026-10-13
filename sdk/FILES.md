@@ -1,4 +1,4 @@
-# FATHOM SDK - File Reference Guide
+# PulseDB SDK - File Reference Guide
 
 ## Quick Navigation
 
@@ -22,7 +22,7 @@
 
 ### Testing
 
-- **tests/fathom.test.js** - Unit tests (run: npm test)
+- **tests/pulsedb.test.js** - Unit tests (run: npm test)
 
 ### Configuration
 
@@ -104,7 +104,7 @@ Sections:
 Contains:
 
 - EventEmitter class (inline, zero-dependency)
-- FathomSDK class with all methods:
+- PulseDBSDK class with all methods:
     - Core methods: trackAPI, trackError, trackAudit, trackMetric, track
     - Auto-capture: expressMiddleware, captureUncaughtExceptions
     - Batching: \_enqueue, flush
@@ -126,8 +126,8 @@ Features:
 
 Exports:
 
-- FathomSDK class definition
-- FathomOptions interface
+- PulseDBSDK class definition
+- PulseDBOptions interface
 - TrackAPIOptions interface
 - TrackErrorOptions interface
 - TrackAuditOptions interface
@@ -141,12 +141,12 @@ Exports:
 
 Specifies:
 
-- Package name: @fathom/sdk
+- Package name: @pulsedb/sdk
 - Version: 1.0.0
 - Main entry: dist/index.js (CJS)
 - Module entry: src/index.js (ESM)
 - Exports: dual ESM/CJS support
-- Keywords: fathom, monitoring, observability
+- Keywords: pulsedb, monitoring, observability
 - Scripts: build, test
 - Node requirement: >=18.0.0
 - License: MIT
@@ -189,7 +189,7 @@ Demonstrates:
 Demonstrates:
 
 - Express app creation
-- FATHOM middleware setup
+- PulseDB middleware setup
 - Exception capture configuration
 - Multiple route handlers:
     - GET /api/users - Basic route
@@ -199,7 +199,7 @@ Demonstrates:
 - SIGTERM signal handling
 - Server startup with auto-flush
 
-### tests/fathom.test.js (94 lines)
+### tests/pulsedb.test.js (94 lines)
 
 **Unit test suite**
 
@@ -261,7 +261,7 @@ Ignores:
 | STRUCTURE.md               | 300+  | 12 KB  | Architecture guide  |
 | examples/basic-usage.js    | 71    | 1.5 KB | Simple example      |
 | examples/express-server.js | 73    | 1.8 KB | Express example     |
-| tests/fathom.test.js       | 94    | 2.1 KB | Unit tests          |
+| tests/pulsedb.test.js       | 94    | 2.1 KB | Unit tests          |
 | package.json               | 35    | 0.7 KB | Package config      |
 | build.cjs                  | 30    | 0.8 KB | Build script        |
 | .gitignore                 | 25    | 0.5 KB | Git config          |
@@ -287,7 +287,7 @@ Ignores:
 ### For Developers
 
 1. Study: **src/index.js** - Main implementation
-2. Check: **tests/fathom.test.js** - Test suite
+2. Check: **tests/pulsedb.test.js** - Test suite
 3. Review: **src/index.d.ts** - Type definitions
 4. Build: Run `npm run build` to generate CJS version
 
@@ -295,7 +295,7 @@ Ignores:
 
 1. Review: **package.json** - Package configuration
 2. Run: **build.cjs** - Generate distribution files
-3. Test: **tests/fathom.test.js** - Verify functionality
+3. Test: **tests/pulsedb.test.js** - Verify functionality
 4. Publish: `npm publish` to release
 
 ---
@@ -316,7 +316,7 @@ examples/
   └─> express-server.js (imports src/index.js + express)
 
 tests/
-  └─> fathom.test.js (imports src/index.js)
+  └─> pulsedb.test.js (imports src/index.js)
 ```
 
 ---
@@ -341,7 +341,7 @@ npm publish
 
 ## Next Steps
 
-1. **Install**: `npm install @fathom/sdk`
+1. **Install**: `npm install @pulsedb/sdk`
 2. **Read**: Start with README.md
 3. **Integrate**: Follow DEPLOYMENT.md patterns
 4. **Test**: Check examples/ for working code

@@ -1,5 +1,5 @@
 /**
- * EventEmitter - Core event management system for FATHOM SDK
+ * EventEmitter - Core event management system for PulseDB SDK
  * Provides typed events for monitoring alerts, metric updates, and connection changes
  */
 

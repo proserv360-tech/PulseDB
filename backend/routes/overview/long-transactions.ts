@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/long-transactions
+//  PulseDB — /api/overview/long-transactions
 //  Returns: queries/transactions running longer than THRESHOLD_SECONDS
 // ==========================================================================
 

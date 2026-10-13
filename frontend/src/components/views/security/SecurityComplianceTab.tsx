@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Security & Compliance Center (v2.0)
+//  PulseDB — Security & Compliance Center (v2.0)
 // ==========================================================================
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { THEME, useAdaptiveTheme, useGlobalRefresh, metricValue } from '../../../utils/theme';

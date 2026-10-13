@@ -118,7 +118,7 @@ function DemoMongoDBTab({ tabId }) {
 
             // Server Info
             serverInfo: {
-                hostname: 'mongo-primary-01.prod.fathom',
+                hostname: 'mongo-primary-01.prod.pulsedb',
                 port: 27017,
                 memory: '32 GB',
                 storage: 'WiredTiger',
@@ -287,7 +287,7 @@ function DemoMongoDBTab({ tabId }) {
 
             // Live Agent
             liveAgentStatus: {
-                agent_id: 'fathom-mongo-01',
+                agent_id: 'pulsedb-mongo-01',
                 status: 'CONNECTED',
                 last_heartbeat: '2s ago',
                 version: '2.4.1',

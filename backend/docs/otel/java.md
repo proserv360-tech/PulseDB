@@ -1,4 +1,4 @@
-# Java — OTel to FATHOM
+# Java — OTel to PulseDB
 
 Targets the PostgreSQL JDBC driver (`org.postgresql:postgresql:42.7+`)
 and either HikariCP or a Spring Boot datasource. Assumes the OpenTelemetry
@@ -16,7 +16,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import java.sql.Connection;
 
-public class FathomTraceHikariInterceptor implements HikariCP.ConnectionCustomizer {
+public class PulseDBTraceHikariInterceptor implements HikariCP.ConnectionCustomizer {
     public void customize(Connection conn) throws java.sql.SQLException {
         SpanContext ctx = Span.current().getSpanContext();
         String tp = ctx.isValid()
@@ -69,14 +69,14 @@ The resulting queries look like:
 /*traceparent='00-...-...-01'*/ SELECT * FROM orders WHERE id = ?
 ```
 
-FATHOM picks these up off `pg_stat_statements.query`.
+PulseDB picks these up off `pg_stat_statements.query`.
 
 ## Verify
 
 After deploying:
 
 1. Hit an endpoint that issues a query.
-2. In FATHOM → Query Details, expand the slow query. A "Trace"
+2. In PulseDB → Query Details, expand the slow query. A "Trace"
    link should render.
 3. If nothing appears, run
    `SELECT application_name FROM pg_stat_activity WHERE usename = current_user;`

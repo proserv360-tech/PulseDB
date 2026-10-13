@@ -240,7 +240,7 @@ const DEPLOYMENTS = [
         time: '13:40',
         service: 'orders-api',
         version: 'v2.8.1',
-        author: 'dilip@fathom',
+        author: 'dilip@pulsedb',
         note: 'hotfix: retry logic',
         impact: 'warn',
     },
@@ -283,7 +283,7 @@ const LOG_DATA = [
         svc: 'payments-api',
         msg: 'stripe webhook latency 820ms · above SLO threshold 800ms',
     },
-    { ts: '14:21:50.091', lvl: 'INFO', svc: 'auth', msg: 'sso.saml.login dilip@fathom · session created · TTL 3600s' },
+    { ts: '14:21:50.091', lvl: 'INFO', svc: 'auth', msg: 'sso.saml.login dilip@pulsedb · session created · TTL 3600s' },
     {
         ts: '14:21:44.882',
         lvl: 'DEBUG',
@@ -1155,7 +1155,7 @@ function TracesSection(ctx) {
                                             title="Correlate this trace with the SQL each span ran"
                                             onClick={() =>
                                                 window.dispatchEvent(
-                                                    new CustomEvent('fathom:navigate-tab', {
+                                                    new CustomEvent('pulsedb:navigate-tab', {
                                                         detail: {
                                                             tab: 'trace-correlation',
                                                             payload: { traceId: tid.toLowerCase() },

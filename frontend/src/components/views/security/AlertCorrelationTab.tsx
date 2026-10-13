@@ -118,7 +118,7 @@ export default function AlertCorrelationTab() {
     const fetchCorrelationData = useCallback(async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('fathom_token');
+            const token = localStorage.getItem('pulsedb_token');
             const result = await fetchData('/api/alerts/correlation', {
                 method: 'GET',
                 headers: token ? { Authorization: `Bearer ${token}` } : {},

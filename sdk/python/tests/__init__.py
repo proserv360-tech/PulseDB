@@ -1,1 +1,1 @@
-"""Fathom SDK tests."""
+"""PulseDB SDK tests."""

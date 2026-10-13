@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fathom/fathom-go"
+	"github.com/pulsedb/pulsedb-go"
 )
 
 // SkipFunc is a function that returns true if the request should be skipped
@@ -15,7 +15,7 @@ type SkipFunc func(r *http.Request) bool
 // Usage:
 //   handler := http.HandlerFunc(myHandler)
 //   wrappedHandler := nethttp.Middleware(client)(handler)
-func Middleware(client *fathom.Client) func(http.Handler) http.Handler {
+func Middleware(client *pulsedb.Client) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Wrap response writer to capture status code

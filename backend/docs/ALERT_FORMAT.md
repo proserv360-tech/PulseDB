@@ -1,6 +1,6 @@
 # Alert message format
 
-Every alert Fathom sends uses one structure, whatever the category. A rule
+Every alert PulseDB sends uses one structure, whatever the category. A rule
 supplies the affected objects and their measurements; the pipeline does the
 rest — one incident per object, priority, owner, SLA, rendering.
 

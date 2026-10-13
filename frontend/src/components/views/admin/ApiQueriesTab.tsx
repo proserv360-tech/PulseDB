@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — ApiQueriesTab  (v8 — Apex Observability)
+//  PulseDB — ApiQueriesTab  (v8 — Apex Observability)
 // ==========================================================================
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import DOMPurify from 'dompurify';
@@ -53,7 +53,7 @@ const GlobalStyles = () => (
     <style>{`
         *, *::before, *::after { box-sizing: border-box; }
 
-        .fathom-root { font-family: ${THEME.fontMono}; background: ${T.bg}; color: ${T.text1}; min-height: 100vh; }
+        .pulsedb-root { font-family: ${THEME.fontMono}; background: ${T.bg}; color: ${T.text1}; min-height: 100vh; }
 
         @keyframes fadeUp    { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse     { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
@@ -818,7 +818,7 @@ const ApiQueriesTab = () => {
     ];
 
     return (
-        <div className="fathom-root" style={{ padding: '0 24px 48px' }}>
+        <div className="pulsedb-root" style={{ padding: '0 24px 48px' }}>
             <GlobalStyles />
 
             {/* ── Global Stats Bar ── */}
@@ -990,7 +990,7 @@ const ApiQueriesTab = () => {
                                 <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
                                     <CurlBlock
                                         method={selected.method}
-                                        url={`https://api.fathom.io${selected.endpoint}`}
+                                        url={`https://api.pulsedb.io${selected.endpoint}`}
                                         headers={selected.payload.headers}
                                         body={selected.payload.body || {}}
                                     />

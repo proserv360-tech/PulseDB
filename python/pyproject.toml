@@ -3,11 +3,11 @@ requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fathom-python"
+name = "pulsedb-python"
 version = "1.0.0"
-description = "FATHOM Python Backend - Analytics, ML, and Data Processing for PostgreSQL Monitoring"
+description = "PulseDB Python Backend - Analytics, ML, and Data Processing for PostgreSQL Monitoring"
 requires-python = ">=3.11"
-authors = [{name = "FATHOM Team"}]
+authors = [{name = "PulseDB Team"}]
 license = {text = "MIT"}
 
 dependencies = [
@@ -30,7 +30,7 @@ dev = [
 ]
 
 [project.scripts]
-fathom-api = "api.main:app"
+pulsedb-api = "api.main:app"
 
 [tool.setuptools]
 packages = ["api", "tests"]

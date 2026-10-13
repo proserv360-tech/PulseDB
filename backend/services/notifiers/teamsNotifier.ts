@@ -54,11 +54,11 @@ export class TeamsNotifier extends BaseNotifier {
       '@type': 'MessageCard',
       '@context': 'https://schema.org/extensions',
       themeColor,
-      summary: alert.title || alert.message || 'FATHOM alert',
-      title: alert.title || 'FATHOM alert',
+      summary: alert.title || alert.message || 'PulseDB alert',
+      title: alert.title || 'PulseDB alert',
       sections: [
         {
-          activityTitle: alert.title || 'FATHOM alert',
+          activityTitle: alert.title || 'PulseDB alert',
           activitySubtitle: alert.message || '',
           facts,
           markdown: true,
@@ -69,7 +69,7 @@ export class TeamsNotifier extends BaseNotifier {
     if (alert.url) {
       card.potentialAction = [{
         '@type': 'OpenUri',
-        name: 'Open in FATHOM',
+        name: 'Open in PulseDB',
         targets: [{ os: 'default', uri: alert.url }],
       }];
     }

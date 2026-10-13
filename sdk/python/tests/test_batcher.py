@@ -3,9 +3,9 @@
 import pytest
 import time
 from unittest.mock import Mock, MagicMock
-from fathom_sdk.batcher import EventBatcher
-from fathom_sdk.events import SdkEvent
-from fathom_sdk.transport import FathomTransport
+from pulsedb_sdk.batcher import EventBatcher
+from pulsedb_sdk.events import SdkEvent
+from pulsedb_sdk.transport import PulseDBTransport
 
 
 class TestEventBatcher:
@@ -13,7 +13,7 @@ class TestEventBatcher:
 
     def test_enqueue_single_event(self):
         """enqueue adds event to queue."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         batcher = EventBatcher(mock_transport, batch_size=50)
 
         event = SdkEvent(type="test", title="Test", severity="info")
@@ -25,7 +25,7 @@ class TestEventBatcher:
 
     def test_flush_at_batch_size(self):
         """flush_sync sends events when batch_size is reached."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (True, 3, None)
 
         batcher = EventBatcher(mock_transport, batch_size=3)
@@ -44,7 +44,7 @@ class TestEventBatcher:
 
     def test_flush_sync_multiple_batches(self):
         """flush_sync splits large queue across multiple POSTs."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (True, 2, None)
 
         batcher = EventBatcher(mock_transport, batch_size=2)
@@ -63,7 +63,7 @@ class TestEventBatcher:
 
     def test_failed_batch_requeued(self):
         """Failed batch is re-queued to front of queue."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (False, 0, "Network error")
 
         batcher = EventBatcher(mock_transport, batch_size=2)
@@ -84,7 +84,7 @@ class TestEventBatcher:
 
     def test_auth_header_included(self):
         """Flush includes X-SDK-Key header."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (True, 1, None)
 
         batcher = EventBatcher(mock_transport, batch_size=1)
@@ -106,7 +106,7 @@ class TestEventBatcher:
 
     def test_stop_thread_safe(self):
         """stop() cleanly stops background thread."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (True, 0, None)
 
         batcher = EventBatcher(mock_transport, batch_size=50, flush_interval_seconds=1.0)
@@ -122,7 +122,7 @@ class TestEventBatcher:
 
     def test_start_is_idempotent(self):
         """start() can be called multiple times safely."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         batcher = EventBatcher(mock_transport)
 
         batcher.start()
@@ -132,7 +132,7 @@ class TestEventBatcher:
 
     def test_event_to_dict_conversion(self):
         """Events are converted to dict with correct field names."""
-        mock_transport = MagicMock(spec=FathomTransport)
+        mock_transport = MagicMock(spec=PulseDBTransport)
         mock_transport.post_ingest.return_value = (True, 1, None)
 
         batcher = EventBatcher(mock_transport, batch_size=1)

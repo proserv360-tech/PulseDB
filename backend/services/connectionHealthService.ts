@@ -8,12 +8,12 @@
  * ---------------
  * EnhancedAlertEngine is constructed as `new EnhancedAlertEngine(pool, …)` where
  * `pool` is the ADMIN pool, so every threshold rule it evaluates is measuring
- * FATHOM's own control-plane database — not the databases a user has connected.
+ * PulseDB's own control-plane database — not the databases a user has connected.
  * And when a probe fails, collectMetrics() catches, returns null, and the caller
  * does `if (!metrics) return []`. The result: an unreachable monitored database
  * produced complete silence.
  *
- * This service polls each row in fathom_connections directly and fires on
+ * This service polls each row in pulsedb_connections directly and fires on
  * transitions.
  *
  * DESIGN NOTES
@@ -43,10 +43,10 @@ import { decrypt, isEncrypted } from './encryptionService.js';
 const { Client } = pg;
 
 const DEFAULTS = {
-    intervalMs: Number(process.env.FATHOM_HEALTH_INTERVAL_MS) || 60_000,
-    timeoutMs: Number(process.env.FATHOM_HEALTH_TIMEOUT_MS) || 8_000,
-    slowMs: Number(process.env.FATHOM_HEALTH_SLOW_MS) || 2_000,
-    failureThreshold: Number(process.env.FATHOM_HEALTH_FAILURES) || 2,
+    intervalMs: Number(process.env.PULSEDB_HEALTH_INTERVAL_MS) || 60_000,
+    timeoutMs: Number(process.env.PULSEDB_HEALTH_TIMEOUT_MS) || 8_000,
+    slowMs: Number(process.env.PULSEDB_HEALTH_SLOW_MS) || 2_000,
+    failureThreshold: Number(process.env.PULSEDB_HEALTH_FAILURES) || 2,
 };
 
 function log(level, msg, meta = {}) {
@@ -119,7 +119,7 @@ export async function probeConnection(conn, timeoutMs = DEFAULTS.timeoutMs) {
 export class ConnectionHealthMonitor {
     /**
      * @param {object} opts
-     * @param {import('pg').Pool} opts.pool    — admin pool (reads fathom_connections)
+     * @param {import('pg').Pool} opts.pool    — admin pool (reads pulsedb_connections)
      * @param {object} opts.alerts             — the alert engine; needs .fire()
      */
     constructor({ pool, alerts, ...options } = {}) {
@@ -134,7 +134,7 @@ export class ConnectionHealthMonitor {
     async _loadConnections() {
         const { rows } = await this.pool.query(
             `SELECT id, name, host, port, db_name, username, password, ssl, db_type
-               FROM pgmonitoringtool.fathom_connections`,
+               FROM pgmonitoringtool.pulsedb_connections`,
         );
         return rows
             // Only Postgres for now — probing MySQL/Mongo needs their own drivers.

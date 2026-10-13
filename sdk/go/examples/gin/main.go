@@ -6,14 +6,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/fathom/fathom-go"
-	fathomgin "github.com/fathom/fathom-go/middleware/gin"
+	"github.com/pulsedb/pulsedb-go"
+	pulsedbgin "github.com/pulsedb/pulsedb-go/middleware/gin"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Initialize Fathom SDK
-	client, err := fathom.New(fathom.Config{
+	// Initialize PulseDB SDK
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test123",
 		Endpoint:      "http://localhost:3000",
 		AppName:       "gin-example",
@@ -30,8 +30,8 @@ func main() {
 	// Create Gin router
 	router := gin.Default()
 
-	// Use Fathom middleware
-	router.Use(fathomgin.Middleware(client))
+	// Use PulseDB middleware
+	router.Use(pulsedbgin.Middleware(client))
 
 	// Define routes
 	router.GET("/", func(c *gin.Context) {
@@ -72,7 +72,7 @@ func main() {
 		}, []string{"registration", "new_user"})
 
 		// Track an audit event
-		client.TrackAudit("Database Migration", fathom.AuditOpts{
+		client.TrackAudit("Database Migration", pulsedb.AuditOpts{
 			Message: "Executed migration v001_create_users_table",
 			Severity: "info",
 		})

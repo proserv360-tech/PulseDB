@@ -37,7 +37,7 @@ function log(level, msg, meta = {}) {
 
 export const AUTO_EXPLAIN_RETENTION_DAYS = Math.max(
     1,
-    Number(process.env.FATHOM_AUTO_EXPLAIN_DAYS) || 14
+    Number(process.env.PULSEDB_AUTO_EXPLAIN_DAYS) || 14
 );
 
 /**

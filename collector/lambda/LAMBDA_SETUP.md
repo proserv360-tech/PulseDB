@@ -41,11 +41,11 @@ Set environment variables:
 
 | Key                    | Value                                  |
 | ---------------------- | -------------------------------------- |
-| `FATHOM_URL`           | `https://postgres-tool.vercel.app`     |
-| `FATHOM_SDK_KEY`       | `sk_...` (Admin → SDK Integration)     |
-| `FATHOM_CONNECTION_ID` | `10` (numeric VIGIL PRD connection id) |
+| `PULSEDB_URL`           | `https://postgres-tool.vercel.app`     |
+| `PULSEDB_SDK_KEY`       | `sk_...` (Admin → SDK Integration)     |
+| `PULSEDB_CONNECTION_ID` | `10` (numeric VIGIL PRD connection id) |
 
-> The handler validates that `FATHOM_CONNECTION_ID` is a positive integer and
+> The handler validates that `PULSEDB_CONNECTION_ID` is a positive integer and
 > throws on startup otherwise.
 
 ## 3. Execution role
@@ -72,7 +72,7 @@ payload directly — no `logs:FilterLogEvents` required):
 
 ```sh
 aws lambda add-permission \
-  --function-name fathom-autoexplain \
+  --function-name pulsedb-autoexplain \
   --statement-id cwlogs-invoke \
   --principal logs.amazonaws.com \
   --action lambda:InvokeFunction \
@@ -87,9 +87,9 @@ delivery to lines that contain auto_explain output (reduces invocations):
 ```sh
 aws logs put-subscription-filter \
   --log-group-name "/aws/rds/instance/<db>/postgresql" \
-  --filter-name fathom-autoexplain \
+  --filter-name pulsedb-autoexplain \
   --filter-pattern "duration" \
-  --destination-arn "arn:aws:lambda:<region>:<account-id>:function:fathom-autoexplain"
+  --destination-arn "arn:aws:lambda:<region>:<account-id>:function:pulsedb-autoexplain"
 ```
 
 > CloudWatch allows **one** Lambda/Kinesis subscription filter per log group on

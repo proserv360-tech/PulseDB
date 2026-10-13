@@ -85,17 +85,17 @@ const DashboardInner = ({ onLogout }) => {
     });
 
     // Cross-component tab navigation. Any component can dispatch
-    //   window.dispatchEvent(new CustomEvent('fathom:navigate-tab',
+    //   window.dispatchEvent(new CustomEvent('pulsedb:navigate-tab',
     //     { detail: { tab: 'trace-correlation', payload: { traceId } } }))
     // to switch tabs and hand a payload to the target tab (read once from
-    // sessionStorage under fathom:tab-payload:<tab>).
+    // sessionStorage under pulsedb:tab-payload:<tab>).
     useEffect(() => {
         const onNav = (e) => {
             const tab = e && e.detail && e.detail.tab;
             if (!tab) return;
             if (e.detail.payload !== undefined) {
                 try {
-                    sessionStorage.setItem('fathom:tab-payload:' + tab, JSON.stringify(e.detail.payload));
+                    sessionStorage.setItem('pulsedb:tab-payload:' + tab, JSON.stringify(e.detail.payload));
                 } catch {
                     /* ignore */
                 }
@@ -107,8 +107,8 @@ const DashboardInner = ({ onLogout }) => {
                 /* ignore */
             }
         };
-        window.addEventListener('fathom:navigate-tab', onNav);
-        return () => window.removeEventListener('fathom:navigate-tab', onNav);
+        window.addEventListener('pulsedb:navigate-tab', onNav);
+        return () => window.removeEventListener('pulsedb:navigate-tab', onNav);
     }, []);
     const [notifications, setNotifications] = useState([]);
     const [latestAlert, setLatestAlert] = useState(null);

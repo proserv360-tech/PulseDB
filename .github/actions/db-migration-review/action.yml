@@ -1,13 +1,13 @@
 # .github/actions/db-migration-review/action.yml
 # ──────────────────────────────────────────────────────────────────────────────
-# FATHOM — DB Migration Review
+# PulseDB — DB Migration Review
 #
 # Composite GitHub Action that scans the SQL migration files changed in a
 # pull request, lints them for risky statements (e.g. blocking ALTERs on
 # big tables, destructive drops, missing CONCURRENTLY on index builds), and
 # posts a consolidated review comment on the PR.
 #
-# Usage (in a repo that consumes FATHOM as a tool):
+# Usage (in a repo that consumes PulseDB as a tool):
 #
 #   name: DB migration review
 #   on: pull_request
@@ -25,10 +25,10 @@
 #             migrations-glob: 'db/migrations/**/*.sql'
 #             engine: postgres            # postgres | mysql | mongo
 #             block-on-error: 'true'      # fail the job if any ERROR-level findings
-#             fathom-api-url: ${{ secrets.FATHOM_API_URL }}      # optional
-#             fathom-api-token: ${{ secrets.FATHOM_API_TOKEN }}  # optional
+#             pulsedb-api-url: ${{ secrets.PULSEDB_API_URL }}      # optional
+#             pulsedb-api-token: ${{ secrets.PULSEDB_API_TOKEN }}  # optional
 
-name: FATHOM DB Migration Review
+name: PulseDB DB Migration Review
 description: Review SQL migration files in a pull request for risky operations.
 branding: { icon: database, color: blue }
 
@@ -45,12 +45,12 @@ inputs:
     description: Fail the job if any ERROR-level findings are produced.
     required: false
     default: 'false'
-  fathom-api-url:
-    description: Optional FATHOM API endpoint. If set, findings are also recorded there.
+  pulsedb-api-url:
+    description: Optional PulseDB API endpoint. If set, findings are also recorded there.
     required: false
     default: ''
-  fathom-api-token:
-    description: Optional FATHOM API token (paired with fathom-api-url).
+  pulsedb-api-token:
+    description: Optional PulseDB API token (paired with pulsedb-api-url).
     required: false
     default: ''
 
@@ -108,7 +108,7 @@ runs:
         echo "Discovered $count migration files:"
         cat /tmp/targets.txt || true
 
-    - name: Run FATHOM migration linter
+    - name: Run PulseDB migration linter
       id: review
       if: steps.files.outputs.count != '0'
       shell: bash
@@ -145,12 +145,12 @@ runs:
           "--repo=$REPO" \
           "--pr=$PR"
 
-    - name: Report findings to FATHOM API (optional)
-      if: steps.files.outputs.count != '0' && inputs.fathom-api-url != ''
+    - name: Report findings to PulseDB API (optional)
+      if: steps.files.outputs.count != '0' && inputs.pulsedb-api-url != ''
       shell: bash
       env:
-        FATHOM_API_URL:   ${{ inputs.fathom-api-url }}
-        FATHOM_API_TOKEN: ${{ inputs.fathom-api-token }}
+        PULSEDB_API_URL:   ${{ inputs.pulsedb-api-url }}
+        PULSEDB_API_TOKEN: ${{ inputs.pulsedb-api-token }}
       run: node "$GITHUB_ACTION_PATH/report.mjs" --findings=/tmp/findings.json
 
     - name: Enforce error gate

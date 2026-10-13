@@ -1,6 +1,6 @@
 /**
  * SDKDashboardTab.tsx
- * FATHOM SDK Hub — register apps, ingest events, view metrics.
+ * PulseDB SDK Hub — register apps, ingest events, view metrics.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { THEME, useAdaptiveTheme, useGlobalRefresh } from '../../../utils/theme';
@@ -13,7 +13,7 @@ import {
 
 /* ── Fetch helpers ─────────────────────────────────────────────────────── */
 function getToken() {
-    try { return localStorage.getItem('fathom_token'); } catch { return null; }
+    try { return localStorage.getItem('pulsedb_token'); } catch { return null; }
 }
 function authHeaders() {
     const t = getToken();
@@ -681,8 +681,8 @@ function AppDetail({ app: initialApp, onBack, onDelete, onUpdate }: { app: any; 
                     <Card style={{ padding: 22 }}>
                         <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.14em', color: THEME.textMuted, textTransform: 'uppercase', marginBottom: 14 }}>Quick-start snippet</div>
                         <div style={{ background: THEME.bg, border: '1px solid rgba(99,102,241,0.10)', borderRadius: 7, padding: '14px 16px', fontSize: 12, fontFamily: THEME.fontMono, color: THEME.textMuted, lineHeight: 1.7, overflowX: 'auto' }}>
-                            <span style={{ color: THEME.primary }}>import</span> {`{Fathom}`} <span style={{ color: THEME.primary }}>from</span> <span style={{ color: THEME.success }}>'@fathom/sdk'</span><br /><br />
-                            <span style={{ color: THEME.primary }}>const</span> sdk = <span style={{ color: THEME.primary }}>new</span> Fathom({'{'}<br />
+                            <span style={{ color: THEME.primary }}>import</span> {`{PulseDB}`} <span style={{ color: THEME.primary }}>from</span> <span style={{ color: THEME.success }}>'@pulsedb/sdk'</span><br /><br />
+                            <span style={{ color: THEME.primary }}>const</span> sdk = <span style={{ color: THEME.primary }}>new</span> PulseDB({'{'}<br />
                             &nbsp;&nbsp;appId: <span style={{ color: THEME.success }}>'{app.id}'</span>,<br />
                             &nbsp;&nbsp;key: <span style={{ color: THEME.success }}>'{showKey ? sdkKey : 'sk_live_••••••••••••••••••••••••••••••••'}'</span>,<br />
                             &nbsp;&nbsp;env: <span style={{ color: THEME.success }}>'{app.environment || app.env || 'development'}'</span><br />
@@ -1013,8 +1013,8 @@ function SettingsView() {
                     <Card style={{ padding: 18 }}>
                         <div style={{ fontSize: 12.5, color: THEME.textMuted, marginBottom: 12, lineHeight: 1.6 }}>Initialize the SDK in your application:</div>
                         <div style={{ background: THEME.bg, border: '1px solid rgba(99,102,241,0.10)', borderRadius: 7, padding: '14px 16px', fontSize: 12, fontFamily: THEME.fontMono, color: THEME.textMuted, lineHeight: 1.7 }}>
-                            <span style={{ color: THEME.primary }}>import</span> {`{Fathom}`} <span style={{ color: THEME.primary }}>from</span> <span style={{ color: THEME.success }}>'@fathom/sdk'</span><br /><br />
-                            <span style={{ color: THEME.primary }}>const</span> sdk = <span style={{ color: THEME.primary }}>new</span> Fathom({'{'}<br />
+                            <span style={{ color: THEME.primary }}>import</span> {`{PulseDB}`} <span style={{ color: THEME.primary }}>from</span> <span style={{ color: THEME.success }}>'@pulsedb/sdk'</span><br /><br />
+                            <span style={{ color: THEME.primary }}>const</span> sdk = <span style={{ color: THEME.primary }}>new</span> PulseDB({'{'}<br />
                             &nbsp;&nbsp;key: <span style={{ color: THEME.success }}>'sk_live_...'</span>,<br />
                             &nbsp;&nbsp;env: <span style={{ color: THEME.success }}>'{prefs.region}'</span><br />
                             {'}'})<br />

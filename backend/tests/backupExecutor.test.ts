@@ -34,8 +34,8 @@ test('restoreCommandFor builds a pg_restore command, never executes', () => {
     assert.equal(restoreCommandFor({ artifact_uri: null }), null);
 });
 
-test('runDueBackups is inert when FATHOM_BACKUPS_ENABLED != 1', async () => {
-    delete process.env.FATHOM_BACKUPS_ENABLED;
+test('runDueBackups is inert when PULSEDB_BACKUPS_ENABLED != 1', async () => {
+    delete process.env.PULSEDB_BACKUPS_ENABLED;
     const out = await runDueBackups({
         schedules: [{ id: 1, cadence: 'daily', last_run_at: null }],
         resolveConn: async () => ({}),

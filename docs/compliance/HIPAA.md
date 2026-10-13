@@ -1,10 +1,10 @@
-# FATHOM — HIPAA Compliance Playbook
+# PulseDB — HIPAA Compliance Playbook
 
-Operating FATHOM as a HIPAA-eligible service requires three things: the
+Operating PulseDB as a HIPAA-eligible service requires three things: the
 right BAA posture, the right configuration, and the right operating
 controls. This document covers all three.
 
-FATHOM itself is not automatically HIPAA-compliant — compliance is a
+PulseDB itself is not automatically HIPAA-compliant — compliance is a
 property of **your deployment**. These are the knobs you have to turn.
 
 ## 1. Business Associate Agreements (BAAs)
@@ -14,7 +14,7 @@ Information (PHI) at any point in the pipeline.
 
 | Vendor                                  | Signed BAA needed when                                                            |
 | --------------------------------------- | --------------------------------------------------------------------------------- |
-| Your cloud provider (AWS / GCP / Azure) | You deploy FATHOM on their infra.                                                 |
+| Your cloud provider (AWS / GCP / Azure) | You deploy PulseDB on their infra.                                                 |
 | Your Postgres host                      | If the control-plane DB will hold any PHI (avoid this if possible).               |
 | Your KMS                                | Required — AWS KMS / Google Cloud KMS / Azure Key Vault all have one.             |
 | Your email provider                     | If alerts / reports can contain PHI.                                              |
@@ -30,11 +30,11 @@ Every environment handling PHI must:
     - redacts `ssn / mrn / dob / patient_id / name / email / phone /
 address` fields from every JSON response body;
     - sets `Cache-Control: no-store` on every response;
-    - emits an `X-Fathom-PHI-Access: 1` header and an audit entry for
+    - emits an `X-PulseDB-PHI-Access: 1` header and an audit entry for
       every request to `/**/patients/**`, `/**/phi/**`, `/**/records/**`.
 
-2. **Configure a BAA-eligible KMS.** Set `FATHOM_KMS_BACKEND=aws-kms`
-   and `FATHOM_KMS_KEY_ID=arn:aws:kms:…`. The `local` backend is for
+2. **Configure a BAA-eligible KMS.** Set `PULSEDB_KMS_BACKEND=aws-kms`
+   and `PULSEDB_KMS_KEY_ID=arn:aws:kms:…`. The `local` backend is for
    dev only.
 
 3. **Provision a tenant key per workspace.** Run
@@ -42,7 +42,7 @@ address` fields from every JSON response body;
    creation. All at-rest secrets for that workspace will be wrapped
    with the KEK managed by your KMS.
 
-4. **Disable the AI copilot.** Set `FATHOM_AI_DISABLED=true`. PHI must
+4. **Disable the AI copilot.** Set `PULSEDB_AI_DISABLED=true`. PHI must
    not be sent to a third-party LLM unless you have a specific BAA with
    that provider covering the flow.
 
@@ -50,12 +50,12 @@ address` fields from every JSON response body;
    immutable audit records to long-term WORM storage. Configure an S3
    bucket with Object Lock + Compliance mode.
 
-6. **Tighten retention.** Set `FATHOM_RETENTION_DAYS=2555` (7 years)
+6. **Tighten retention.** Set `PULSEDB_RETENTION_DAYS=2555` (7 years)
    for audit, `=30` for query-sample bodies. Retention is enforced by
    `retentionService.js` on a nightly job.
 
 7. **Force TLS.** Terminate at a load balancer that enforces
-   TLS 1.2+; set `FATHOM_REQUIRE_TLS=true` so in-product links also
+   TLS 1.2+; set `PULSEDB_REQUIRE_TLS=true` so in-product links also
    refuse plaintext.
 
 8. **IP allow-list admin paths.** Constrain `/api/admin/*` and
@@ -79,16 +79,16 @@ address` fields from every JSON response body;
   the table above to a yearly SOC 2 Type II report; file them in
   `docs/compliance/vendor-reports/`.
 
-## 4. What FATHOM does NOT do
+## 4. What PulseDB does NOT do
 
-- **FATHOM does not store PHI by design.** It stores telemetry about
+- **PulseDB does not store PHI by design.** It stores telemetry about
   databases and applications. If your application data model sends
-  PHI through FATHOM (for instance by surfacing a sample row in a
+  PHI through PulseDB (for instance by surfacing a sample row in a
   slow-query view), `HIPAA_MODE` will redact it, but the right answer
   is to avoid capturing it in the first place. Configure
-  `FATHOM_QUERY_SAMPLE_MODE=shape-only` to capture query shapes
+  `PULSEDB_QUERY_SAMPLE_MODE=shape-only` to capture query shapes
   without parameter values.
-- **FATHOM does not sign your BAA automatically.** Contact sales for a
+- **PulseDB does not sign your BAA automatically.** Contact sales for a
   countersigned BAA once you have deployed in HIPAA mode.
 
 ## 5. Pre-flight checklist
@@ -96,8 +96,8 @@ address` fields from every JSON response body;
 Before handling PHI in production, the following must all be true:
 
 - [ ] `HIPAA_MODE=true` in every environment variable set.
-- [ ] `FATHOM_KMS_BACKEND` is one of `aws-kms`, `gcp-kms`, `vault`.
-- [ ] `FATHOM_AI_DISABLED=true`.
+- [ ] `PULSEDB_KMS_BACKEND` is one of `aws-kms`, `gcp-kms`, `vault`.
+- [ ] `PULSEDB_AI_DISABLED=true`.
 - [ ] Every workspace has a row in `tenant_keys` with `retired_at IS NULL`.
 - [ ] Audit export target is WORM-configured S3 (Object Lock, Compliance).
 - [ ] BAAs on file with cloud, KMS, email, paging, monitoring.

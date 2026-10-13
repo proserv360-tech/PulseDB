@@ -4,7 +4,7 @@
  * Continuous schema tracking + drift timeline (gap-analysis P1-2).
  *
  * Datadog DBM's Schema Explorer tracks schema changes over time and lets
- * operators correlate them with performance regressions. FATHOM had
+ * operators correlate them with performance regressions. PulseDB had
  * on-demand schema diff only. This service captures canonical snapshots of
  * a monitored connection's schema (tables, columns, indexes), hashes them,
  * and when the hash changes computes a structured diff that is stored as
@@ -158,7 +158,7 @@ export async function captureSnapshot({ controlPool, targetPool, connectionId }:
     const hash = hashSchema(schema);
 
     const prev = await controlPool.query(
-        `SELECT id, hash, schema FROM fathom_schema_snapshots
+        `SELECT id, hash, schema FROM pulsedb_schema_snapshots
           WHERE connection_id = $1 ORDER BY captured_at DESC LIMIT 1`,
         [String(connectionId)],
     );
@@ -169,14 +169,14 @@ export async function captureSnapshot({ controlPool, targetPool, connectionId }:
 
     const changes = prev.rows.length ? diffSchemas(prev.rows[0].schema, schema) : [];
 
-    await controlPool.query(`INSERT INTO fathom_schema_snapshots (connection_id, hash, schema) VALUES ($1, $2, $3)`, [
+    await controlPool.query(`INSERT INTO pulsedb_schema_snapshots (connection_id, hash, schema) VALUES ($1, $2, $3)`, [
         String(connectionId),
         hash,
         JSON.stringify(schema),
     ]);
     for (const ch of changes) {
         await controlPool.query(
-            `INSERT INTO fathom_schema_changes (connection_id, change_type, object_type, object_name, detail)
+            `INSERT INTO pulsedb_schema_changes (connection_id, change_type, object_type, object_name, detail)
              VALUES ($1, $2, $3, $4, $5)`,
             [String(connectionId), ch.change_type, ch.object_type, ch.object_name, JSON.stringify(ch.detail)],
         );
@@ -190,7 +190,7 @@ export async function captureSnapshot({ controlPool, targetPool, connectionId }:
 export async function getTimeline({ controlPool, connectionId, limit = 100 }: any) {
     const { rows } = await controlPool.query(
         `SELECT id, change_type, object_type, object_name, detail, detected_at
-           FROM fathom_schema_changes
+           FROM pulsedb_schema_changes
           WHERE connection_id = $1
           ORDER BY detected_at DESC
           LIMIT $2`,

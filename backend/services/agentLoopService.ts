@@ -7,7 +7,7 @@
  * (Xata Agent) ship: instead of waiting for a user to open the copilot,
  * the sweep runs on the monitoring cron, feeds recent metric snapshots
  * through the anomaly-detection suite, writes deduplicated FINDINGS with a
- * draft diagnosis + proposed next step, raises a fathom_alert (which rides
+ * draft diagnosis + proposed next step, raises a pulsedb_alert (which rides
  * the existing notifier fan-out), and enqueues RCA for context assembly.
  *
  * Entry points:
@@ -83,7 +83,7 @@ export async function runAgentSweep({ pool }: { pool: any }) {
     const findings: any[] = [];
     const { rows } = await pool.query(
         `SELECT time_bucket, avg_qps, avg_tps, avg_latency_p95_ms, avg_latency_p99_ms
-           FROM fathom_metric_snapshots
+           FROM pulsedb_metric_snapshots
           ORDER BY time_bucket DESC
           LIMIT 96`,
     );
@@ -106,7 +106,7 @@ export async function runAgentSweep({ pool }: { pool: any }) {
 
         // Dedupe: skip if an open finding for this metric exists in the window.
         const dup = await pool.query(
-            `SELECT id FROM fathom_agent_findings
+            `SELECT id FROM pulsedb_agent_findings
               WHERE metric = $1 AND status = 'open'
                 AND detected_at > now() - ($2 || ' minutes')::interval
               LIMIT 1`,
@@ -115,7 +115,7 @@ export async function runAgentSweep({ pool }: { pool: any }) {
         if (dup.rows.length) continue;
 
         const ins = await pool.query(
-            `INSERT INTO fathom_agent_findings (metric, severity, title, summary, proposal, context)
+            `INSERT INTO pulsedb_agent_findings (metric, severity, title, summary, proposal, context)
              VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING id, detected_at`,
             [
@@ -137,7 +137,7 @@ export async function runAgentSweep({ pool }: { pool: any }) {
         // Ride the existing alert pipeline (fan-out, unread badge, RCA enqueue).
         try {
             await pool.query(
-                `INSERT INTO fathom_alerts (severity, title, message, fingerprint, source)
+                `INSERT INTO pulsedb_alerts (severity, title, message, fingerprint, source)
                  VALUES ($1, $2, $3, $4, 'agent')
                  ON CONFLICT (fingerprint) DO NOTHING`,
                 [
@@ -177,7 +177,7 @@ export async function listFindings({ pool, status = null, limit = 50 }: any) {
     const { rows } = await pool.query(
         `SELECT id, metric, severity, title, summary, proposal, context, status,
                 detected_at, acked_at, resolved_at
-           FROM fathom_agent_findings ${where}
+           FROM pulsedb_agent_findings ${where}
           ORDER BY detected_at DESC
           LIMIT $${params.length}`,
         params,
@@ -191,7 +191,7 @@ export async function setFindingStatus({ pool, id, status }: any) {
     }
     const col = status === 'acked' ? 'acked_at' : status === 'resolved' ? 'resolved_at' : null;
     const { rows } = await pool.query(
-        `UPDATE fathom_agent_findings
+        `UPDATE pulsedb_agent_findings
             SET status = $2 ${col ? `, ${col} = now()` : ''}
           WHERE id = $1
           RETURNING id, status`,

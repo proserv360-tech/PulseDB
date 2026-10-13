@@ -1,4 +1,4 @@
-# FATHOM SDK Framework - Complete Index
+# PulseDB SDK Framework - Complete Index
 
 ## Quick Navigation
 
@@ -24,7 +24,7 @@ sdk/
 ├── src/
 │   ├── index.js                    # Main entry point - exports all classes
 │   ├── core/                       # Core SDK components
-│   │   ├── client.js              # FathomClient - main API client
+│   │   ├── client.js              # PulseDBClient - main API client
 │   │   ├── auth.js                # AuthManager - authentication
 │   │   ├── logger.js              # Logger - structured logging
 │   │   └── events.js              # EventEmitter - event system
@@ -46,7 +46,7 @@ Main SDK entry point. Exports all classes.
 
 **Exports:**
 
-- `FathomClient`
+- `PulseDBClient`
 - `SalesforceConnector`
 - `MulesoftConnector`
 - `DatabaseConnector`
@@ -58,7 +58,7 @@ Main SDK entry point. Exports all classes.
 
 #### core/client.js (486 lines)
 
-**FathomClient** - Main API client for FATHOM monitoring platform
+**PulseDBClient** - Main API client for PulseDB monitoring platform
 
 **Key Methods:**
 
@@ -75,7 +75,7 @@ Main SDK entry point. Exports all classes.
 
 ```javascript
 {
-  baseUrl: 'https://api.fathom.example.com',
+  baseUrl: 'https://api.pulsedb.example.com',
   apiKey: 'sk_test_...',
   orgId: 'org_123',
   options: { timeout, retryAttempts, logLevel }
@@ -149,7 +149,7 @@ Main SDK entry point. Exports all classes.
 - `getOrgs()` / `getObjects()`
 - `getAuditTrail()`
 - `subscribeToEvents()`
-- `syncToFathom()`
+- `syncToPulseDB()`
 
 **Configuration:**
 
@@ -179,7 +179,7 @@ Main SDK entry point. Exports all classes.
 - `getApiManagerApis()`
 - `getApiAnalytics()`
 - `getAlerts()` / `getAuditLogs()`
-- `syncToFathom()`
+- `syncToPulseDB()`
 
 **Configuration:**
 
@@ -241,7 +241,7 @@ NPM package configuration
 
 **Key Details:**
 
-- Name: `@fathom/sdk`
+- Name: `@pulsedb/sdk`
 - Version: `1.0.0`
 - Type: ES Module
 - Node.js: >= 18.0.0
@@ -250,11 +250,11 @@ NPM package configuration
 **Export Points:**
 
 ```javascript
-import { FathomClient } from '@fathom/sdk';
-import { FathomClient } from '@fathom/sdk/client';
-import { SalesforceConnector } from '@fathom/sdk/salesforce';
-import { MulesoftConnector } from '@fathom/sdk/mulesoft';
-import { DatabaseConnector } from '@fathom/sdk/database';
+import { PulseDBClient } from '@pulsedb/sdk';
+import { PulseDBClient } from '@pulsedb/sdk/client';
+import { SalesforceConnector } from '@pulsedb/sdk/salesforce';
+import { MulesoftConnector } from '@pulsedb/sdk/mulesoft';
+import { DatabaseConnector } from '@pulsedb/sdk/database';
 ```
 
 ---
@@ -264,10 +264,10 @@ import { DatabaseConnector } from '@fathom/sdk/database';
 ### Basic Client Setup
 
 ```javascript
-import { FathomClient } from '@fathom/sdk';
+import { PulseDBClient } from '@pulsedb/sdk';
 
-const client = new FathomClient({
-    baseUrl: 'https://api.fathom.example.com',
+const client = new PulseDBClient({
+    baseUrl: 'https://api.pulsedb.example.com',
     apiKey: 'sk_test_...',
     orgId: 'org_123',
 });
@@ -278,7 +278,7 @@ await client.connect();
 ### Salesforce Integration
 
 ```javascript
-import { SalesforceConnector } from '@fathom/sdk';
+import { SalesforceConnector } from '@pulsedb/sdk';
 
 const sf = new SalesforceConnector({
     /* config */
@@ -290,7 +290,7 @@ const metrics = await sf.getMetrics();
 ### Mulesoft Integration
 
 ```javascript
-import { MulesoftConnector } from '@fathom/sdk';
+import { MulesoftConnector } from '@pulsedb/sdk';
 
 const mule = new MulesoftConnector({
     /* config */
@@ -302,7 +302,7 @@ const apps = await mule.getApps();
 ### Database Monitoring
 
 ```javascript
-import { DatabaseConnector } from '@fathom/sdk';
+import { DatabaseConnector } from '@pulsedb/sdk';
 
 const db = new DatabaseConnector({
     /* config */
@@ -380,7 +380,7 @@ client.on('error', (error) => {
 
 ## API Reference Quick Links
 
-### FathomClient Methods
+### PulseDBClient Methods
 
 - `connect()` → Promise
 - `disconnect()` → Promise
@@ -402,7 +402,7 @@ client.on('error', (error) => {
 - `getMetrics()` → Promise
 - `getAuditTrail(options)` → Promise
 - `subscribeToEvents(channel, callback)` → string
-- `syncToFathom(client, options)` → Promise
+- `syncToPulseDB(client, options)` → Promise
 
 ### MulesoftConnector Methods
 
@@ -413,7 +413,7 @@ client.on('error', (error) => {
 - `getApiAnalytics(apiId, options)` → Promise
 - `getAlerts(options)` → Promise
 - `getAuditLogs(options)` → Promise
-- `syncToFathom(client, options)` → Promise
+- `syncToPulseDB(client, options)` → Promise
 
 ### DatabaseConnector Methods
 
@@ -490,7 +490,7 @@ client.on('error', (error) => {
 1. **Install the SDK**
 
     ```bash
-    npm install @fathom/sdk
+    npm install @pulsedb/sdk
     ```
 
 2. **Review README.md** for comprehensive guide

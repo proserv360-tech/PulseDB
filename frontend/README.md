@@ -1,4 +1,4 @@
-# FATHOM frontend
+# PulseDB frontend
 
 React 19 + Vite SPA. Run `npm run dev` (proxies `/api` and `/ws` to the
 backend on port 5000), `npm run build`, `npm run test:run`.

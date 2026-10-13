@@ -1,6 +1,6 @@
 // @ts-nocheck — legacy JS migrated 2026-06-10; remove after typing this module (see docs/TS_MIGRATION.md)
 // ==========================================================================
-//  FATHOM — /api/overview/top-tables
+//  PulseDB — /api/overview/top-tables
 //  Returns: top N tables ranked by total I/O (reads + writes)
 // ==========================================================================
 

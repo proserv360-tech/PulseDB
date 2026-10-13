@@ -17,7 +17,7 @@ export function startBackgroundJobs() {
     // ── A3: Postgres wait-event sampler ─────────────────────────────────────────
     // Polls pg_stat_activity at 1 Hz across registered Postgres connections.
     // Skipped on Vercel and in tests; moves to the worker tier in B1.
-    if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test' && process.env.FATHOM_WAIT_EVENTS !== 'off') {
+    if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test' && process.env.PULSEDB_WAIT_EVENTS !== 'off') {
         (async () => {
             try {
                 const { startWaitEventSampler } = await import('../services/waitEventSampler.js');

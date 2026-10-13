@@ -7,7 +7,7 @@
 -- 0029's rules came from services/metricsRegistry.ts, which collects metrics
 -- from a database that is already answering. These three come from
 -- services/connectionHealthService.ts, which probes each row in
--- fathom_connections directly and fires on state transitions.
+-- pulsedb_connections directly and fires on state transitions.
 --
 -- That distinction matters: every rule in 0028 and 0029 is unmeasurable when the
 -- database is unreachable, because the collector cannot run. Before the health
@@ -24,10 +24,10 @@
 -- one place:
 --
 --   connection_unreachable  threshold 2     — consecutive failed probes before
---                                             alerting (FATHOM_HEALTH_FAILURES).
+--                                             alerting (PULSEDB_HEALTH_FAILURES).
 --                                             One dropped packet must not page.
 --   connection_slow         threshold 2000  — round-trip ms for SELECT 1
---                                             (FATHOM_HEALTH_SLOW_MS).
+--                                             (PULSEDB_HEALTH_SLOW_MS).
 --   connection_recovered    threshold 1     — one successful probe closes it out.
 --
 -- Changing a value here does not change the monitor's behaviour — it reads the

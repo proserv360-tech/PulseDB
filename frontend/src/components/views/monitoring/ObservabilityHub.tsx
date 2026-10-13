@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — ObservabilityHub (Unified Monitoring Dashboard) — v3.2.1 layout
+//  PulseDB — ObservabilityHub (Unified Monitoring Dashboard) — v3.2.1 layout
 //  Ported from observability_enterprise_v2 mockup, themed with THEME tokens.
 // ==========================================================================
 import React, { useState, useEffect, useMemo } from 'react';
@@ -687,7 +687,7 @@ const ObservabilityHub = ({ initialSection = 'overview', hideSidebar = false } =
                     <div className="ohx-sub">
                         {section === 'overview' || section === 'all'
                             ? 'Unified monitoring for API performance, exceptions, uptime, audit logs, and job execution'
-                            : `FATHOM observability — ${SECTION_TITLE[section] || ''}`}
+                            : `PulseDB observability — ${SECTION_TITLE[section] || ''}`}
                     </div>
 
                     {section === 'all' ? (

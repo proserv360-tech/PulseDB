@@ -15,7 +15,7 @@
  * Redux/Zustand dep — this is one value with one publisher.
  */
 
-const KEY = 'fathom_latest_query_plan';
+const KEY = 'pulsedb_latest_query_plan';
 const MAX_BYTES = 512 * 1024; // cap localStorage payload at 512 KB
 
 export type PlanRecord = {

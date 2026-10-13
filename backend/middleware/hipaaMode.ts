@@ -14,7 +14,7 @@
  *     integrations — handled elsewhere (integrationsService); this file
  *     exposes the helper `isHipaaMode()` those hooks consume.
  *
- * The goal is not to make FATHOM automatically HIPAA-compliant — that is
+ * The goal is not to make PulseDB automatically HIPAA-compliant — that is
  * always a BAA, policy, and configuration exercise — but to flip a
  * handful of guardrails so operators aren't one-line away from logging
  * PHI in plaintext.
@@ -82,7 +82,7 @@ export function hipaaMiddleware({ log = (..._args: any[]) => {} }: { log?: (...a
         // Tag PHI-adjacent paths so audit downstream can filter.
         const p = req.path || '';
         if (/\/patients\/|\/phi\/|\/records\//.test(p)) {
-            res.setHeader('X-Fathom-PHI-Access', '1');
+            res.setHeader('X-PulseDB-PHI-Access', '1');
             log('INFO', 'phi-access', {
                 path: p,
                 method: req.method,

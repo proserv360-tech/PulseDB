@@ -1,7 +1,7 @@
-module github.com/fathom/fathom-go/examples/nethttp
+module github.com/pulsedb/pulsedb-go/examples/nethttp
 
 go 1.21
 
-require github.com/fathom/fathom-go v0.1.0
+require github.com/pulsedb/pulsedb-go v0.1.0
 
-replace github.com/fathom/fathom-go => ../..
+replace github.com/pulsedb/pulsedb-go => ../..

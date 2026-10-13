@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fathom/fathom-go"
+	"github.com/pulsedb/pulsedb-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,7 +38,7 @@ func TestGinMiddlewareTracksRequest(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := fathom.New(fathom.Config{
+	client, err := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -97,7 +97,7 @@ func TestGinMiddlewareRecordsStatusCode(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -148,7 +148,7 @@ func TestGinMiddlewareRecordsMethod(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -199,7 +199,7 @@ func TestGinMiddlewareRecordsDuration(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -247,7 +247,7 @@ func TestGinMiddlewareMultipleRequests(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,
@@ -303,7 +303,7 @@ func TestGinMiddlewareWithError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, _ := fathom.New(fathom.Config{
+	client, _ := pulsedb.New(pulsedb.Config{
 		APIKey:        "sk_live_test",
 		Endpoint:      server.URL,
 		BatchSize:     1,

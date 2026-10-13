@@ -32,7 +32,7 @@ import { BarChart2, TrendingUp, PieChart as PieIcon, Maximize2, Download, X, Tab
  * - Chart type selector: Line, Bar, Area, Pie, Scatter
  * - X-axis and Y-axis column selectors (dropdowns)
  * - Uses Recharts: LineChart, BarChart, AreaChart, PieChart, ScatterChart
- * - Color theme matching FATHOM (cyan, violet, emerald, amber, rose)
+ * - Color theme matching PulseDB (cyan, violet, emerald, amber, rose)
  * - Export button: "Save as PNG" (using canvas toDataURL)
  * - Toggle between Table view and Chart view
  * - Responsive chart sizing
@@ -47,7 +47,7 @@ const ChartBuilder = ({ columns = [], rows = [], onClose = null }) => {
     const [yAxisColumn, setYAxisColumn] = useState(columns[1] || '');
     const chartContainerRef = useRef(null);
 
-    // FATHOM color palette
+    // PulseDB color palette
     const chartColors = [
         THEME.primary, // Purple
         THEME.primaryDark, // Teal

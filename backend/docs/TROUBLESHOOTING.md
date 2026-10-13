@@ -1,4 +1,4 @@
-# FATHOM — Troubleshooting
+# PulseDB — Troubleshooting
 
 The backend surfaces structured diagnostic codes on every failure path so you
 should almost never have to dig through stack traces. There are three places
@@ -23,8 +23,8 @@ names the blocker:
     "schema": {
       "ok": false,
       "code": "SCHEMA_NOT_MIGRATED",
-      "missing": ["fathom_connections"],
-      "hint": "Missing tables: fathom_connections. Run migrations: npm run migrate --workspace=backend."
+      "missing": ["pulsedb_connections"],
+      "hint": "Missing tables: pulsedb_connections. Run migrations: npm run migrate --workspace=backend."
     },
     "blockers": [ … ]
   }
@@ -36,13 +36,13 @@ names the blocker:
 Runs the same checks from CI or your terminal and prints a readable table:
 
 ```
-FATHOM doctor — checking configuration…
+PulseDB doctor — checking configuration…
 ------------------------------------------------------------------------
 [ OK ]  ENCRYPTION_KEY        OK
 [FAIL]  DATABASE_URL          SCHEMA_NOT_MIGRATED
-         hint: Missing tables: fathom_connections. Run migrations: …
+         hint: Missing tables: pulsedb_connections. Run migrations: …
 [FAIL]  Control-plane schema  SCHEMA_NOT_MIGRATED
-         missing: fathom_connections
+         missing: pulsedb_connections
 [ OK ]  JWT_SECRET            OK
 ------------------------------------------------------------------------
 1 blocker(s) — fix the items above and re-run `npm run doctor`.
@@ -75,7 +75,7 @@ or invalid. Log output:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  FATHOM MISCONFIGURED — ENCRYPTION_NOT_CONFIGURED
+  PulseDB MISCONFIGURED — ENCRYPTION_NOT_CONFIGURED
   Set ENCRYPTION_KEY on the host. Generate with: node -e "…"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -85,7 +85,7 @@ deployment UI.
 
 To temporarily start a non-prod instance without encryption configured (for
 debugging — do not use in production), set
-`FATHOM_ALLOW_DEGRADED_BOOT=true`. Write paths will return 503 until the env
+`PULSEDB_ALLOW_DEGRADED_BOOT=true`. Write paths will return 503 until the env
 is fixed.
 
 ## Generating secrets

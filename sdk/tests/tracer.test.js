@@ -1,15 +1,15 @@
 /**
- * Unit tests for FATHOM SDK Tracer
+ * Unit tests for PulseDB SDK Tracer
  * Run with: node --test tests/tracer.test.js
  */
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { FathomTracer, Span } from '../src/core/tracer.js';
+import { PulseDBTracer, Span } from '../src/core/tracer.js';
 import { SpanBatcher } from '../src/core/spanBatcher.js';
 
 test('Tracer: startSpan creates valid span', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
 
   const span = tracer.startSpan('test-operation', {
     attributes: { 'user.id': 'u123' },
@@ -26,8 +26,8 @@ test('Tracer: startSpan creates valid span', () => {
 });
 
 test('Tracer: setAttribute updates span attributes', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
   const span = tracer.startSpan('op');
 
   span.setAttribute('http.status_code', 200);
@@ -38,8 +38,8 @@ test('Tracer: setAttribute updates span attributes', () => {
 });
 
 test('Tracer: recordException captures error details', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
   const span = tracer.startSpan('op');
 
   const error = new Error('Test error');
@@ -52,8 +52,8 @@ test('Tracer: recordException captures error details', () => {
 });
 
 test('Tracer: end() sets endTimeUnixNano and status', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
   const span = tracer.startSpan('op');
 
   assert.equal(span.endTimeUnixNano, null);
@@ -67,8 +67,8 @@ test('Tracer: end() sets endTimeUnixNano and status', () => {
 });
 
 test('Tracer: injectHeaders adds W3C traceparent', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
   const span = tracer.startSpan('op');
 
   const headers = {};
@@ -85,8 +85,8 @@ test('Tracer: injectHeaders adds W3C traceparent', () => {
 });
 
 test('Tracer: extractContext parses W3C traceparent', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
 
   const headers = {
     traceparent: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
@@ -101,8 +101,8 @@ test('Tracer: extractContext parses W3C traceparent', () => {
 });
 
 test('Tracer: extractContext returns null for missing traceparent', () => {
-  const mockClient = { endpoint: 'https://fathom.app', appName: 'test', _log: () => {} };
-  const tracer = new FathomTracer(mockClient);
+  const mockClient = { endpoint: 'https://pulsedb.app', appName: 'test', _log: () => {} };
+  const tracer = new PulseDBTracer(mockClient);
 
   const ctx = tracer.extractContext({});
 
@@ -110,7 +110,7 @@ test('Tracer: extractContext returns null for missing traceparent', () => {
 });
 
 test('SpanBatcher: enqueue adds span to queue', () => {
-  const mockClient = { endpoint: 'https://fathom.app', apiKey: 'test', appName: 'test', _log: () => {} };
+  const mockClient = { endpoint: 'https://pulsedb.app', apiKey: 'test', appName: 'test', _log: () => {} };
   const batcher = new SpanBatcher(mockClient, 100, 1000);
 
   const span = new Span('trace1', 'span1', 'op1');
@@ -121,7 +121,7 @@ test('SpanBatcher: enqueue adds span to queue', () => {
 });
 
 test('SpanBatcher: buildOtlpPayload creates valid OTLP structure', () => {
-  const mockClient = { endpoint: 'https://fathom.app', apiKey: 'test', appName: 'my-app', _log: () => {} };
+  const mockClient = { endpoint: 'https://pulsedb.app', apiKey: 'test', appName: 'my-app', _log: () => {} };
   const batcher = new SpanBatcher(mockClient, 100, 1000);
 
   const span = new Span('trace1', 'span1', 'test-op');
@@ -134,7 +134,7 @@ test('SpanBatcher: buildOtlpPayload creates valid OTLP structure', () => {
   assert.equal(payload.resourceSpans.length, 1);
   assert.ok(payload.resourceSpans[0].resource);
   assert.ok(payload.resourceSpans[0].scopeSpans);
-  assert.equal(payload.resourceSpans[0].scopeSpans[0].scope.name, '@fathom/sdk');
+  assert.equal(payload.resourceSpans[0].scopeSpans[0].scope.name, '@pulsedb/sdk');
   assert.ok(payload.resourceSpans[0].scopeSpans[0].spans.length > 0);
 });
 

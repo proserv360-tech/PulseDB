@@ -43,7 +43,7 @@ export default function registerAuthRoutes(app) {
             // (bypassing the startup guard above), omitted the audience/issuer
             // claims that authenticate() verifies, omitted the `sid` claim that the
             // revocation check requires, and wrote the result to a cookie named
-            // `fathom_session` which readAuthCookie() never reads. The token it
+            // `pulsedb_session` which readAuthCookie() never reads. The token it
             // returned could therefore never authenticate a subsequent request.
             //
             // The correct behaviour: this request ALREADY carried a valid, non-

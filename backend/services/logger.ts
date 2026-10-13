@@ -28,7 +28,7 @@ const LEVEL = (process.env.LOG_LEVEL || 'info').toLowerCase();
 export const logger = pino
     ? pino({
           level: LEVEL,
-          base: { service: 'fathom-backend' },
+          base: { service: 'pulsedb-backend' },
           timestamp: pino.stdTimeFunctions.isoTime,
           redact: {
               paths: [

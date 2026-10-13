@@ -1,4 +1,4 @@
-# FATHOM — Phase 3 + 4 Deliverables
+# PulseDB — Phase 3 + 4 Deliverables
 
 Phase 3 + 4 operationalise section 7 of the strategic roadmap: distributed
 tracing plus desktop-grade query-editor features. Everything below is shipped
@@ -119,7 +119,7 @@ node --test tests/otlpTraceService.test.js \
             tests/schemaDiffService.test.js
 
 # SDKs
-cd sdk            && node --test tests/fathom.test.js tests/tracer.test.js
+cd sdk            && node --test tests/pulsedb.test.js tests/tracer.test.js
 cd sdk/python     && pytest -q
 cd sdk/go         && go test ./... -race -count=1
 cd sdk/go/middleware/gin && go test ./... -race -count=1

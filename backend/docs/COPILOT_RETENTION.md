@@ -12,7 +12,7 @@ exposure of any regulated identifier that slips through.
 ## TTL
 
 - **Default:** 30 days.
-- **Override:** set `FATHOM_COPILOT_HISTORY_DAYS=<n>` in the backend env.
+- **Override:** set `PULSEDB_COPILOT_HISTORY_DAYS=<n>` in the backend env.
 - **Minimum:** 1 day (clamped server-side).
 
 ## Scheduled purge

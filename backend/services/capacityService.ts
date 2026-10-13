@@ -12,7 +12,7 @@
  *   getForecast(client, opts)  → -30…+days projection via linear regression
  *   getActions(client)         → data-driven reclaim/archive/vacuum suggestions
  *
- * History source: pgmonitoringtool.fathom_capacity_history (one row per table
+ * History source: pgmonitoringtool.pulsedb_capacity_history (one row per table
  * per snapshot). If the history table is empty we fall back to a single
  * synthetic "today" point so the UI still renders, and growth is estimated
  * from n_tup_ins / n_live_tup ratios in pg_stat_user_tables.
@@ -31,7 +31,7 @@ function toGB(bytes) {
 export async function ensureCapacityHistory(appPool) {
     await appPool.query(`CREATE SCHEMA IF NOT EXISTS pgmonitoringtool`);
     await appPool.query(`
-        CREATE TABLE IF NOT EXISTS pgmonitoringtool.fathom_capacity_history (
+        CREATE TABLE IF NOT EXISTS pgmonitoringtool.pulsedb_capacity_history (
             id            BIGSERIAL    PRIMARY KEY,
             connection_id TEXT         NOT NULL,
             captured_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -41,8 +41,8 @@ export async function ensureCapacityHistory(appPool) {
             row_estimate  BIGINT
         )`);
     await appPool.query(`
-        CREATE INDEX IF NOT EXISTS fathom_capacity_history_conn_time_idx
-            ON pgmonitoringtool.fathom_capacity_history (connection_id, captured_at DESC)`);
+        CREATE INDEX IF NOT EXISTS pulsedb_capacity_history_conn_time_idx
+            ON pgmonitoringtool.pulsedb_capacity_history (connection_id, captured_at DESC)`);
 }
 
 /**
@@ -79,7 +79,7 @@ export async function captureSnapshot(appPool, client, connectionId) {
     }
     if (values.length > 0) {
         await appPool.query(
-            `INSERT INTO pgmonitoringtool.fathom_capacity_history
+            `INSERT INTO pgmonitoringtool.pulsedb_capacity_history
                 (connection_id, db_size_bytes, table_name, table_bytes, row_estimate)
              VALUES ${values.join(', ')}`,
             params
@@ -132,7 +132,7 @@ export async function getStats(client, opts = {}) {
         await ensureCapacityHistory(appPool);
         const hist = await appPool.query(
             `SELECT captured_at, db_size_bytes
-             FROM   pgmonitoringtool.fathom_capacity_history
+             FROM   pgmonitoringtool.pulsedb_capacity_history
              WHERE  connection_id = $1
              GROUP  BY captured_at, db_size_bytes
              ORDER  BY captured_at ASC
@@ -214,7 +214,7 @@ export async function getTableBreakdown(client, opts = {}) {
             SELECT table_name,
                    date_trunc('week', captured_at) AS wk,
                    AVG(table_bytes)                 AS bytes
-            FROM   pgmonitoringtool.fathom_capacity_history
+            FROM   pgmonitoringtool.pulsedb_capacity_history
             WHERE  connection_id = $1
               AND  table_name = ANY($2)
               AND  captured_at > now() - interval '8 weeks'
@@ -273,7 +273,7 @@ export async function getForecast(client, opts = {}) {
         await ensureCapacityHistory(appPool);
         const hist = await appPool.query(`
             SELECT captured_at, db_size_bytes
-            FROM   pgmonitoringtool.fathom_capacity_history
+            FROM   pgmonitoringtool.pulsedb_capacity_history
             WHERE  connection_id = $1
             GROUP  BY captured_at, db_size_bytes
             ORDER  BY captured_at ASC

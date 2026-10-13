@@ -1,5 +1,5 @@
 /**
- * FathomClient - Core FATHOM SDK client
+ * PulseDBClient - Core PulseDB SDK client
  * Universal database monitoring integration with external platform connectors
  */
 
@@ -8,8 +8,8 @@ import { Logger } from './logger.js';
 import { AuthManager } from './auth.js';
 
 /**
- * @typedef {Object} FathomClientConfig
- * @property {string} baseUrl - FATHOM API base URL
+ * @typedef {Object} PulseDBClientConfig
+ * @property {string} baseUrl - PulseDB API base URL
  * @property {string} apiKey - API key for authentication
  * @property {string} orgId - Organization ID
  * @property {Object} [options] - Additional options
@@ -20,23 +20,23 @@ import { AuthManager } from './auth.js';
  */
 
 /**
- * @typedef {Object} FathomMetrics
+ * @typedef {Object} PulseDBMetrics
  * @property {string} dbType - Database type (postgresql, mysql, mongodb)
  * @property {string} connectionId - Connection ID
  * @property {Object} metrics - Performance metrics
  * @property {number} timestamp - Metric timestamp
  */
 
-export class FathomClient extends EventEmitter {
+export class PulseDBClient extends EventEmitter {
   /**
-   * Creates a new FathomClient instance
+   * Creates a new PulseDBClient instance
    *
-   * @param {FathomClientConfig} config - Client configuration
+   * @param {PulseDBClientConfig} config - Client configuration
    * @throws {Error} If config is invalid
    *
    * @example
-   * const client = new FathomClient({
-   *   baseUrl: 'https://api.fathom.example.com',
+   * const client = new PulseDBClient({
+   *   baseUrl: 'https://api.pulsedb.example.com',
    *   apiKey: 'sk_test_...',
    *   orgId: 'org_123',
    *   options: {
@@ -49,7 +49,7 @@ export class FathomClient extends EventEmitter {
     super();
 
     if (!config || !config.baseUrl || !config.apiKey || !config.orgId) {
-      throw new Error('FathomClient requires baseUrl, apiKey, and orgId');
+      throw new Error('PulseDBClient requires baseUrl, apiKey, and orgId');
     }
 
     this.baseUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
@@ -63,7 +63,7 @@ export class FathomClient extends EventEmitter {
 
     // Initialize core components
     this.logger = new Logger({
-      name: 'FathomClient',
+      name: 'PulseDBClient',
       level: opts.logLevel || 'info',
     });
 
@@ -83,33 +83,33 @@ export class FathomClient extends EventEmitter {
     this.healthCheckInterval = null;
     this.metricsCollectionInterval = null;
 
-    this.logger.info('FathomClient initialized', { baseUrl: this.baseUrl, orgId: this.orgId });
+    this.logger.info('PulseDBClient initialized', { baseUrl: this.baseUrl, orgId: this.orgId });
   }
 
   /**
-   * Connect to FATHOM API
+   * Connect to PulseDB API
    *
    * @returns {Promise<void>}
    * @throws {Error} If connection fails
    *
    * @example
    * await client.connect();
-   * console.log('Connected to FATHOM');
+   * console.log('Connected to PulseDB');
    */
   async connect() {
     try {
-      this.logger.info('Connecting to FATHOM');
+      this.logger.info('Connecting to PulseDB');
 
       const response = await this._request('/api/v1/health', {
         method: 'GET',
       });
 
       if (response.status !== 'ok') {
-        throw new Error('FATHOM health check failed');
+        throw new Error('PulseDB health check failed');
       }
 
       this.isConnected = true;
-      this.logger.info('Connected to FATHOM successfully');
+      this.logger.info('Connected to PulseDB successfully');
       this.emit('connected', { timestamp: Date.now() });
 
       // Start health checks and metrics collection
@@ -123,7 +123,7 @@ export class FathomClient extends EventEmitter {
   }
 
   /**
-   * Disconnect from FATHOM API
+   * Disconnect from PulseDB API
    *
    * @returns {Promise<void>}
    *
@@ -132,7 +132,7 @@ export class FathomClient extends EventEmitter {
    */
   async disconnect() {
     try {
-      this.logger.info('Disconnecting from FATHOM');
+      this.logger.info('Disconnecting from PulseDB');
 
       // Stop health checks
       this._stopHealthChecks();
@@ -153,7 +153,7 @@ export class FathomClient extends EventEmitter {
       this.metrics.clear();
 
       this.isConnected = false;
-      this.logger.info('Disconnected from FATHOM');
+      this.logger.info('Disconnected from PulseDB');
       this.emit('disconnected', { timestamp: Date.now() });
     } catch (error) {
       this.logger.error('Disconnection error', error);
@@ -437,7 +437,7 @@ export class FathomClient extends EventEmitter {
    */
   _ensureConnected() {
     if (!this.isConnected) {
-      throw new Error('FathomClient is not connected. Call connect() first.');
+      throw new Error('PulseDBClient is not connected. Call connect() first.');
     }
   }
 

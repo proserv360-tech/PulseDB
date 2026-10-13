@@ -1,4 +1,4 @@
-# FATHOM Frontend Test Framework Index
+# PulseDB Frontend Test Framework Index
 
 ## Quick Links
 

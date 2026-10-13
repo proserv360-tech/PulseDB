@@ -3,7 +3,7 @@
     "server": {
         "version": "MongoDB 7.0.8",
         "uptime_days": 62,
-        "host": "mongo-prod-01.fathom.demo",
+        "host": "mongo-prod-01.pulsedb.demo",
         "port": 27017,
         "storage_engine": "WiredTiger"
     },

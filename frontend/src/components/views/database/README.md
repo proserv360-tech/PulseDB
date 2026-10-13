@@ -1,4 +1,4 @@
-# FATHOM Database Components - TypeScript Edition
+# PulseDB Database Components - TypeScript Edition
 
 Complete TypeScript conversion of 13 production-grade database visualization and analysis components.
 
@@ -204,7 +204,7 @@ interface MyComponentProps {
 ✅ **Design System Integration**
 
 - THEME object compatibility
-- Consistent styling with fathom-\* colors
+- Consistent styling with pulsedb-\* colors
 - Responsive layouts
 
 ✅ **Performance**

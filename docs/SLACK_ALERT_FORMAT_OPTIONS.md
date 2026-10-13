@@ -68,7 +68,7 @@ nothing. The genuinely useful "why" — 62% bloat — is already in the metric.
 ### 1.4 The footer is addressed to a machine
 
 ```
-Sent by Fathom · or /ack <incident-id> · alert d9832ad1-5031-41c5-9605-2928a53e0e69
+Sent by PulseDB · or /ack <incident-id> · alert d9832ad1-5031-41c5-9605-2928a53e0e69
 ```
 
 The alert UUID is unusable by a human: it is not what `/ack` takes (that wants

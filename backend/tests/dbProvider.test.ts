@@ -58,7 +58,7 @@ test('checkDbProvider warns about pooler during migration', async () => {
             env: {
                 DATABASE_URL: 'postgresql://postgres.abcd:x@aws-0-us-east-1.pooler.supabase.com:6543/postgres',
                 DB_SSL: 'true',
-                FATHOM_RUNNING_MIGRATION: 'true',
+                PULSEDB_RUNNING_MIGRATION: 'true',
             },
         },
     );

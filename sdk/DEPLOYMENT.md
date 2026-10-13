@@ -1,8 +1,8 @@
-# FATHOM SDK - Deployment & Integration Guide
+# PulseDB SDK - Deployment & Integration Guide
 
 ## Package Overview
 
-**@fathom/sdk** is a lightweight, zero-dependency JavaScript SDK for integrating applications with the FATHOM observability platform.
+**@pulsedb/sdk** is a lightweight, zero-dependency JavaScript SDK for integrating applications with the PulseDB observability platform.
 
 - **Location**: `/sessions/zealous-dazzling-mendel/mnt/PostgresTool/sdk/`
 - **Package Size**: ~136 KB (source + docs)
@@ -17,23 +17,23 @@
 ### 1. Install the SDK
 
 ```bash
-npm install @fathom/sdk
+npm install @pulsedb/sdk
 ```
 
 ### 2. Initialize in Your Application
 
 ```javascript
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: 'my-app',
     environment: process.env.NODE_ENV || 'production',
     debug: false,
 });
 
-fathom.start();
+pulsedb.start();
 ```
 
 ### 3. Add Express Middleware (if using Express)
@@ -42,7 +42,7 @@ fathom.start();
 import express from 'express';
 
 const app = express();
-app.use(fathom.expressMiddleware());
+app.use(pulsedb.expressMiddleware());
 // All routes now auto-tracked!
 ```
 
@@ -50,7 +50,7 @@ app.use(fathom.expressMiddleware());
 
 ```javascript
 process.on('SIGTERM', async () => {
-    await fathom.shutdown();
+    await pulsedb.shutdown();
     process.exit(0);
 });
 ```
@@ -62,7 +62,7 @@ process.on('SIGTERM', async () => {
 ### API Tracking
 
 ```javascript
-fathom.trackAPI({
+pulsedb.trackAPI({
     method: 'GET',
     endpoint: '/api/users',
     statusCode: 200,
@@ -77,7 +77,7 @@ fathom.trackAPI({
 try {
     await risky();
 } catch (error) {
-    fathom.trackError({
+    pulsedb.trackError({
         error,
         severity: 'error',
         metadata: { context: 'payment' },
@@ -88,7 +88,7 @@ try {
 ### Audit Events
 
 ```javascript
-fathom.trackAudit({
+pulsedb.trackAudit({
     title: 'User Permission Changed',
     message: 'Admin elevated user to manager role',
     metadata: { userId: 'user_123', role: 'manager' },
@@ -98,7 +98,7 @@ fathom.trackAudit({
 ### Metrics
 
 ```javascript
-fathom.trackMetric({
+pulsedb.trackMetric({
     title: 'Database Pool Usage',
     value: 87,
     unit: '%',
@@ -108,7 +108,7 @@ fathom.trackMetric({
 ### Custom Events
 
 ```javascript
-fathom.track('payment.completed', {
+pulsedb.track('payment.completed', {
     title: 'Payment Processed',
     metadata: { transactionId: 'txn_789', amount: 99.99 },
 });
@@ -121,8 +121,8 @@ fathom.track('payment.completed', {
 Create a `.env` file in your application root:
 
 ```
-FATHOM_API_KEY=sk_live_your_key_here
-FATHOM_ENDPOINT=https://fathom.example.com
+PULSEDB_API_KEY=sk_live_your_key_here
+PULSEDB_ENDPOINT=https://pulsedb.example.com
 APP_NAME=my-service
 NODE_ENV=production
 DEBUG=false
@@ -134,9 +134,9 @@ Load in your app:
 import dotenv from 'dotenv';
 dotenv.config();
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: process.env.APP_NAME,
     environment: process.env.NODE_ENV,
     debug: process.env.DEBUG === 'true',
@@ -150,9 +150,9 @@ const fathom = new FathomSDK({
 ### For High-Volume Applications
 
 ```javascript
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     batchSize: 200, // Larger batches = fewer requests
     flushInterval: 30000, // Longer intervals = better latency
     appName: 'high-volume-api',
@@ -162,9 +162,9 @@ const fathom = new FathomSDK({
 ### For Real-Time Monitoring
 
 ```javascript
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     batchSize: 20, // Smaller batches = faster delivery
     flushInterval: 5000, // Shorter intervals = more timely
     appName: 'realtime-service',
@@ -179,19 +179,19 @@ const fathom = new FathomSDK({
 
 ```javascript
 import express from 'express';
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: 'express-api',
 });
 
 const app = express();
 
 // Middleware setup (IMPORTANT: before routes)
-app.use(fathom.expressMiddleware());
-fathom.captureUncaughtExceptions();
+app.use(pulsedb.expressMiddleware());
+pulsedb.captureUncaughtExceptions();
 
 // Your routes
 app.get('/api/users', (req, res) => {
@@ -199,12 +199,12 @@ app.get('/api/users', (req, res) => {
 });
 
 // Start services
-fathom.start();
+pulsedb.start();
 app.listen(3000);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-    await fathom.shutdown();
+    await pulsedb.shutdown();
     process.exit(0);
 });
 ```
@@ -213,11 +213,11 @@ process.on('SIGTERM', async () => {
 
 ```javascript
 import Fastify from 'fastify';
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: 'fastify-api',
 });
 
@@ -225,7 +225,7 @@ const fastify = Fastify();
 
 // Hook into requests
 fastify.addHook('onResponse', async (request, reply) => {
-    fathom.trackAPI({
+    pulsedb.trackAPI({
         method: request.method,
         endpoint: request.url,
         statusCode: reply.statusCode,
@@ -237,7 +237,7 @@ fastify.get('/api/users', async () => {
     return { users: [] };
 });
 
-fathom.start();
+pulsedb.start();
 await fastify.listen({ port: 3000 });
 ```
 
@@ -245,11 +245,11 @@ await fastify.listen({ port: 3000 });
 
 ```javascript
 import pg from 'pg';
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: 'db-service',
 });
 
@@ -261,7 +261,7 @@ async function queryUsers() {
         const result = await pool.query('SELECT * FROM users');
         const duration = Date.now() - start;
 
-        fathom.trackMetric({
+        pulsedb.trackMetric({
             title: 'Database Query Time',
             value: duration,
             unit: 'ms',
@@ -270,7 +270,7 @@ async function queryUsers() {
 
         return result.rows;
     } catch (error) {
-        fathom.trackError({
+        pulsedb.trackError({
             error,
             severity: 'error',
             metadata: { query: 'SELECT users' },
@@ -279,17 +279,17 @@ async function queryUsers() {
     }
 }
 
-fathom.start();
+pulsedb.start();
 ```
 
 ### Lambda Function
 
 ```javascript
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 
-const fathom = new FathomSDK({
-    apiKey: process.env.FATHOM_API_KEY,
-    endpoint: process.env.FATHOM_ENDPOINT,
+const pulsedb = new PulseDBSDK({
+    apiKey: process.env.PULSEDB_API_KEY,
+    endpoint: process.env.PULSEDB_ENDPOINT,
     appName: 'lambda-function',
 });
 
@@ -300,7 +300,7 @@ export const handler = async (event) => {
         // Your Lambda logic
         const result = await processOrder(event);
 
-        fathom.trackAPI({
+        pulsedb.trackAPI({
             method: 'LAMBDA',
             endpoint: context.functionName,
             statusCode: 200,
@@ -312,17 +312,17 @@ export const handler = async (event) => {
         });
 
         // Flush before Lambda freeze
-        await fathom.flush();
+        await pulsedb.flush();
 
         return result;
     } catch (error) {
-        fathom.trackError({
+        pulsedb.trackError({
             error,
             severity: 'error',
             metadata: { orderId: event.orderId },
         });
 
-        await fathom.flush();
+        await pulsedb.flush();
         throw error;
     }
 };
@@ -332,13 +332,13 @@ export const handler = async (event) => {
 
 ## Deployment Checklist
 
-- [ ] **Create API Key**: Generate `sk_live_xxx` key in FATHOM dashboard
-- [ ] **Set Environment Variables**: `FATHOM_API_KEY`, `FATHOM_ENDPOINT`
-- [ ] **Install Package**: `npm install @fathom/sdk`
-- [ ] **Add Middleware**: `app.use(fathom.expressMiddleware())`
-- [ ] **Start Auto-Flush**: `fathom.start()`
-- [ ] **Handle Shutdown**: Implement graceful shutdown with `fathom.shutdown()`
-- [ ] **Test Integration**: Send test events and verify in FATHOM dashboard
+- [ ] **Create API Key**: Generate `sk_live_xxx` key in PulseDB dashboard
+- [ ] **Set Environment Variables**: `PULSEDB_API_KEY`, `PULSEDB_ENDPOINT`
+- [ ] **Install Package**: `npm install @pulsedb/sdk`
+- [ ] **Add Middleware**: `app.use(pulsedb.expressMiddleware())`
+- [ ] **Start Auto-Flush**: `pulsedb.start()`
+- [ ] **Handle Shutdown**: Implement graceful shutdown with `pulsedb.shutdown()`
+- [ ] **Test Integration**: Send test events and verify in PulseDB dashboard
 - [ ] **Monitor**: Watch dashboard for incoming events
 - [ ] **Tune Batch Settings**: Adjust `batchSize` and `flushInterval` for performance
 - [ ] **Error Handling**: Implement `captureUncaughtExceptions()` if needed
@@ -349,11 +349,11 @@ export const handler = async (event) => {
 
 ### Events Not Appearing in Dashboard
 
-1. **Check API Key**: Ensure `FATHOM_API_KEY` is valid
-2. **Check Endpoint**: Ensure `FATHOM_ENDPOINT` is correct and reachable
+1. **Check API Key**: Ensure `PULSEDB_API_KEY` is valid
+2. **Check Endpoint**: Ensure `PULSEDB_ENDPOINT` is correct and reachable
 3. **Check Network**: Verify outbound HTTPS connectivity
 4. **Enable Debug**: Set `debug: true` to see console logs
-5. **Manual Flush**: Call `await fathom.flush()` to send immediately
+5. **Manual Flush**: Call `await pulsedb.flush()` to send immediately
 
 ### High Network Usage
 
@@ -364,8 +364,8 @@ export const handler = async (event) => {
 ### Memory Concerns
 
 1. **Reduce batchSize**: Send events more frequently
-2. **Enable Flush**: Call `fathom.flush()` periodically
-3. **Monitor Queue**: Check `fathom.queue.length` in debug logs
+2. **Enable Flush**: Call `pulsedb.flush()` periodically
+3. **Monitor Queue**: Check `pulsedb.queue.length` in debug logs
 
 ---
 
@@ -438,7 +438,7 @@ Body:
 
 ## Support & Resources
 
-- **Dashboard**: https://fathom.example.com
+- **Dashboard**: https://pulsedb.example.com
 - **Documentation**: See README.md
 - **Examples**: See `examples/` directory
 - **Tests**: Run `npm test`

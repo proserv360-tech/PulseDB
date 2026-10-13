@@ -2,11 +2,11 @@
 
 import pytest
 from unittest.mock import MagicMock, Mock, AsyncMock, patch
-from fathom_sdk.integrations.fastapi import FathomFastAPIMiddleware
+from pulsedb_sdk.integrations.fastapi import PulseDBFastAPIMiddleware
 
 
 class TestFastAPIMiddleware:
-    """Tests for FathomFastAPIMiddleware."""
+    """Tests for PulseDBFastAPIMiddleware."""
 
     @pytest.mark.asyncio
     async def test_middleware_tracks_api_call(self):
@@ -17,7 +17,7 @@ class TestFastAPIMiddleware:
         mock_response.status_code = 200
         mock_app.return_value = mock_response
 
-        middleware = FathomFastAPIMiddleware(mock_app, sdk=mock_sdk)
+        middleware = PulseDBFastAPIMiddleware(mock_app, sdk=mock_sdk)
 
         # Create mock request
         mock_request = Mock()
@@ -54,7 +54,7 @@ class TestFastAPIMiddleware:
         mock_response = Mock()
         mock_app.return_value = mock_response
 
-        middleware = FathomFastAPIMiddleware(mock_app, sdk=mock_sdk)
+        middleware = PulseDBFastAPIMiddleware(mock_app, sdk=mock_sdk)
 
         # Test /health path
         mock_request = Mock()
@@ -76,7 +76,7 @@ class TestFastAPIMiddleware:
         mock_response = Mock()
         mock_app.return_value = mock_response
 
-        middleware = FathomFastAPIMiddleware(
+        middleware = PulseDBFastAPIMiddleware(
             mock_app,
             sdk=mock_sdk,
             skip_paths={"/custom-health", "/internal"},
@@ -112,7 +112,7 @@ class TestFastAPIMiddleware:
         mock_response.status_code = 200
         mock_app.return_value = mock_response
 
-        middleware = FathomFastAPIMiddleware(mock_app, sdk=mock_sdk)
+        middleware = PulseDBFastAPIMiddleware(mock_app, sdk=mock_sdk)
 
         # Test with no client
         mock_request = Mock()
@@ -136,7 +136,7 @@ class TestFastAPIMiddleware:
         mock_sdk = MagicMock()
         mock_app = AsyncMock()
 
-        middleware = FathomFastAPIMiddleware(mock_app, sdk=mock_sdk)
+        middleware = PulseDBFastAPIMiddleware(mock_app, sdk=mock_sdk)
 
         # Test 404
         mock_request = Mock()

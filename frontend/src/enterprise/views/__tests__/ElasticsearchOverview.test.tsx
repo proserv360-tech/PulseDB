@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — ElasticsearchOverview view tests
+//  PulseDB — ElasticsearchOverview view tests
 // ==========================================================================
 //  Covers: loading, success (health + indices table), empty-indices, error.
 // ==========================================================================
@@ -23,7 +23,7 @@ vi.mock('../../components/LicenseGate', () => ({
 import ElasticsearchOverview from '../ElasticsearchOverview';
 
 const HEALTH_GREEN = {
-    cluster_name: 'fathom-es',
+    cluster_name: 'pulsedb-es',
     status: 'green',
     number_of_nodes: 3,
     number_of_data_nodes: 3,
@@ -59,7 +59,7 @@ describe('ElasticsearchOverview', () => {
         render(<ElasticsearchOverview />);
 
         await waitFor(() => {
-            expect(screen.getByText('fathom-es')).toBeInTheDocument();
+            expect(screen.getByText('pulsedb-es')).toBeInTheDocument();
         });
         expect(screen.getByText('GREEN')).toBeInTheDocument();
         expect(screen.getByText('logs-2026.04')).toBeInTheDocument();

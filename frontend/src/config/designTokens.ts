@@ -1,5 +1,5 @@
 // ==========================================================================
-//  FATHOM — Design Tokens (single source of truth for the visual system)
+//  PulseDB — Design Tokens (single source of truth for the visual system)
 // ==========================================================================
 
 /* Accent colors — Midnight Blue palette (single theme, no light/dark split) */

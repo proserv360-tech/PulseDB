@@ -50,7 +50,7 @@ export const StatusPill = ({ connected }) => (
    also keeps the mutable DS object in sync for legacy consumers
    ───────────────────────────────────────────────────────────────── */
 /* ─────────────────────────────────────────────────────────────────
-   GLOBAL REFRESH BUTTON — dispatches 'fathom-refresh' CustomEvent
+   GLOBAL REFRESH BUTTON — dispatches 'pulsedb-refresh' CustomEvent
    that individual tabs listen for to trigger their own data reload.
    ───────────────────────────────────────────────────────────────── */
 export const GlobalRefreshButton = () => {
@@ -58,7 +58,7 @@ export const GlobalRefreshButton = () => {
 
     const handleRefresh = () => {
         setSpinning(true);
-        window.dispatchEvent(new CustomEvent('fathom-refresh'));
+        window.dispatchEvent(new CustomEvent('pulsedb-refresh'));
         setTimeout(() => setSpinning(false), 900);
     };
 

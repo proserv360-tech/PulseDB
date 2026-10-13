@@ -42,7 +42,7 @@ const mkAlert = (overrides = {}) => ({
     severity: 'critical',
     title: 'Replication lag exceeded 10s',
     message: 'primary-1 lag=12.3s for 2m',
-    source: 'fathom',
+    source: 'pulsedb',
     component: 'primary-1',
     metadata: { host: 'primary-1', lag_seconds: 12.3 },
     ...overrides,
@@ -151,7 +151,7 @@ describe('TeamsNotifier', () => {
     it('adds OpenUri action when alert.url is set', async () => {
         const http = createMockHttp([{ status: 200 }]);
         const n = new TeamsNotifier({ webhookUrl: 'https://outlook/hook', http });
-        await n.send(mkAlert({ url: 'https://fathom.example.com/alerts/1' }));
+        await n.send(mkAlert({ url: 'https://pulsedb.example.com/alerts/1' }));
         const body = JSON.parse(http.calls[0].body);
         assert.equal(body.potentialAction[0]['@type'], 'OpenUri');
     });
@@ -169,7 +169,7 @@ describe('WebhookNotifier', () => {
         const r = await n.send(mkAlert());
         assert.equal(r.ok, true);
 
-        const sigHeader = http.calls[0].headers['X-FATHOM-Signature'];
+        const sigHeader = http.calls[0].headers['X-PULSEDB-Signature'];
         const rawBody = http.calls[0].body;
         // Extract the timestamp the signer used so the test is not clock-bound.
         const ts = Number(sigHeader.split(',')[0].split('=')[1]);
@@ -196,7 +196,7 @@ describe('WebhookNotifier', () => {
             url: 'https://example.com/hook', secret: 'whsec_test', http,
         });
         await n.send(mkAlert());
-        const header = http.calls[0].headers['X-FATHOM-Signature'];
+        const header = http.calls[0].headers['X-PULSEDB-Signature'];
         const rawBody = http.calls[0].body;
         const ts = Number(header.split(',')[0].split('=')[1]);
         const ok = verifyWebhookSignature({

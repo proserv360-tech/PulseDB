@@ -20,23 +20,23 @@ sdk/
 │   └── express-server.js     # Express middleware integration example
 │
 └── tests/
-    └── fathom.test.js         # Unit tests
+    └── pulsedb.test.js         # Unit tests
 ```
 
 ## File Descriptions
 
 ### `package.json`
 
-- Declares the package as `@fathom/sdk` v1.0.0
+- Declares the package as `@pulsedb/sdk` v1.0.0
 - Configures both ESM and CJS exports
 - Specifies Node.js 18+ requirement
 - Includes build and test scripts
 
 ### `src/index.js` (Main SDK)
 
-The complete FATHOM SDK implementation with:
+The complete PulseDB SDK implementation with:
 
-- **FathomSDK class**: Main entry point
+- **PulseDBSDK class**: Main entry point
 - **Inline EventEmitter**: Zero-dependency event system
 - **Core Methods**:
     - `trackAPI()` - Track HTTP requests
@@ -49,7 +49,7 @@ The complete FATHOM SDK implementation with:
     - `captureUncaughtExceptions()` - Catch uncaught errors
 - **Batching & Transport**:
     - `_enqueue()` - Queue events with auto-flush
-    - `flush()` - Send batched events to FATHOM
+    - `flush()` - Send batched events to PulseDB
     - `heartbeat()` - Send health checks
     - `start()` / `shutdown()` - Lifecycle management
 - **Utilities**:
@@ -60,7 +60,7 @@ The complete FATHOM SDK implementation with:
 
 TypeScript type definitions for:
 
-- FathomSDK class and all method signatures
+- PulseDBSDK class and all method signatures
 - Configuration interfaces
 - Event tracking options
 - EventEmitter interface
@@ -87,12 +87,12 @@ Standalone example demonstrating:
 
 Full Express.js integration example with:
 
-- FATHOM middleware setup
+- PulseDB middleware setup
 - Auto-tracking of all routes
 - Error handling
 - Graceful shutdown on SIGTERM
 
-### `tests/fathom.test.js`
+### `tests/pulsedb.test.js`
 
 Unit tests for:
 
@@ -132,7 +132,7 @@ Comprehensive 400+ line documentation including:
 
 - Queue events until `batchSize` reached (default 50)
 - Auto-flush every `flushInterval` ms (default 10000)
-- Manual flush with `await fathom.flush()`
+- Manual flush with `await pulsedb.flush()`
 - Failed events re-queued on network errors
 
 ### Express Integration
@@ -160,19 +160,19 @@ Comprehensive 400+ line documentation including:
 ### Install from npm
 
 ```bash
-npm install @fathom/sdk
+npm install @pulsedb/sdk
 ```
 
 ### ESM Import
 
 ```javascript
-import FathomSDK from '@fathom/sdk';
+import PulseDBSDK from '@pulsedb/sdk';
 ```
 
 ### CJS Require
 
 ```javascript
-const FathomSDK = require('@fathom/sdk');
+const PulseDBSDK = require('@pulsedb/sdk');
 ```
 
 ### Build for Distribution

@@ -2,7 +2,7 @@
 /**
  * routes/sdkRoutes.js
  * ───────────────────
- * REST API routes for the FATHOM SDK integration.
+ * REST API routes for the PulseDB SDK integration.
  * Handles app registration, configuration, and event ingestion.
  * Mount with:
  *   app.use('/api', sdkRoutes(pool, authenticate, requireScreen));

@@ -447,8 +447,8 @@
             "checkConstraints": {},
             "isRLSEnabled": false
         },
-        "pgmonitoringtool.fathom_connections": {
-            "name": "fathom_connections",
+        "pgmonitoringtool.pulsedb_connections": {
+            "name": "pulsedb_connections",
             "schema": "pgmonitoringtool",
             "columns": {
                 "id": {
@@ -597,9 +597,9 @@
                 }
             },
             "foreignKeys": {
-                "fathom_connections_user_id_users_id_fk": {
-                    "name": "fathom_connections_user_id_users_id_fk",
-                    "tableFrom": "fathom_connections",
+                "pulsedb_connections_user_id_users_id_fk": {
+                    "name": "pulsedb_connections_user_id_users_id_fk",
+                    "tableFrom": "pulsedb_connections",
                     "tableTo": "users",
                     "schemaTo": "pgmonitoringtool",
                     "columnsFrom": ["user_id"],

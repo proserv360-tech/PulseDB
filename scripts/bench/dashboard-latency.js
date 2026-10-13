@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const { values } = parseArgs({
     options: {
         url:         { type: 'string', default: 'http://localhost:4000' },
-        token:       { type: 'string', default: process.env.FATHOM_JWT || '' },
+        token:       { type: 'string', default: process.env.PULSEDB_JWT || '' },
         concurrency: { type: 'string', default: '25' },
         duration:    { type: 'string', default: '30' },
     },

@@ -31,7 +31,7 @@ export const ProfileModal = ({ user, onClose, onSave }) => {
         setSaving(true);
         setError('');
         try {
-            const token = localStorage.getItem('fathom_token');
+            const token = localStorage.getItem('pulsedb_token');
             const res = await fetch('/api/users/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

@@ -69,7 +69,7 @@ export function arrayToCSV(data: Record<string, any>[]): string {
  */
 export function exportToCSV(data: Record<string, any>[], filename?: string): void {
   const csv = arrayToCSV(data);
-  const finalFilename = filename || `fathom-export-${formatDateForFilename()}.csv`;
+  const finalFilename = filename || `pulsedb-export-${formatDateForFilename()}.csv`;
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   downloadFile(blob, finalFilename);
@@ -80,7 +80,7 @@ export function exportToCSV(data: Record<string, any>[], filename?: string): voi
  */
 export function exportToJSON(data: any, filename?: string): void {
   const json = JSON.stringify(data, null, 2);
-  const finalFilename = filename || `fathom-export-${formatDateForFilename()}.json`;
+  const finalFilename = filename || `pulsedb-export-${formatDateForFilename()}.json`;
 
   const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
   downloadFile(blob, finalFilename);
@@ -91,7 +91,7 @@ export function exportToJSON(data: any, filename?: string): void {
  */
 export function exportAsTextReport(element: HTMLElement, filename?: string): void {
   const text = element.innerText || element.textContent || '';
-  const finalFilename = filename || `fathom-report-${formatDateForFilename()}.txt`;
+  const finalFilename = filename || `pulsedb-report-${formatDateForFilename()}.txt`;
 
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
   downloadFile(blob, finalFilename);
