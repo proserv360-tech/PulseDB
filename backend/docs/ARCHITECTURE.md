@@ -45,6 +45,25 @@ Last updated: 2026-06-02 (Wave A, task A6).
 - **In-process state**: rate-limit buckets (`middleware/rateLimiter.js`),
   cached IP allow-lists, alert dedup map.
 
+### Source layout
+
+`server.ts` is bootstrap only: it builds the Express app, registers
+middleware and routes **in order**, and owns startup/shutdown. Everything
+else lives in:
+
+| Path | Contents |
+| --- | --- |
+| `core/` | Shared state and helpers: `config`, `adminPool` (control-plane DB), `connectionStore` (saved connections), `connectionPools` (pools for user DBs, `reqPool`/`getPool`), `activeSelection`, `auth` (`authenticate`, `issueSession`), `alerting`, `responseCache` (`cached`), `sqlGuard`, `loginLockout`, `queryHistory`, `backgroundJobs`, `websocket` |
+| `middleware/` | `httpSecurity` (headers, rate limits, CSRF), `pgOnlyGuard`, `errorHandlers`, plus the pre-existing auth/RBAC middleware |
+| `routes/index.ts` | Mounts the feature modules (`routes/*Routes.ts`) at `/api` and `/api/v1` |
+| `routes/platform/` | Control-plane endpoints: auth, health, connections, fleet health, SQL console, alerts, AI proxy, CloudWatch |
+| `routes/postgres/` | Postgres monitoring endpoints (tables, indexes, bloat, vacuum, optimizer, …), registered after `pgOnlyGuard` |
+
+Registration order is significant: Express matches first-registered-wins,
+and the `/api` middlewares (version header, IP allow-list, `pgOnlyGuard`)
+only cover routes registered after them. Add new routes in the matching
+slot in `server.ts`.
+
 That topology is correct for development and for a single-tenant
 deployment. It does not scale horizontally:
 
