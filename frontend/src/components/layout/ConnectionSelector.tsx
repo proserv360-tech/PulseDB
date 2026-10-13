@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+// Header dropdown for switching the active connection.
+// Extracted from App.tsx.
 import { CheckCircle, ChevronDown, Database } from 'lucide-react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { PHASE5_DEMO_TABS } from '../../app/tabRegistry';
+import { DS } from '../../config/designTokens';
 import { useConnection } from '../../context/ConnectionContext';
 import { NavigationContext } from '../../context/NavigationContext';
-import { DS } from '../../config/designTokens';
+import { THEME } from '../../utils/theme';
 
+/* ─────────────────────────────────────────────────────────────────
+   CONNECTION SELECTOR — dropdown in the header to switch databases
+   ───────────────────────────────────────────────────────────────── */
 export const ConnectionSelector = () => {
     const { connections, activeConnectionId, activeConnection, switchConnection, loading } = useConnection();
     const { goToTab } = useContext(NavigationContext) || {};
@@ -38,6 +45,8 @@ export const ConnectionSelector = () => {
                     targetTab = 'mysql-overview';
                 } else if (dbType === 'mongodb') {
                     targetTab = 'mongo-overview';
+                } else if (dbType && PHASE5_DEMO_TABS[dbType]) {
+                    targetTab = PHASE5_DEMO_TABS[dbType];
                 }
 
                 // Defer navigation to allow state to settle
@@ -150,6 +159,10 @@ export const ConnectionSelector = () => {
                                     padding: '2px 6px',
                                     flexShrink: 0,
                                     letterSpacing: '0.02em',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    lineHeight: 1,
                                 }}
                                 title={`Database type: ${activeConnection.dbType || 'unknown'}`}
                             >
@@ -277,8 +290,8 @@ export const ConnectionSelector = () => {
                                     <span
                                         style={{
                                             fontSize: 9,
-                                            color: DS.violet,
-                                            background: `${DS.violet}18`,
+                                            color: DS.violet || THEME.primaryLight,
+                                            background: `${DS.violet || THEME.primaryLight}18`,
                                             padding: '1px 5px',
                                             borderRadius: 14,
                                             fontFamily: DS.fontMono,

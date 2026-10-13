@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+// Alert notification drawer.
+// Extracted from App.tsx.
 import { AlertCircle, Bell, X } from 'lucide-react';
+import { useState } from 'react';
 import { DS } from '../../config/designTokens';
 import { THEME } from '../../utils/theme';
 
-const SEV_COLORS = {
+/* ─────────────────────────────────────────────────────────────────
+   NOTIFICATION CENTER — redesigned with severity colors + timeline
+   ───────────────────────────────────────────────────────────────── */
+export const SEV_COLORS = {
     critical: DS.rose,
     warning: DS.amber,
     info: DS.cyan,
@@ -122,6 +127,9 @@ export const NotificationCenter = ({ notifications, onDismiss, onClearAll }) => 
                                             padding: '2px 7px',
                                             borderRadius: 20,
                                             fontFamily: DS.fontMono,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                         }}
                                     >
                                         {notifications.length}

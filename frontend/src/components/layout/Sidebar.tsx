@@ -1,31 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-    ChevronLeft,
-    ChevronRight,
-    Database,
-    Folder,
-    FolderOpen,
-    LogOut,
-    MessageSquarePlus,
-    User,
-    Users,
-} from 'lucide-react';
-import { useConnection } from '../../context/ConnectionContext';
+// Main navigation sidebar.
+// Extracted from App.tsx.
+import { ChevronLeft, ChevronRight, Database, LogOut, MessageSquarePlus, User, Users } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getGroupForTab, getSectionForTab, SECTION_GROUPS } from '../../app/tabRegistry';
 import { DS } from '../../config/designTokens';
+import { useConnection } from '../../context/ConnectionContext';
 import { THEME } from '../../utils/theme';
-import { buildTabConfig, getSectionGroups } from '../../config/tabConfig';
 
-const SECTION_GROUPS = getSectionGroups(buildTabConfig());
-
-const getSectionForTab = (tabId) => {
-    for (const g of SECTION_GROUPS) {
-        if (g.tabs.some((t) => t.id === tabId)) return g.section;
-    }
-    return null;
-};
-
-const getGroupForTab = () => null;
-
+/* ─────────────────────────────────────────────────────────────────
+   SIDEBAR
+   ───────────────────────────────────────────────────────────────── */
 export const Sidebar = ({
     activeTab,
     onTabChange,
@@ -47,53 +31,18 @@ export const Sidebar = ({
         return s;
     });
 
-    /* Sidebar state */
+    // Track which sub-group tabs (those with children[]) are expanded
+    const [openSubGroups, setOpenSubGroups] = useState<Set<string>>(() => new Set<string>());
 
-    // Tab-level tree: a parent tab id -> ordered child tab ids nested under it.
-    const TAB_CHILDREN = {
-        'observability-hub': [
-            'obs-overview',
-            'obs-api',
-            'obs-exceptions',
-            'obs-uptime',
-            'obs-audit',
-            'obs-jobs',
-            'obs-slo',
-            'obs-alerts',
-            'obs-logs',
-            'obs-infra',
-            'obs-topology',
-            'obs-ai',
-            'obs-cost',
-            'obs-traces',
-        ],
-    };
-    const CHILD_TO_PARENT = Object.fromEntries(
-        Object.entries(TAB_CHILDREN).flatMap(([parent, kids]) => kids.map((k) => [k, parent])),
-    );
-
-    const [openTabs, setOpenTabs] = useState(() => {
-        const s = new Set();
-        // Start collapsed. Only auto-expand a parent when one of its CHILDREN
-        // is the active tab (so the active child stays visible). Landing on the
-        // parent tab itself does NOT auto-expand — the user toggles it.
-        const parent = CHILD_TO_PARENT[activeTab];
-        if (parent) s.add(parent);
-        return s;
-    });
-    const toggleTabTree = useCallback((tabId) => {
-        setOpenTabs((prev) => {
+    const toggleSubGroup = useCallback((tabId: string) => {
+        setOpenSubGroups((prev) => {
             const next = new Set(prev);
             next.has(tabId) ? next.delete(tabId) : next.add(tabId);
             return next;
         });
     }, []);
 
-    // Keep a parent expanded when one of its children is active.
-    useEffect(() => {
-        const parent = CHILD_TO_PARENT[activeTab];
-        if (parent) setOpenTabs((prev) => (prev.has(parent) ? prev : new Set([...prev, parent])));
-    }, [activeTab]);
+    /* Sidebar state */
 
     useEffect(() => {
         const sec = getSectionForTab(activeTab);
@@ -104,6 +53,17 @@ export const Sidebar = ({
             if (parentGrp && !prev.has(parentGrp)) needs.push(parentGrp);
             if (needs.length === 0) return prev;
             return new Set([...prev, ...needs]);
+        });
+        // Auto-open sub-group if the active tab is a child
+        visibleGroups.forEach((grp: any) => {
+            (grp.tabs || []).forEach((tab: any) => {
+                if (tab.children?.some((c: any) => c.id === activeTab)) {
+                    setOpenSubGroups((prev) => {
+                        if (prev.has(tab.id)) return prev;
+                        return new Set([...prev, tab.id]);
+                    });
+                }
+            });
         });
     }, [activeTab]);
 
@@ -284,9 +244,213 @@ export const Sidebar = ({
             >
                 {/* ── Tree-style collapsible navigation ── */}
                 {(() => {
+                    /* ── Child leaf: indented tab under a sub-group ── */
+                    const renderChildTab = (tab, accent) => {
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                id={`${tab.id}-tab`}
+                                key={tab.id}
+                                className="nav-item"
+                                onClick={() => onTabChange(tab.id)}
+                                role="tab"
+                                aria-selected={isActive}
+                                aria-label={tab.label}
+                                title={collapsed ? tab.label : undefined}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: collapsed ? 'center' : 'flex-start',
+                                    gap: 8,
+                                    padding: collapsed ? '6px 0' : '5px 10px 5px 44px',
+                                    background: isActive ? `${accent}15` : 'transparent',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    cursor: 'pointer',
+                                    color: isActive ? accent : DS.sidebarText,
+                                    fontWeight: isActive ? 600 : 400,
+                                    fontSize: 12,
+                                    textAlign: 'left',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    fontFamily: DS.fontUI,
+                                    transition: 'all 0.15s ease',
+                                    position: 'relative',
+                                    margin: '1px 0',
+                                    opacity: 0.9,
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = DS.sidebarHover;
+                                        e.currentTarget.style.color = DS.sidebarText;
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = DS.sidebarText;
+                                    }
+                                }}
+                            >
+                                {/* Deeper tree connector */}
+                                {!collapsed && (
+                                    <span
+                                        style={{
+                                            position: 'absolute',
+                                            left: 28,
+                                            top: 0,
+                                            bottom: 0,
+                                            width: 1,
+                                            background: isActive ? `${accent}40` : `${DS.sidebarText}10`,
+                                        }}
+                                    />
+                                )}
+                                {!collapsed && (
+                                    <span
+                                        style={{
+                                            position: 'absolute',
+                                            left: 28,
+                                            top: '50%',
+                                            width: 10,
+                                            height: 1,
+                                            background: isActive ? `${accent}40` : `${DS.sidebarText}10`,
+                                        }}
+                                    />
+                                )}
+                                <tab.icon size={12} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.6 }} />
+                                {!collapsed && (
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
+                                        {tab.label}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    };
+
                     /* ── Leaf node: single tab item ── */
                     const renderTab = (tab, accent) => {
                         const isActive = activeTab === tab.id;
+
+                        // Sub-group: tab with children — render as inline collapsible branch
+                        if (tab.children?.length) {
+                            const isSubOpen = collapsed || openSubGroups.has(tab.id);
+                            const hasActiveChild = tab.children.some((c) => c.id === activeTab);
+                            const isParentActive = activeTab === tab.id;
+                            return (
+                                <div key={tab.id}>
+                                    {/* Parent row — clickable: navigates + toggles children */}
+                                    <button
+                                        id={`${tab.id}-tab`}
+                                        className="nav-item"
+                                        onClick={() => {
+                                            onTabChange(tab.id);
+                                            toggleSubGroup(tab.id);
+                                        }}
+                                        role="tab"
+                                        aria-selected={isParentActive}
+                                        aria-expanded={isSubOpen}
+                                        aria-label={tab.label}
+                                        title={collapsed ? tab.label : undefined}
+                                        style={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: collapsed ? 'center' : 'flex-start',
+                                            gap: 8,
+                                            padding: collapsed ? '7px 0' : '6px 10px 6px 28px',
+                                            background:
+                                                isParentActive || hasActiveChild ? `${accent}15` : 'transparent',
+                                            border: 'none',
+                                            borderRadius: 6,
+                                            cursor: 'pointer',
+                                            color: isParentActive || hasActiveChild ? accent : DS.sidebarText,
+                                            fontWeight: isParentActive || hasActiveChild ? 600 : 400,
+                                            fontSize: 12.5,
+                                            textAlign: 'left',
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            fontFamily: DS.fontUI,
+                                            transition: 'all 0.15s ease',
+                                            position: 'relative',
+                                            margin: '1px 0',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isParentActive && !hasActiveChild) {
+                                                e.currentTarget.style.background = DS.sidebarHover;
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isParentActive && !hasActiveChild) {
+                                                e.currentTarget.style.background = 'transparent';
+                                            }
+                                        }}
+                                    >
+                                        {/* Tree connectors */}
+                                        {!collapsed && (
+                                            <span
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: 14,
+                                                    top: 0,
+                                                    bottom: 0,
+                                                    width: 1,
+                                                    background:
+                                                        isParentActive || hasActiveChild
+                                                            ? `${accent}40`
+                                                            : `${DS.sidebarText}15`,
+                                                }}
+                                            />
+                                        )}
+                                        {!collapsed && (
+                                            <span
+                                                style={{
+                                                    position: 'absolute',
+                                                    left: 14,
+                                                    top: '50%',
+                                                    width: 8,
+                                                    height: 1,
+                                                    background:
+                                                        isParentActive || hasActiveChild
+                                                            ? `${accent}40`
+                                                            : `${DS.sidebarText}15`,
+                                                }}
+                                            />
+                                        )}
+                                        <tab.icon size={14} style={{ flexShrink: 0 }} />
+                                        {!collapsed && (
+                                            <>
+                                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
+                                                    {tab.label}
+                                                </span>
+                                                {/* Chevron indicator */}
+                                                <ChevronRight
+                                                    size={11}
+                                                    style={{
+                                                        flexShrink: 0,
+                                                        marginRight: 4,
+                                                        transition: 'transform 0.2s ease',
+                                                        transform: isSubOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                                                        opacity: 0.5,
+                                                    }}
+                                                />
+                                            </>
+                                        )}
+                                    </button>
+                                    {/* Children */}
+                                    {isSubOpen && !collapsed && (
+                                        <div style={{ overflow: 'hidden' }}>
+                                            {tab.children.map((child) => renderChildTab(child, accent))}
+                                        </div>
+                                    )}
+                                    {isSubOpen && collapsed && (
+                                        <div>{tab.children.map((child) => renderChildTab(child, accent))}</div>
+                                    )}
+                                </div>
+                            );
+                        }
                         return (
                             <button
                                 id={`${tab.id}-tab`}
@@ -391,9 +555,6 @@ export const Sidebar = ({
                                                     fontFamily: DS.fontMono,
                                                     lineHeight: '14px',
                                                     flexShrink: 0,
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
                                                 }}
                                             >
                                                 {tab.badge}
@@ -401,135 +562,6 @@ export const Sidebar = ({
                                         )}
                                     </>
                                 )}
-                            </button>
-                        );
-                    };
-
-                    /* ── Parent tab with a collapsible child tree (e.g. Observability Hub) ── */
-                    const renderParentTab = (tab, accent, open) => {
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={`${tab.id}-parent`}
-                                className="nav-item"
-                                onClick={() => {
-                                    onTabChange(tab.id);
-                                    toggleTabTree(tab.id);
-                                }}
-                                title={collapsed ? tab.label : undefined}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: collapsed ? 'center' : 'flex-start',
-                                    gap: 8,
-                                    padding: collapsed ? '7px 0' : '6px 10px 6px 22px',
-                                    background: isActive ? `${accent}15` : 'transparent',
-                                    border: 'none',
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
-                                    color: isActive ? accent : DS.sidebarText,
-                                    fontWeight: isActive ? 600 : 500,
-                                    fontSize: 12.5,
-                                    textAlign: 'left',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    fontFamily: DS.fontUI,
-                                    transition: 'all 0.15s ease',
-                                    position: 'relative',
-                                    margin: '1px 0',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isActive) e.currentTarget.style.background = DS.sidebarHover;
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isActive) e.currentTarget.style.background = 'transparent';
-                                }}
-                            >
-                                {!collapsed && (
-                                    <ChevronRight
-                                        size={13}
-                                        style={{
-                                            flexShrink: 0,
-                                            opacity: 0.7,
-                                            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-                                            transition: 'transform 0.2s ease',
-                                        }}
-                                    />
-                                )}
-                                {open ? (
-                                    <FolderOpen size={15} style={{ flexShrink: 0, color: THEME.warning }} />
-                                ) : (
-                                    <Folder size={15} style={{ flexShrink: 0, color: THEME.warning }} />
-                                )}
-                                {!collapsed && (
-                                    <span
-                                        style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                                    >
-                                        {tab.label}
-                                    </span>
-                                )}
-                            </button>
-                        );
-                    };
-
-                    /* ── Tree-leaf child tab (under an expandable parent) ── */
-                    const renderChildTab = (tab, accent) => {
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                className="nav-item"
-                                onClick={() => onTabChange(tab.id)}
-                                title={tab.label}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 8,
-                                    padding: '5px 10px 5px 28px',
-                                    background: isActive ? `${accent}15` : 'transparent',
-                                    border: 'none',
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
-                                    color: isActive ? accent : DS.sidebarText,
-                                    fontWeight: isActive ? 600 : 400,
-                                    fontSize: 12,
-                                    textAlign: 'left',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    fontFamily: DS.fontUI,
-                                    transition: 'all 0.15s ease',
-                                    position: 'relative',
-                                    margin: '1px 0',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isActive) e.currentTarget.style.background = DS.sidebarHover;
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isActive) e.currentTarget.style.background = 'transparent';
-                                }}
-                            >
-                                {/* dotted dash connector from the trunk, file-tree style */}
-                                <span
-                                    style={{
-                                        flexShrink: 0,
-                                        color: `${DS.sidebarText}99`,
-                                        fontSize: 13,
-                                        lineHeight: 1,
-                                        marginLeft: 2,
-                                        marginRight: 1,
-                                        userSelect: 'none',
-                                    }}
-                                >
-                                    —
-                                </span>
-                                <tab.icon size={13} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.6 }} />
-                                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {tab.label}
-                                </span>
                             </button>
                         );
                     };
@@ -627,36 +659,7 @@ export const Sidebar = ({
                                             position: 'relative',
                                         }}
                                     >
-                                        {group.tabs
-                                            .filter((tab) => !CHILD_TO_PARENT[tab.id])
-                                            .map((tab) => {
-                                                const childIds = TAB_CHILDREN[tab.id];
-                                                if (!childIds) return renderTab(tab, group.accent);
-                                                // Expandable parent tab (tree node)
-                                                const open = openTabs.has(tab.id);
-                                                const children = group.tabs.filter((t) => childIds.includes(t.id));
-                                                return (
-                                                    <div key={tab.id}>
-                                                        {renderParentTab(tab, group.accent, open)}
-                                                        {open && !collapsed && (
-                                                            <div style={{ position: 'relative', paddingLeft: 18 }}>
-                                                                {/* vertical trunk */}
-                                                                <span
-                                                                    style={{
-                                                                        position: 'absolute',
-                                                                        left: 20,
-                                                                        top: 0,
-                                                                        bottom: 16,
-                                                                        width: 0,
-                                                                        borderLeft: `2px dotted ${DS.sidebarText}66`,
-                                                                    }}
-                                                                />
-                                                                {children.map((c) => renderChildTab(c, group.accent))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                        {group.tabs.map((tab) => renderTab(tab, group.accent))}
                                     </div>
                                 )}
                             </div>
@@ -827,7 +830,7 @@ export const Sidebar = ({
                     /* Expanded: compact button rows */
                     <>
                         {/* Nav buttons: User Management (super_admin only) & Demo */}
-                        <div style={{ display: 'flex', gap: 4, marginBottom: 2, alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 4, marginBottom: 2 }}>
                             {[
                                 currentUser?.role === 'super_admin' && {
                                     icon: Users,
@@ -887,7 +890,7 @@ export const Sidebar = ({
                                 ))}
                         </div>
                         {/* Utility buttons: Feedback & Sign Out */}
-                        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: 4 }}>
                             {/* Feedback is scoped to a connection — hidden when none exists. */}
                             {connDbType && (
                                 <button

@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+// Current-user profile editor.
+// Extracted from App.tsx.
 import { CheckCircle, Save, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { DS } from '../../config/designTokens';
 import { THEME } from '../../utils/theme';
 
+/* ─────────────────────────────────────────────────────────────────
+   PROFILE MODAL
+   ───────────────────────────────────────────────────────────────── */
 export const ProfileModal = ({ user, onClose, onSave }) => {
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
@@ -26,8 +31,7 @@ export const ProfileModal = ({ user, onClose, onSave }) => {
         setSaving(true);
         setError('');
         try {
-            // SECURITY: Retrieve token from sessionStorage instead of localStorage
-            const token = sessionStorage.getItem('fathom_token');
+            const token = localStorage.getItem('fathom_token');
             const res = await fetch('/api/users/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -169,7 +173,7 @@ export const ProfileModal = ({ user, onClose, onSave }) => {
                         >
                             {initials}
                         </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
+                        <div>
                             <div style={{ fontSize: 16, fontWeight: 700, color: DS.textPrimary }}>{user?.name}</div>
                             <div
                                 style={{
@@ -266,7 +270,7 @@ export const ProfileModal = ({ user, onClose, onSave }) => {
                             ['Role', user?.role || '—'],
                             ['Access', user?.accessLevel || '—'],
                         ].map(([lbl, val]) => (
-                            <div key={lbl} style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div key={lbl}>
                                 <label
                                     style={{
                                         display: 'block',
@@ -289,8 +293,6 @@ export const ProfileModal = ({ user, onClose, onSave }) => {
                                         fontSize: 13,
                                         fontFamily: DS.fontMono,
                                         letterSpacing: '0.04em',
-                                        display: 'flex',
-                                        alignItems: 'center',
                                     }}
                                 >
                                     {val}

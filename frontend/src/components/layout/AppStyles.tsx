@@ -1,10 +1,14 @@
+// Global stylesheet for the app shell.
+// Extracted from App.tsx.
 import React from 'react';
-import { THEME } from '../../utils/theme';
 import { DS } from '../../config/designTokens';
+import { THEME } from '../../utils/theme';
 
-export const AppStyles = () => (
+/* ─────────────────────────────────────────────────────────────────
+   GLOBAL STYLES
+   ───────────────────────────────────────────────────────────────── */
+export const AppStyles = React.memo(() => (
     <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; }
 
@@ -24,6 +28,14 @@ export const AppStyles = () => (
         @keyframes badgePop        { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
         @keyframes waveFlow        { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes dotBlink        { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
 
         /* ═══ FATHOM — Clean & Refined ═══ */
 
@@ -72,9 +84,10 @@ export const AppStyles = () => (
             transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
         }
         .fathom-card:hover {
-            box-shadow: ${DS._dark
-                ? '0 4px 16px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15)'
-                : '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)'
+            box-shadow: ${
+                DS._dark
+                    ? '0 4px 16px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15)'
+                    : '0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)'
             } !important;
             border-color: ${DS._dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'} !important;
         }
@@ -84,9 +97,10 @@ export const AppStyles = () => (
         [class*="_card"],
         [class*="Card"] {
             border-radius: 16px !important;
-            box-shadow: ${DS._dark
-                ? '0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)'
-                : '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03)'
+            box-shadow: ${
+                DS._dark
+                    ? '0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.1)'
+                    : '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03)'
             } !important;
             transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
             border: 1px solid ${DS._dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} !important;
@@ -94,9 +108,10 @@ export const AppStyles = () => (
         [class*="-card"]:hover,
         [class*="_card"]:hover,
         [class*="Card"]:hover {
-            box-shadow: ${DS._dark
-                ? '0 4px 16px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15)'
-                : '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)'
+            box-shadow: ${
+                DS._dark
+                    ? '0 4px 16px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.15)'
+                    : '0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)'
             } !important;
             border-color: ${DS._dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.09)'} !important;
         }
@@ -373,13 +388,6 @@ export const AppStyles = () => (
             }
         }
 
-        /* ── Accessibility: Reduced motion ── */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
     `}</style>
-);
+));
+AppStyles.displayName = 'AppStyles';
