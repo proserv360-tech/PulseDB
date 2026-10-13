@@ -1,5 +1,5 @@
 {
-    "name": "postgrestool-backend",
+    "name": "pulsedb-backend",
     "version": "1.0.0",
     "type": "module",
     "description": "PulseDB — Universal Database Monitoring & Administration Backend",

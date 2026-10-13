@@ -24,11 +24,14 @@ export const CONFIG = Object.freeze({
     JWT_ISSUER: process.env.JWT_ISSUER || 'pulsedb-auth',
     CORS_ORIGINS: [
         ...(IS_PROD ? [] : ['http://localhost:5173', 'http://localhost:3000']),
-        'https://postgres-tool.vercel.app',
-        'https://postgres-tool-frontend.vercel.app',
         process.env.FRONTEND_URL,
         process.env.CORS_ORIGIN,
+        // Vercel system env vars: the per-deployment URL, the branch URL, and
+        // the project's production domain, so a fresh project works same-origin
+        // without hand-configuring CORS.
         process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+        process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : null,
+        process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
     ].filter(Boolean),
     SLOW_QUERY_MIN: Number(process.env.SLOW_QUERY_MINUTES) || 5,
     WS_INTERVAL_MS: Number(process.env.WS_INTERVAL_MS) || 5000,
@@ -140,7 +143,7 @@ export const HAS_ADMIN_DB = !!(process.env.DATABASE_URL || (process.env.PGHOST &
     //       tool where users connect their own databases at runtime.
     if (IS_PROD) {
         // At least one CORS origin must be configured
-        if (!process.env.CORS_ORIGIN && !process.env.FRONTEND_URL) {
+        if (!process.env.CORS_ORIGIN && !process.env.FRONTEND_URL && !process.env.VERCEL_PROJECT_PRODUCTION_URL) {
             errors.push('Missing CORS origin in production: set CORS_ORIGIN or FRONTEND_URL.');
         }
     }

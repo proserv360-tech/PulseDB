@@ -34,7 +34,7 @@ import { CloudWatchLogsClient, FilterLogEventsCommand } from '@aws-sdk/client-cl
 import { parseAutoExplainMessage } from './autoexplain-parser.mjs';
 
 // ── config ───────────────────────────────────────────────────────────────────
-const PULSEDB_URL = req('PULSEDB_URL');                 // e.g. https://postgres-tool.vercel.app
+const PULSEDB_URL = req('PULSEDB_URL');                 // e.g. https://pulsedb.vercel.app
 const SDK_KEY = req('PULSEDB_SDK_KEY');                 // sk_... from Admin -> SDK Integration
 const CONNECTION_ID = Number(req('PULSEDB_CONNECTION_ID')); // NUMERIC connection id (e.g. 10)
 const LOG_GROUP = req('CW_LOG_GROUP');                 // /aws/rds/instance/<db>/postgresql

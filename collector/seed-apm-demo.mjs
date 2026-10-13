@@ -11,7 +11,7 @@
  * use only to validate the pipeline, then run the real shipper for live data.
  *
  * USAGE:
- *   PULSEDB_URL=https://postgres-tool.vercel.app \
+ *   PULSEDB_URL=https://pulsedb.vercel.app \
  *   PULSEDB_SDK_KEY=sk_live_xxx \
  *   PULSEDB_CONNECTION_ID=10 \
  *   node seed-apm-demo.mjs            # send events

@@ -22,7 +22,7 @@
  *
  *   Options:
  *     --url <url>       full endpoint URL (overrides --prod)
- *     --prod            hit https://postgres-tool-frontend.vercel.app
+ *     --prod            hit https://pulsedb.vercel.app
  *     --secret <s>      signing secret (default: SLACK_SIGNING_SECRET from .env)
  *     --id <INC-…>      incident id to acknowledge (default: a nonexistent one)
  *     --commands        probe /api/slack/commands with `/ack` instead
@@ -40,7 +40,7 @@ import crypto from 'crypto';
 const G = '\x1b[32m', R = '\x1b[31m', Y = '\x1b[33m', C = '\x1b[36m',
       D = '\x1b[2m', B = '\x1b[1m', O = '\x1b[0m';
 
-const PROD_ORIGIN = 'https://postgres-tool-frontend.vercel.app';
+const PROD_ORIGIN = 'https://pulsedb.vercel.app';
 const DEFAULT_LOCAL = `http://localhost:${process.env.PORT || 5000}`;
 
 /** A deliberately impossible id: the date part is all zeroes. */

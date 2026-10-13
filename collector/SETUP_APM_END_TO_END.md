@@ -108,7 +108,7 @@ npm install @aws-sdk/client-cloudwatch-logs
 
 AWS_REGION=<your-region> \
 CW_LOG_GROUP=/aws/rds/instance/<db-id>/postgresql \
-PULSEDB_URL=https://postgres-tool.vercel.app \
+PULSEDB_URL=https://pulsedb.vercel.app \
 PULSEDB_SDK_KEY=sk_live_xxx \
 PULSEDB_CONNECTION_ID=10 \
 node pulsedb-autoexplain-shipper.mjs

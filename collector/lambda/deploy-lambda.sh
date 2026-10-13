@@ -28,7 +28,7 @@ set -euo pipefail
 AWS_REGION="${AWS_REGION:-us-east-1}"                 # region of the RDS log group
 FUNCTION_NAME="${FUNCTION_NAME:-pulsedb-autoexplain}"
 LOG_GROUP="${CW_LOG_GROUP:-/aws/rds/instance/REPLACE-DB-ID/postgresql}"
-PULSEDB_URL="${PULSEDB_URL:-https://postgres-tool.vercel.app}"
+PULSEDB_URL="${PULSEDB_URL:-https://pulsedb.vercel.app}"
 PULSEDB_SDK_KEY="${PULSEDB_SDK_KEY:-sk_live_REPLACE_ME}"
 PULSEDB_CONNECTION_ID="${PULSEDB_CONNECTION_ID:-10}"   # numeric VIGIL PRD connection id
 ROLE_NAME="${ROLE_NAME:-pulsedb-autoexplain-role}"

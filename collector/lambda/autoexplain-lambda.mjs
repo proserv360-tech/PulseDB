@@ -14,7 +14,7 @@
  * No AWS SDK needed — the platform delivers the payload directly.
  *
  * Required env vars:
- *   PULSEDB_URL            https://postgres-tool.vercel.app
+ *   PULSEDB_URL            https://pulsedb.vercel.app
  *   PULSEDB_SDK_KEY        sk_...
  *   PULSEDB_CONNECTION_ID  numeric connection id (e.g. 10)
  *

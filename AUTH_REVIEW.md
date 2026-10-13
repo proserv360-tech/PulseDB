@@ -1,4 +1,4 @@
-# Auth Review — PulseDB / PostgresTool
+# Auth Review — PulseDB
 
 > **Status: P0 items 1–4 and item 5 (API-key scope) are implemented.**
 > See "Implementation log" at the bottom for what changed and what is still

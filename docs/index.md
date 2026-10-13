@@ -8,7 +8,7 @@ Multi-engine database monitoring and administration platform.
 
 ## Getting started
 
-- [README](https://github.com/your-org/postgres-tool#readme) — project overview and quick start
+- [README](https://github.com/your-org/pulsedb#readme) — project overview and quick start
 - [Collector agent](../collector/README.md) — install the host agent (Postgres, MySQL, MongoDB)
 - [Backend architecture](../backend/docs/ARCHITECTURE.md)
 

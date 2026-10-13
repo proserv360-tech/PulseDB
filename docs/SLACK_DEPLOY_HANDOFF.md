@@ -1,7 +1,7 @@
 # Handoff — enable Slack acknowledgement in production
 
 **For:** whoever administers the Vercel project serving
-`postgres-tool-frontend.vercel.app` (under the `foxsense-innovations` scope).
+`pulsedb.vercel.app`.
 
 **Ask:** add one environment variable and redeploy. Two minutes of work.
 
@@ -27,7 +27,7 @@ effect. It needs to be on the project that owns this domain.
 
 ## What to do
 
-1. Vercel → the project serving `postgres-tool-frontend.vercel.app` →
+1. Vercel → the project serving `pulsedb.vercel.app` →
    **Settings → Environment Variables**
 2. Add:
 

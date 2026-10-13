@@ -96,7 +96,7 @@ Set environment variables:
 
 | Env var                | Required | Example                                  | Purpose                                                  |
 | ---------------------- | -------- | ---------------------------------------- | -------------------------------------------------------- |
-| `PULSEDB_URL`           | yes      | `https://postgres-tool.vercel.app`       | PulseDB base URL                                          |
+| `PULSEDB_URL`           | yes      | `https://pulsedb.vercel.app`       | PulseDB base URL                                          |
 | `PULSEDB_SDK_KEY`       | yes      | `sk_...`                                 | from **Admin → SDK Integration**                         |
 | `PULSEDB_CONNECTION_ID` | yes      | `10`                                     | **numeric** connection id for VIGIL PRD (see note below) |
 | `CW_LOG_GROUP`         | yes      | `/aws/rds/instance/vigil-prd/postgresql` | from step A.2                                            |
@@ -114,7 +114,7 @@ Set environment variables:
 ### 3. Start it
 
 ```sh
-PULSEDB_URL=https://postgres-tool.vercel.app \
+PULSEDB_URL=https://pulsedb.vercel.app \
 PULSEDB_SDK_KEY=sk_your_key \
 PULSEDB_CONNECTION_ID=10 \
 CW_LOG_GROUP=/aws/rds/instance/vigil-prd/postgresql \
@@ -133,7 +133,7 @@ Description=PulseDB auto_explain shipper
 After=network-online.target
 
 [Service]
-Environment=PULSEDB_URL=https://postgres-tool.vercel.app
+Environment=PULSEDB_URL=https://pulsedb.vercel.app
 Environment=PULSEDB_SDK_KEY=sk_your_key
 Environment=PULSEDB_CONNECTION_ID=10
 Environment=CW_LOG_GROUP=/aws/rds/instance/vigil-prd/postgresql

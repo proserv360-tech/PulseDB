@@ -41,7 +41,7 @@ Set environment variables:
 
 | Key                    | Value                                  |
 | ---------------------- | -------------------------------------- |
-| `PULSEDB_URL`           | `https://postgres-tool.vercel.app`     |
+| `PULSEDB_URL`           | `https://pulsedb.vercel.app`     |
 | `PULSEDB_SDK_KEY`       | `sk_...` (Admin → SDK Integration)     |
 | `PULSEDB_CONNECTION_ID` | `10` (numeric VIGIL PRD connection id) |
 
