@@ -5,10 +5,12 @@
 // ==========================================================================
 
 import 'dotenv/config';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pool } from '../db.js';
+import { createUser } from '../services/userService.js';
 
 const migrations = [
     // ── Schema (must exist before any table inside it) ──
@@ -245,18 +247,50 @@ const MIGRATIONS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '
 //
 // The practical consequence: 0024 onward are the migrations this runner
 // actually executes, and every new file must be written idempotently.
+//
+// The baseline only applies to a database that ALREADY has the control-plane
+// schema. A genuinely empty database is detected by isFreshDatabase() and gets
+// every file executed in order instead — baselining there would record ~60
+// tables as created without ever creating them.
 const BASELINE_BEFORE = '0024_session_schema_reconcile.sql';
 
-async function applyFileMigrations(client) {
+// A chunk is skipped when every line is blank or a SQL comment. Checked line by
+// line on purpose: the previous single regex, /^(--[^\n]*\n?)*$/, backtracks
+// exponentially on a long comment header followed by SQL and hung forever on
+// 0024.
+const isCommentOnly = (chunk) => chunk.split('\n').every((l) => /^\s*(--.*)?$/.test(l));
+
+// psql meta-commands (\echo, \set, ...) let a file double as a hand-run psql
+// script that prints a report. The pg driver cannot execute them.
+const stripPsqlMeta = (sql) =>
+    sql
+        .split('\n')
+        .filter((l) => !/^\s*\\/.test(l))
+        .join('\n');
+
+/** True when neither the ledger nor the control-plane users table exist. */
+async function isFreshDatabase(client) {
+    const { rows } = await client.query(
+        `SELECT to_regclass('pgmonitoringtool.schema_migrations') IS NULL
+            AND to_regclass('pgmonitoringtool.users') IS NULL AS fresh`,
+    );
+    return rows[0].fresh;
+}
+
+async function applyFileMigrations(client, { fresh }) {
     if (!fs.existsSync(MIGRATIONS_DIR)) {
         console.log('[migrate] No db/migrations directory — skipping file migrations.');
         return;
     }
 
+    // Restored after every file — see the finally block below.
+    const { search_path: originalSearchPath } = (await client.query('SHOW search_path')).rows[0];
+
     const ledgerExisted = (
         await client.query(`SELECT to_regclass('pgmonitoringtool.schema_migrations') IS NOT NULL AS present`)
     ).rows[0].present;
 
+    await client.query(`CREATE SCHEMA IF NOT EXISTS pgmonitoringtool`);
     await client.query(`
         CREATE TABLE IF NOT EXISTS pgmonitoringtool.schema_migrations (
             filename    TEXT        PRIMARY KEY,
@@ -270,7 +304,7 @@ async function applyFileMigrations(client) {
         .filter((f) => f.endsWith('.sql'))
         .sort();
 
-    if (!ledgerExisted) {
+    if (!ledgerExisted && !fresh) {
         const baseline = files.filter((f) => f < BASELINE_BEFORE);
         if (baseline.length) {
             await client.query(
@@ -295,13 +329,13 @@ async function applyFileMigrations(client) {
             continue;
         }
 
-        const raw = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8');
+        const raw = stripPsqlMeta(fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8'));
         // drizzle-kit separates statements with this marker. Files without it
         // are executed as a single batch.
         const statements = raw
             .split('--> statement-breakpoint')
             .map((s) => s.trim())
-            .filter((s) => s.length > 0 && !/^(--[^\n]*\n?)*$/.test(s));
+            .filter((s) => s.length > 0 && !isCommentOnly(s));
 
         console.log(`[migrate] Applying ${file} (${statements.length} statement(s))...`);
         try {
@@ -315,29 +349,120 @@ async function applyFileMigrations(client) {
         } catch (err) {
             await client.query('ROLLBACK').catch(() => {});
             throw new Error(`${file}: ${err.message}`);
+        } finally {
+            // A file may SET search_path (0010 does). Session settings outlive
+            // COMMIT, and would send every later unqualified CREATE TABLE into
+            // the wrong schema.
+            await client
+                .query(`SELECT set_config('search_path', $1, false)`, [originalSearchPath])
+                .catch(() => {});
         }
     }
+}
+
+async function applyInlineMigrations(client) {
+    for (let i = 0; i < migrations.length; i++) {
+        const sql = migrations[i].trim();
+        const preview = sql.split('\n')[0].slice(0, 60);
+        console.log(`[migrate] Running migration ${i + 1}/${migrations.length}: ${preview}...`);
+        await client.query(sql);
+        console.log(`[migrate] ✓ Done`);
+    }
+}
+
+// Every screen id the permission matrix knows about — the super_admin preset in
+// frontend/src/components/views/usermanagement/PermissionMatrix/Modals.tsx.
+const ALL_SCREENS = [
+    'connections',
+    'overview',
+    'performance',
+    'resources',
+    'reliability',
+    'alerts',
+    'sql',
+    'optimizer',
+    'indexes',
+    'api',
+    'regression',
+    'replication',
+    'checkpoint',
+    'maintenance',
+    'backup',
+    'bloat',
+    'schema',
+    'capacity',
+    'repository',
+    'security',
+    'admin',
+    'UserManagement',
+    'cloudwatch',
+    'log-patterns',
+    'alert-correlation',
+    'ai-monitoring',
+    'tasks',
+    'mongo-overview',
+    'mongo-performance',
+    'mongo-storage',
+    'mongo-replication',
+    'mongo-data-tools',
+    'mongo-sharding',
+];
+
+/**
+ * Create the first account on an empty users table: `admin`, super_admin, with
+ * PULSEDB_INITIAL_ADMIN_PASSWORD or a random password printed exactly once.
+ * The user must change it on first login.
+ */
+async function ensureAdminUser(client) {
+    const { rows } = await client.query('SELECT count(*)::int AS n FROM pgmonitoringtool.users');
+    if (rows[0].n > 0) return;
+
+    const supplied = process.env.PULSEDB_INITIAL_ADMIN_PASSWORD;
+    const password = supplied || crypto.randomBytes(18).toString('base64url');
+    const user = await createUser(client, {
+        username: 'admin',
+        password,
+        name: 'Administrator',
+        email: 'admin@localhost',
+        role: 'super_admin',
+        allowedScreens: ALL_SCREENS,
+        mfa: false,
+    });
+    await client.query('UPDATE pgmonitoringtool.users SET must_change_password = true WHERE id = $1', [user.id]);
+
+    console.log('\n' + '━'.repeat(64));
+    console.log('  Created the first user:  admin');
+    console.log(
+        supplied
+            ? '  Password: the value of PULSEDB_INITIAL_ADMIN_PASSWORD'
+            : `  Password: ${password}\n  Save it now — it is not stored anywhere and will not be shown again.`,
+    );
+    console.log('  You will be asked to change it on first login.');
+    console.log('━'.repeat(64) + '\n');
 }
 
 async function migrate() {
     console.log('[migrate] Connecting to database...');
     const client = await pool.connect();
     try {
-        for (let i = 0; i < migrations.length; i++) {
-            const sql = migrations[i].trim();
-            const preview = sql.split('\n')[0].slice(0, 60);
-            console.log(`[migrate] Running migration ${i + 1}/${migrations.length}: ${preview}...`);
-            await client.query(sql);
-            console.log(`[migrate] ✓ Done`);
+        if (await isFreshDatabase(client)) {
+            // Files first: 0000 creates the schema and base tables, and later
+            // files depend on them. The inline array is idempotent and only
+            // fills in what the files do not create.
+            console.log('[migrate] Empty database — applying every migration file from 0000.');
+            await applyFileMigrations(client, { fresh: true });
+            await applyInlineMigrations(client);
+        } else {
+            await applyInlineMigrations(client);
+            console.log('[migrate] Applying file migrations from db/migrations...');
+            await applyFileMigrations(client, { fresh: false });
         }
 
-        console.log('[migrate] Applying file migrations from db/migrations...');
-        await applyFileMigrations(client);
-
+        await ensureAdminUser(client);
         console.log('[migrate] All migrations applied successfully.');
     } catch (err) {
         console.error('[migrate] ERROR:', err.message);
-        process.exit(1);
+        process.exitCode = 1;
     } finally {
         client.release();
         await pool.end();

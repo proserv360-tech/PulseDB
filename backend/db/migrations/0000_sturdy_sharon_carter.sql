@@ -1,4 +1,4 @@
-CREATE SCHEMA "pgmonitoringtool";
+CREATE SCHEMA IF NOT EXISTS "pgmonitoringtool";
 --> statement-breakpoint
 CREATE TABLE "pgmonitoringtool"."alert_rules" (
 	"id" serial PRIMARY KEY NOT NULL,
