@@ -88,7 +88,7 @@ const DemoLayout: React.FC<DemoLayoutProps> = ({
 
     const activeDemo = propActiveDemo || (() => {
         try {
-            const t = localStorage.getItem('pg_monitor_active_tab') || '';
+            const t = localStorage.getItem('pulsedb_active_tab') || '';
             return t.startsWith('demo-') ? t : 'demo-postgres';
         } catch {
             return 'demo-postgres';

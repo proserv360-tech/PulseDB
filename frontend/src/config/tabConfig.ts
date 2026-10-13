@@ -660,8 +660,8 @@ export function getSectionAccent(groups, tabId) {
 }
 
 export const STORAGE_KEYS = {
-    ACTIVE_TAB: 'pg_monitor_active_tab',
-    SIDEBAR_COLLAPSED: 'pg_monitor_sidebar_collapsed',
-    NOTIFICATIONS_DISMISSED: 'pg_monitor_notifications_dismissed',
-    FEEDBACK_PROMPT: 'pg_monitor_feedback_prompt_shown',
+    ACTIVE_TAB: 'pulsedb_active_tab',
+    SIDEBAR_COLLAPSED: 'pulsedb_sidebar_collapsed',
+    NOTIFICATIONS_DISMISSED: 'pulsedb_notifications_dismissed',
+    FEEDBACK_PROMPT: 'pulsedb_feedback_prompt_shown',
 };

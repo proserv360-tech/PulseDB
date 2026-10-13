@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }) => {
     // ── Involuntary session end ────────────────────────────────────────────
     // Shared by the 401 listener and the expiry poll. Records why so the login
     // page can say something more useful than nothing. Note what it does NOT
-    // clear: pg_monitor_active_tab survives, because being timed out should
+    // clear: pulsedb_active_tab survives, because being timed out should
     // not also cost you your place — see logout() for the deliberate case.
     const endSession = useCallback((reason) => {
         secureStorage.removeItem(STORAGE_KEYS.TOKEN);
@@ -236,7 +236,7 @@ export const AuthProvider = ({ children }) => {
             const prevUser = secureStorage.getItem(STORAGE_KEYS.USER);
             const prevParsed = prevUser ? JSON.parse(prevUser) : null;
             if (!prevParsed || prevParsed.username !== data.user.username) {
-                secureStorage.removeItem('pg_monitor_active_tab');
+                secureStorage.removeItem('pulsedb_active_tab');
                 secureStorage.removeItem('pulsedb_active_connection_id');
                 secureStorage.removeItem('pulsedb_custom_dashboards');
                 secureStorage.removeItem('pulsedb_active_dashboard');
@@ -290,7 +290,7 @@ export const AuthProvider = ({ children }) => {
               })()
             : null;
         if (!prevParsed || prevParsed.username !== user.username) {
-            secureStorage.removeItem('pg_monitor_active_tab');
+            secureStorage.removeItem('pulsedb_active_tab');
             secureStorage.removeItem('pulsedb_active_connection_id');
             secureStorage.removeItem('pulsedb_custom_dashboards');
             secureStorage.removeItem('pulsedb_active_dashboard');
@@ -323,7 +323,7 @@ export const AuthProvider = ({ children }) => {
         // connection selected. This is the branch that SHOULD clear these —
         // endSession() leaves them alone, because a timeout is not a request
         // to be put back at the beginning.
-        secureStorage.removeItem('pg_monitor_active_tab');
+        secureStorage.removeItem('pulsedb_active_tab');
         secureStorage.removeItem('pulsedb_active_connection_id');
         // Clear password-change flag so it's re-evaluated on next login
         secureStorage.removeItem('pulsedb_must_change_password');

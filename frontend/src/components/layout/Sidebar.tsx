@@ -211,7 +211,7 @@ export const Sidebar = ({
                                 color: DS.logoText,
                             }}
                         >
-                            PG <span style={{ color: DS.cyan }}>Monitor</span>
+                            Pulse<span style={{ color: DS.cyan }}>DB</span>
                         </span>
                         <span
                             style={{
