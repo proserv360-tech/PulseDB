@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { THEME, useAdaptiveTheme } from '../utils/theme';
+import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { UsersTable, PermissionMatrix } from './Toggle/TableAndMatrix';
 import { AuditLog, SecurityPanel } from './PermissionMatrix/AuditAndSecurity';
 import { UserDrawer, PasswordModal, UserFormModal } from './PermissionMatrix/Modals';

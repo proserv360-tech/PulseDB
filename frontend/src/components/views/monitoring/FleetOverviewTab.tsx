@@ -8,7 +8,7 @@ import { THEME, useAdaptiveTheme, useGlobalRefresh, metricValue } from '../../..
 import { fetchData } from '../../../utils/api';
 import { useConnection } from '../../../context/ConnectionContext';
 import { useNavigation } from '../../../context/NavigationContext';
-import NoConnectionBanner from '../../shared/NoConnectionBanner';
+import NoConnectionBanner from '../../ui/NoConnectionBanner';
 import { ResponsiveContainer, AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import {
     Database,

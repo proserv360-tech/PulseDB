@@ -120,9 +120,9 @@ const DemoCassandraTab = lazyRetry(() => import('../components/views/demo/DemoCa
 const DemoDynamoDBTab = lazyRetry(() => import('../components/views/demo/DemoDynamoDBFullTab'));
 
 // Other
-const ReliabilityTab = lazyRetry(() => import('../components/views/ReliabilityTab'));
-const UserManagementTab = lazyRetry(() => import('../usermanagement/UserManagementTab'));
-const AuditAndSecurityTab = lazyRetry(() => import('../usermanagement/AuditAndSecurityTab'));
+const ReliabilityTab = lazyRetry(() => import('../components/views/monitoring/ReliabilityTab'));
+const UserManagementTab = lazyRetry(() => import('../components/views/usermanagement/UserManagementTab'));
+const AuditAndSecurityTab = lazyRetry(() => import('../components/views/usermanagement/AuditAndSecurityTab'));
 
 // Phase 1 — Connection Onboarding
 export const ConnectionWizard = lazyRetry(() => import('../components/views/onboarding/ConnectionWizard'));

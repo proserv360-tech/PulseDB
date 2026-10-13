@@ -11,8 +11,8 @@
  * Drop-in: <TraceCorrelationView traceId={id} />
  */
 import { useEffect, useState } from 'react';
-import { fetchDataFresh } from '../utils/api';
-import { THEME, useAdaptiveTheme } from '../utils/theme';
+import { fetchDataFresh } from '../../../utils/api';
+import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { AlertTriangle, Gauge, Database } from 'lucide-react';
 
 type Query = { id: number; db?: string; statement: string; duration_ms: number; plan_hash?: string; span_id?: string };

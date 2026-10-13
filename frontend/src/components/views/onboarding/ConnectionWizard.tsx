@@ -9,7 +9,7 @@ import {
   Database, Key, Zap, Shield, Wifi, Globe, Lock, Plus, Trash2, Power, Circle
 } from 'lucide-react';
 import { postData, deleteData } from '../../../utils/api';
-import ConnectionStringParser from '../../shared/ConnectionStringParser';
+import ConnectionStringParser from '../../ui/ConnectionStringParser';
 import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { useNavigation } from '../../../context/NavigationContext';
 import { useConnection } from '../../../context/ConnectionContext';

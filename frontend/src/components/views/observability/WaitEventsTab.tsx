@@ -4,7 +4,7 @@
  * wait-events panel.
  */
 import { useConnection } from '../../../context/ConnectionContext';
-import WaitEventsPanel from '../../WaitEventsPanel';
+import WaitEventsPanel from './WaitEventsPanel';
 
 export default function WaitEventsTab() {
     const { activeConnectionId } = useConnection();

@@ -1,5 +1,5 @@
 import { authHeader } from './authToken';
-import { queryClient } from '../lib/queryClient';
+import { queryClient } from '../app/queryClient';
 
 const API_BASE =
     import.meta.env.VITE_API_URL ||

@@ -8,8 +8,8 @@
  * Drop-in: <SystemHealthPanel />
  */
 import { useEffect, useState } from 'react';
-import { fetchDataFresh } from '../utils/api';
-import { THEME } from '../utils/theme';
+import { fetchDataFresh } from '../../../utils/api';
+import { THEME } from '../../../utils/theme';
 
 type Diag = {
     ok: boolean;

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, memo } from 'react';
-import { THEME, useAdaptiveTheme } from '../../utils/theme';
+import { THEME, useAdaptiveTheme } from '../../../../utils/theme';
 
 /* ─── Theme ─────────────────────────────────────────────────────── */
 const T = {

@@ -3,7 +3,7 @@ import { THEME, useAdaptiveTheme, useGlobalRefresh } from '../../../utils/theme'
 import { fetchData } from '../../../utils/api';
 import { useConnection } from '../../../context/ConnectionContext';
 import { useNavigation } from '../../../context/NavigationContext';
-import { fmtNum, fmtRelTime } from '../../../lib/utils';
+import { fmtNum, fmtRelTime } from '../../../utils/cn';
 
 // Dropped imports: GlassCard / LiveStatusBadge (never used in this file), plus
 // ArrowUpRight, ArrowDownRight, TrendingDown, ShieldCheck, GitCommit,

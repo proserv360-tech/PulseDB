@@ -4,7 +4,7 @@ import './index.css'
 import App from './App'
 import { ThemeProvider } from './context/ThemeContext'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './lib/queryClient'
+import { queryClient } from './app/queryClient'
 import { initErrorTracking, ErrorTrackingBoundary } from './utils/errorTracking'
 
 // ── Clean up stale demo mode flag (no longer used) ────────────────────────

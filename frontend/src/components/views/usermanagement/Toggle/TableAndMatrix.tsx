@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo, useCallback, memo } from 'react';
-import { THEME, useAdaptiveTheme } from '../../utils/theme';
+import { THEME, useAdaptiveTheme } from '../../../../utils/theme';
 
 const T = {
     get surface()     { return THEME.surface; },

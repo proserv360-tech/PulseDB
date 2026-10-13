@@ -12,7 +12,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { THEME } from '../utils/theme';
+import { THEME } from '../../../utils/theme';
 
 type PgNode = {
     'Node Type': string;

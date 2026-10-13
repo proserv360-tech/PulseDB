@@ -4,7 +4,7 @@
  * the fathom:navigate-tab event) and renders the span↔query correlation view.
  */
 import { useEffect, useState } from 'react';
-import TraceCorrelationView from '../../TraceCorrelationView';
+import TraceCorrelationView from './TraceCorrelationView';
 import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { GitBranch, Info } from 'lucide-react';
 

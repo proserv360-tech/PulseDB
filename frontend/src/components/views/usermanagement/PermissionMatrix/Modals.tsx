@@ -4,7 +4,7 @@ import React, {
 import { createPortal } from 'react-dom';
 
 import { T } from '../constants/theme';
-import { THEME } from '../../utils/theme';
+import { THEME } from '../../../../utils/theme';
 import { ROLES, DEPARTMENTS, LOCATIONS } from '../constants/index';
 import { generatePassword, validateUserForm } from '../helpers/index';
 import { Ico, RoleBadge, StatusBadge, FormField, Toggle } from '../shared/components/ui';

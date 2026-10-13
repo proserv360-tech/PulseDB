@@ -2,8 +2,8 @@
 //  FATHOM — ReliabilityTab  (v6 — Live API Integration)
 // ==========================================================================
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { fetchData, postData } from '../../utils/api';
-import { THEME, useAdaptiveTheme, useGlobalRefresh } from '../../utils/theme';
+import { fetchData, postData } from '../../../utils/api';
+import { THEME, useAdaptiveTheme, useGlobalRefresh } from '../../../utils/theme';
 
 import {
     AlertTriangle,

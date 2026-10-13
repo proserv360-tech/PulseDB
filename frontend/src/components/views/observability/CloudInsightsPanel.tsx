@@ -10,8 +10,8 @@
  * Drop-in: <CloudInsightsPanel onSelectProcess={(p) => ...} />
  */
 import { useEffect, useState } from 'react';
-import { fetchDataFresh } from '../utils/api';
-import { THEME, useAdaptiveTheme } from '../utils/theme';
+import { fetchDataFresh } from '../../../utils/api';
+import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { Cloud, RefreshCw, CheckCircle2, AlertTriangle, MinusCircle } from 'lucide-react';
 
 type AwsStatus = { source?: string; configured: boolean; region?: string | null; dbIdentifier?: string | null };

@@ -12,7 +12,7 @@
  *     <Copilot workspaceId={activeWs.id} />
  */
 import { useEffect, useRef, useState } from 'react';
-import { THEME } from '../utils/theme';
+import { THEME } from '../../../utils/theme';
 
 type Mode = 'sql' | 'explain' | 'rca';
 

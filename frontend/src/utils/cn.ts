@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from 'clsx';
-import { THEME } from '../utils/theme';
+import { THEME } from './theme';
 import { twMerge } from 'tailwind-merge';
 
 /** Merge Tailwind + conditional class names */

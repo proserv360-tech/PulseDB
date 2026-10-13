@@ -9,8 +9,8 @@ import { AmbientOrbs, GlobalRefreshButton, StatusPill, ThemeToggle } from '../co
 import { NotificationCenter, SEV_COLORS } from '../components/layout/NotificationCenter';
 import { ProfileModal } from '../components/layout/ProfileModal';
 import { Sidebar } from '../components/layout/Sidebar';
-import CommandPalette from '../components/shared/CommandPalette';
-import SectionErrorBoundary from '../components/shared/SectionErrorBoundary';
+import CommandPalette from '../components/ui/CommandPalette';
+import SectionErrorBoundary from '../components/ui/SectionErrorBoundary';
 import { AlertBanner } from '../components/ui/SharedComponents';
 import { DS, DS_DARK, DS_LIGHT, setDS } from '../config/designTokens';
 import { STORAGE_KEYS } from '../config/tabConfig';

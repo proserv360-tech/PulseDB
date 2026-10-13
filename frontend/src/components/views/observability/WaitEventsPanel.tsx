@@ -10,8 +10,8 @@
  * Drop-in: <WaitEventsPanel connectionId={conn.id} />
  */
 import { useEffect, useState } from 'react';
-import { fetchDataFresh } from '../utils/api';
-import { THEME, useAdaptiveTheme } from '../utils/theme';
+import { fetchDataFresh } from '../../../utils/api';
+import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { Activity, AlertTriangle, Info, RefreshCw, ChevronRight, ChevronDown } from 'lucide-react';
 
 const POLL_MS = 10_000;
