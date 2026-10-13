@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL Monitor — Database Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #04060f;
+            --surface: #0a0f1e;
+            --surface-hover: #0e1528;
+            --sidebar-bg: #050810;
+            --header-bg: rgba(4, 6, 15, 0.85);
+
+            --text-primary: #f0f4ff;
+            --text-sub: #94a3b8;
+            --text-muted: #475569;
+
+            --cyan: #38bdf8;
+            --violet: #818cf8;
+            --emerald: #34d399;
+            --amber: #fbbf24;
+            --rose: #fb7185;
+
+            --card-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.8);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 252px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid rgba(56, 189, 248, 0.1);
+            padding: 1.5rem 0;
+            overflow-y: auto;
+            z-index: 999;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--bg);
+        }
+
+        .sidebar-logo-text {
+            font-weight: 700;
+            font-size: 14px;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 1.5rem 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .sidebar-section-title.system { color: var(--cyan); }
+        .sidebar-section-title.query { color: var(--violet); }
+        .sidebar-section-title.engine { color: var(--emerald); }
+        .sidebar-section-title.schema { color: var(--amber); }
+        .sidebar-section-title.diag { color: var(--violet); }
+        .sidebar-section-title.admin { color: var(--rose); }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0.25rem 0.75rem;
+        }
+
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar-menu-item:hover {
+            background: rgba(56, 189, 248, 0.05);
+            color: var(--text-primary);
+        }
+
+        .sidebar-menu-item.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--cyan);
+            border-left-color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .sidebar-menu-item.active.query { border-left-color: var(--violet); color: var(--violet); }
+        .sidebar-menu-item.active.engine { border-left-color: var(--emerald); color: var(--emerald); }
+        .sidebar-menu-item.active.schema { border-left-color: var(--amber); color: var(--amber); }
+        .sidebar-menu-item.active.diag { border-left-color: var(--violet); color: var(--violet); }
+        .sidebar-menu-item.active.admin { border-left-color: var(--rose); color: var(--rose); }
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0;
+            left: 252px;
+            right: 0;
+            height: 72px;
+            background: var(--header-bg);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+            z-index: 998;
+        }
+
+        .header-content {
+            height: 100%;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .breadcrumb span {
+            color: var(--text-muted);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(52, 211, 153, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--emerald);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-badge {
+            background: linear-gradient(135deg, var(--rose), var(--amber));
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 252px;
+            margin-top: 72px;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* GLASS CARD */
+        .glass-card {
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.5), transparent);
+        }
+
+        .glass-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* STATUS BANNER */
+        .status-banner {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-banner-metric {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .status-banner-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-banner-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .status-banner-info {
+            font-size: 14px;
+            color: var(--text-sub);
+            text-align: right;
+        }
+
+        /* METRICS GRID */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metrics-grid.grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .metrics-grid.grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .metrics-grid.grid-6 {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        /* METRIC CARD */
+        .metric-card {
+            background: rgba(14, 21, 40, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(14, 21, 40, 0.8);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .metric-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card-icon.cyan { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+        .metric-card-icon.violet { background: rgba(129, 140, 248, 0.15); color: var(--violet); }
+        .metric-card-icon.emerald { background: rgba(52, 211, 153, 0.15); color: var(--emerald); }
+        .metric-card-icon.amber { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
+        .metric-card-icon.rose { background: rgba(251, 113, 133, 0.15); color: var(--rose); }
+
+        .metric-card-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 11px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-card-trend.up { background: rgba(52, 211, 153, 0.15); color: var(--emerald); }
+        .metric-card-trend.down { background: rgba(251, 113, 133, 0.15); color: var(--rose); }
+
+        /* BENTO METRIC */
+        .bento-metric {
+            background: rgba(14, 21, 40, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-metric::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -40%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .bento-metric-value {
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bento-metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* RESOURCE GAUGE */
+        .resource-gauge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .resource-gauge {
+            width: 120px;
+            height: 120px;
+        }
+
+        .gauge-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* DATA TABLE */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table thead {
+            background: rgba(56, 189, 248, 0.05);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.05);
+            font-size: 13px;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .table-query-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--cyan);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* CHART CONTAINER */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1.5rem;
+        }
+
+        .chart-container-dual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* CHIP BADGE */
+        .chip {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chip.cyan { background: rgba(56, 189, 248, 0.15); color: var(--cyan); }
+        .chip.violet { background: rgba(129, 140, 248, 0.15); color: var(--violet); }
+        .chip.emerald { background: rgba(52, 211, 153, 0.15); color: var(--emerald); }
+        .chip.amber { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
+        .chip.rose { background: rgba(251, 113, 133, 0.15); color: var(--rose); }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.4);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .metrics-grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .metrics-grid.grid-6 { grid-template-columns: repeat(3, 1fr); }
+            .chart-container-dual { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 0; transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            header { left: 0; }
+            .metrics-grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .metrics-grid.grid-6 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">🗄️</div>
+                <div>
+                    <div class="sidebar-logo-text">MySQL Monitor</div>
+                    <div class="sidebar-subtitle">Database Intelligence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYSTEM VITALS -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title system">SYSTEM VITALS</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item active" onclick="switchTab('overview')">Overview</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('performance')">Performance</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('resources')">Resources</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('reliability')">Reliability</div></li>
+            </ul>
+        </div>
+
+        <!-- QUERY ANALYSIS -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title query">QUERY ANALYSIS</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item" onclick="switchTab('optimizer')">Query Optimizer</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('slowquery')">Slow Query Log</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('indexes')">Index Statistics</div></li>
+            </ul>
+        </div>
+
+        <!-- ENGINE & REPLICATION -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title engine">ENGINE & REPLICATION</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item" onclick="switchTab('innodb')">InnoDB Engine</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('connpool')">Connection Pool</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('replication')">Replication</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('binlog')">Binary Log</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('bufferpool')">Buffer Pool</div></li>
+            </ul>
+        </div>
+
+        <!-- SCHEMA MANAGEMENT -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title schema">SCHEMA MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item" onclick="switchTab('schema')">Schema Browser</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('security')">User Privileges</div></li>
+            </ul>
+        </div>
+
+        <!-- DIAGNOSTICS -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title diag">DIAGNOSTICS</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item" onclick="switchTab('diagnostics')">Performance Schema</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('errorlog')">Error Log</div></li>
+            </ul>
+        </div>
+
+        <!-- ADMINISTRATION -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-title admin">ADMINISTRATION</div>
+            <ul class="sidebar-menu">
+                <li><div class="sidebar-menu-item" onclick="switchTab('backup')">Backup & Recovery</div></li>
+                <li><div class="sidebar-menu-item" onclick="switchTab('variables')">Server Variables</div></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <div class="breadcrumb">MySQL <span>/</span> Database Monitoring</div>
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    mysql-prod-01
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-badge">DEMO DATA</div>
+                <a href="/demo" class="back-link">← Back to Demo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <!-- Status Banner -->
+            <div class="status-banner">
+                <div class="status-banner-metric">
+                    <div class="status-banner-value">4,820</div>
+                    <div class="status-banner-label">Queries Per Second</div>
+                </div>
+                <div class="status-banner-info">
+                    <div>MySQL 8.4.0</div>
+                    <div style="color: var(--emerald);">Uptime: 34 days</div>
+                </div>
+            </div>
+
+            <!-- Core Vitals -->
+            <div class="glass-card">
+                <div class="glass-card-title">Core Vitals</div>
+                <div class="metrics-grid grid-4">
+                    <div class="bento-metric" style="border-color: rgba(56, 189, 248, 0.3);">
+                        <div class="bento-metric-value" style="color: var(--cyan);">4,820</div>
+                        <div class="bento-metric-label">QPS</div>
+                    </div>
+                    <div class="bento-metric" style="border-color: rgba(129, 140, 248, 0.3);">
+                        <div class="bento-metric-value" style="color: var(--violet);">1,580</div>
+                        <div class="bento-metric-label">TPS</div>
+                    </div>
+                    <div class="bento-metric" style="border-color: rgba(251, 191, 36, 0.3);">
+                        <div class="bento-metric-value" style="color: var(--amber);">95</div>
+                        <div class="bento-metric-label">Connections</div>
+                    </div>
+                    <div class="bento-metric" style="border-color: rgba(52, 211, 153, 0.3);">
+                        <div class="bento-metric-value" style="color: var(--emerald);">34d</div>
+                        <div class="bento-metric-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Handler Rates -->
+            <div class="glass-card">
+                <div class="glass-card-title">Handler Rates</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📖</div>
+                        <div class="metric-card-value">28,400/s</div>
+                        <div class="metric-card-label">Read Rate</div>
+                        <div class="metric-card-trend up">↑ 2.3%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">✏️</div>
+                        <div class="metric-card-value">8,200/s</div>
+                        <div class="metric-card-label">Write Rate</div>
+                        <div class="metric-card-trend down">↓ 1.1%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">💾</div>
+                        <div class="metric-card-value">97.8%</div>
+                        <div class="metric-card-label">Table Open Cache Hit</div>
+                        <div class="metric-card-trend up">↑ 0.4%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">🔄</div>
+                        <div class="metric-card-value">99.2%</div>
+                        <div class="metric-card-label">Thread Cache Hit</div>
+                        <div class="metric-card-trend up">↑ 0.1%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QPS & TPS Trend -->
+            <div class="glass-card">
+                <div class="glass-card-title">QPS & TPS Trend (24h)</div>
+                <div class="chart-container-dual">
+                    <div class="chart-container">
+                        <canvas id="qpsChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="tpsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Breakdown -->
+            <div class="glass-card">
+                <div class="glass-card-title">Command Breakdown</div>
+                <div class="chart-container" style="max-width: 400px;">
+                    <canvas id="commandChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERFORMANCE TAB -->
+        <div id="performance" class="tab-content">
+            <!-- Query Performance -->
+            <div class="glass-card">
+                <div class="glass-card-title">Query Performance</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">⏱️</div>
+                        <div class="metric-card-value">3.2ms</div>
+                        <div class="metric-card-label">Avg Query Time</div>
+                        <div class="metric-card-trend down">↓ 5%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">🐌</div>
+                        <div class="metric-card-value">22</div>
+                        <div class="metric-card-label">Slow Queries</div>
+                        <div class="metric-card-trend down">↓ 12%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📊</div>
+                        <div class="metric-card-value">416M</div>
+                        <div class="metric-card-label">Queries/Day</div>
+                        <div class="metric-card-trend up">↑ 3%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">📈</div>
+                        <div class="metric-card-value">15.4ms</div>
+                        <div class="metric-card-label">P95 Latency</div>
+                        <div class="metric-card-trend down">↓ 2%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latency Trend -->
+            <div class="glass-card">
+                <div class="glass-card-title">Query Latency Trend (24h)</div>
+                <div class="chart-container">
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Slow Query Analysis -->
+            <div class="glass-card">
+                <div class="glass-card-title">Slow Query Analysis</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Avg Time</th>
+                            <th>Calls</th>
+                            <th>Rows Examined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="table-query-text">SELECT * FROM orders WHERE user_id = ? AND...</span></td>
+                            <td>48.2ms</td>
+                            <td>2,840</td>
+                            <td>125,600</td>
+                        </tr>
+                        <tr>
+                            <td><span class="table-query-text">SELECT id, name FROM users WHERE status = ?...</span></td>
+                            <td>32.5ms</td>
+                            <td>1,240</td>
+                            <td>84,320</td>
+                        </tr>
+                        <tr>
+                            <td><span class="table-query-text">UPDATE products SET price = ? WHERE...</span></td>
+                            <td>18.7ms</td>
+                            <td>580</td>
+                            <td>42,100</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sort & Filesort -->
+            <div class="glass-card">
+                <div class="glass-card-title">Sort & Filesort Operations</div>
+                <div class="metrics-grid grid-2">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🔀</div>
+                        <div class="metric-card-value">12</div>
+                        <div class="metric-card-label">Sort Merge Passes/hr</div>
+                        <div class="metric-card-trend down">↓ 8%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">💿</div>
+                        <div class="metric-card-value">280</div>
+                        <div class="metric-card-label">Filesort Ops/hr</div>
+                        <div class="metric-card-trend up">↑ 4%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESOURCES TAB -->
+        <div id="resources" class="tab-content">
+            <!-- CPU & Memory -->
+            <div class="glass-card">
+                <div class="glass-card-title">CPU & Memory Usage</div>
+                <div class="metrics-grid grid-2">
+                    <div class="metric-card">
+                        <div class="resource-gauge-container">
+                            <svg class="resource-gauge" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(56,189,248,0.1)" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#38bdf8" stroke-width="8" stroke-dasharray="78.5 314" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                <text x="60" y="65" text-anchor="middle" font-size="20" font-weight="700" fill="#f0f4ff">35%</text>
+                            </svg>
+                            <div class="gauge-label">CPU Usage</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="resource-gauge-container">
+                            <svg class="resource-gauge" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(129,140,248,0.1)" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#818cf8" stroke-width="8" stroke-dasharray="169.56 314" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                <text x="60" y="65" text-anchor="middle" font-size="20" font-weight="700" fill="#f0f4ff">68%</text>
+                            </svg>
+                            <div class="gauge-label">Memory Usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk & Temp -->
+            <div class="glass-card">
+                <div class="glass-card-title">Disk & Temporary Tables</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">💾</div>
+                        <div class="metric-card-value">52 MB/s</div>
+                        <div class="metric-card-label">Disk I/O</div>
+                        <div class="metric-card-trend up">↑ 6%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">🔄</div>
+                        <div class="metric-card-value">128 MB</div>
+                        <div class="metric-card-label">Swap Usage</div>
+                        <div class="metric-card-trend down">↓ 0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">📊</div>
+                        <div class="metric-card-value">420</div>
+                        <div class="metric-card-label">Tmp Tables/hr</div>
+                        <div class="metric-card-trend down">↓ 3%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">🗂️</div>
+                        <div class="metric-card-value">18</div>
+                        <div class="metric-card-label">Tmp Disk Tables/hr</div>
+                        <div class="metric-card-trend down">↓ 5%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RELIABILITY TAB -->
+        <div id="reliability" class="tab-content">
+            <!-- Reliability Metrics -->
+            <div class="glass-card">
+                <div class="glass-card-title">Reliability Metrics</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">⚠️</div>
+                        <div class="metric-card-value">0.02%</div>
+                        <div class="metric-card-label">Error Rate</div>
+                        <div class="metric-card-trend up">↑ 0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">❌</div>
+                        <div class="metric-card-value">8</div>
+                        <div class="metric-card-label">Failed Txns/hr</div>
+                        <div class="metric-card-trend up">↑ 2</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">⏱️</div>
+                        <div class="metric-card-value">12s</div>
+                        <div class="metric-card-label">Recovery Time</div>
+                        <div class="metric-card-trend down">↓ 1s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">✅</div>
+                        <div class="metric-card-value">99.97%</div>
+                        <div class="metric-card-label">Availability</div>
+                        <div class="metric-card-trend up">↑ 0.01%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">🔌</div>
+                        <div class="metric-card-value">5</div>
+                        <div class="metric-card-label">Aborted Clients/hr</div>
+                        <div class="metric-card-trend down">↓ 1</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📡</div>
+                        <div class="metric-card-value">2</div>
+                        <div class="metric-card-label">Aborted Connects/hr</div>
+                        <div class="metric-card-trend up">↑ 0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUERY OPTIMIZER TAB -->
+        <div id="optimizer" class="tab-content">
+            <!-- Optimizer Stats -->
+            <div class="glass-card">
+                <div class="glass-card-title">Optimizer Statistics</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🔍</div>
+                        <div class="metric-card-value">6.8%</div>
+                        <div class="metric-card-label">Full Scans</div>
+                        <div class="metric-card-trend up">↑ 1.2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📇</div>
+                        <div class="metric-card-value">93.2%</div>
+                        <div class="metric-card-label">Index Scans</div>
+                        <div class="metric-card-trend down">↓ 1.2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">💰</div>
+                        <div class="metric-card-value">142</div>
+                        <div class="metric-card-label">Avg Cost</div>
+                        <div class="metric-card-trend down">↓ 5</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">💾</div>
+                        <div class="metric-card-value">45.2%</div>
+                        <div class="metric-card-label">Cache Hit</div>
+                        <div class="metric-card-trend up">↑ 2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">🔗</div>
+                        <div class="metric-card-value">34</div>
+                        <div class="metric-card-label">Full Join/hr</div>
+                        <div class="metric-card-trend up">↑ 4</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">⚡</div>
+                        <div class="metric-card-value">98.5%</div>
+                        <div class="metric-card-label">Hash Index Hit</div>
+                        <div class="metric-card-trend up">↑ 0.3%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Distribution -->
+            <div class="glass-card">
+                <div class="glass-card-title">Scan Distribution</div>
+                <div class="chart-container" style="max-width: 400px;">
+                    <canvas id="scanChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- INNODB TAB -->
+        <div id="innodb" class="tab-content">
+            <!-- InnoDB Metrics -->
+            <div class="glass-card">
+                <div class="glass-card-title">InnoDB Metrics</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📦</div>
+                        <div class="metric-card-value">82%</div>
+                        <div class="metric-card-label">Pool Usage</div>
+                        <div class="metric-card-trend up">↑ 2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📝</div>
+                        <div class="metric-card-value">450/s</div>
+                        <div class="metric-card-label">Log Writes/s</div>
+                        <div class="metric-card-trend down">↓ 20</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">📖</div>
+                        <div class="metric-card-value">1,200/s</div>
+                        <div class="metric-card-label">Page Reads/s</div>
+                        <div class="metric-card-trend up">↑ 50</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">✏️</div>
+                        <div class="metric-card-value">380/s</div>
+                        <div class="metric-card-label">Page Writes/s</div>
+                        <div class="metric-card-trend up">↑ 30</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">📚</div>
+                        <div class="metric-card-value">2 GB</div>
+                        <div class="metric-card-label">Redo Log Size</div>
+                        <div class="metric-card-trend up">↑ 128 MB</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🔄</div>
+                        <div class="metric-card-value">4</div>
+                        <div class="metric-card-label">Undo Spaces</div>
+                        <div class="metric-card-trend up">↑ 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buffer Pool -->
+            <div class="glass-card">
+                <div class="glass-card-title">Buffer Pool Stats</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">💾</div>
+                        <div class="metric-card-value">16 GB</div>
+                        <div class="metric-card-label">Total Size</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📊</div>
+                        <div class="metric-card-value">82%</div>
+                        <div class="metric-card-label">Utilization</div>
+                        <div class="metric-card-trend up">↑ 2%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">📖</div>
+                        <div class="metric-card-value">1,200/s</div>
+                        <div class="metric-card-label">Reads/s</div>
+                        <div class="metric-card-trend up">↑ 50</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">✅</div>
+                        <div class="metric-card-value">99.6%</div>
+                        <div class="metric-card-label">Hit Ratio</div>
+                        <div class="metric-card-trend up">↑ 0.1%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buffer Pool Trend -->
+            <div class="glass-card">
+                <div class="glass-card-title">Buffer Pool Trend (24h)</div>
+                <div class="chart-container">
+                    <canvas id="bufferPoolChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTION POOL TAB -->
+        <div id="connpool" class="tab-content">
+            <!-- Pool Stats -->
+            <div class="glass-card">
+                <div class="glass-card-title">Connection Pool Statistics</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🔗</div>
+                        <div class="metric-card-value">95</div>
+                        <div class="metric-card-label">Active Connections</div>
+                        <div class="metric-card-trend up">↑ 5</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📈</div>
+                        <div class="metric-card-value">300</div>
+                        <div class="metric-card-label">Max Pool Size</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">❌</div>
+                        <div class="metric-card-value">7</div>
+                        <div class="metric-card-label">Aborted</div>
+                        <div class="metric-card-trend down">↓ 1</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">⚡</div>
+                        <div class="metric-card-value">96.8%</div>
+                        <div class="metric-card-label">Efficiency</div>
+                        <div class="metric-card-trend up">↑ 0.5%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection History -->
+            <div class="glass-card">
+                <div class="glass-card-title">Connection History (24h)</div>
+                <div class="chart-container">
+                    <canvas id="connHistoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPLICATION TAB -->
+        <div id="replication" class="tab-content">
+            <!-- Replication Status -->
+            <div class="glass-card">
+                <div class="glass-card-title">Replication Status</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">⏱️</div>
+                        <div class="metric-card-value">0.5s</div>
+                        <div class="metric-card-label">Replication Lag</div>
+                        <div class="metric-card-trend down">↓ 0.1s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📜</div>
+                        <div class="metric-card-value">128 MB</div>
+                        <div class="metric-card-label">Relay Log Size</div>
+                        <div class="metric-card-trend down">↓ 10 MB</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">⚙️</div>
+                        <div class="metric-card-value">4</div>
+                        <div class="metric-card-label">Worker Threads</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">🔑</div>
+                        <div class="metric-card-value"><span class="chip emerald">ON</span></div>
+                        <div class="metric-card-label">GTID Mode</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">📡</div>
+                        <div class="metric-card-value"><span class="chip emerald">Enabled</span></div>
+                        <div class="metric-card-label">Semi-Sync</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">👥</div>
+                        <div class="metric-card-value">3</div>
+                        <div class="metric-card-label">Group Members</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replica Details -->
+            <div class="glass-card">
+                <div class="glass-card-title">Replica Details</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Replication Lag</th>
+                            <th>State</th>
+                            <th>GTID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mysql-replica-01</td>
+                            <td>0.5s</td>
+                            <td><span class="chip emerald">Connected</span></td>
+                            <td>8e11fa47-...-1:1-2840</td>
+                        </tr>
+                        <tr>
+                            <td>mysql-replica-02</td>
+                            <td>0.8s</td>
+                            <td><span class="chip emerald">Connected</span></td>
+                            <td>8e11fa47-...-1:1-2839</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Binary Log -->
+            <div class="glass-card">
+                <div class="glass-card-title">Binary Log</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📝</div>
+                        <div class="metric-card-value">458920</div>
+                        <div class="metric-card-label">Current Position</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">💾</div>
+                        <div class="metric-card-value">2,400 MB</div>
+                        <div class="metric-card-label">Total Size</div>
+                        <div class="metric-card-trend up">↑ 120 MB</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">🗑️</div>
+                        <div class="metric-card-value">7d</div>
+                        <div class="metric-card-label">Purge Age</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">📊</div>
+                        <div class="metric-card-value"><span class="chip amber">ROW</span></div>
+                        <div class="metric-card-label">Log Format</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUFFER POOL TAB (additional detail) -->
+        <div id="bufferpool" class="tab-content">
+            <div class="glass-card">
+                <div class="glass-card-title">Buffer Pool Detailed View</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">💾</div>
+                        <div class="metric-card-value">16 GB</div>
+                        <div class="metric-card-label">Configured Size</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📊</div>
+                        <div class="metric-card-value">13.1 GB</div>
+                        <div class="metric-card-label">Used</div>
+                        <div class="metric-card-trend up">↑ 256 MB</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">📄</div>
+                        <div class="metric-card-value">3.4M</div>
+                        <div class="metric-card-label">Pages Allocated</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">✅</div>
+                        <div class="metric-card-value">99.6%</div>
+                        <div class="metric-card-label">Hit Ratio</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEMA TAB -->
+        <div id="schema" class="tab-content">
+            <!-- Schema Overview -->
+            <div class="glass-card">
+                <div class="glass-card-title">Schema Overview</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🗂️</div>
+                        <div class="metric-card-value">8</div>
+                        <div class="metric-card-label">Databases</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📑</div>
+                        <div class="metric-card-value">342</div>
+                        <div class="metric-card-label">Tables</div>
+                        <div class="metric-card-trend up">↑ 2</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">👁️</div>
+                        <div class="metric-card-value">28</div>
+                        <div class="metric-card-label">Views</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">⚙️</div>
+                        <div class="metric-card-value">15</div>
+                        <div class="metric-card-label">Procedures</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">⚡</div>
+                        <div class="metric-card-value">22</div>
+                        <div class="metric-card-label">Triggers</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📅</div>
+                        <div class="metric-card-value">8</div>
+                        <div class="metric-card-label">Scheduled Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Object Distribution -->
+            <div class="glass-card">
+                <div class="glass-card-title">Object Distribution</div>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="objectDistChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="glass-card">
+                <div class="glass-card-title">Security & Users</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">👤</div>
+                        <div class="metric-card-value">24</div>
+                        <div class="metric-card-label">Database Users</div>
+                        <div class="metric-card-trend up">↑ 1</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">👥</div>
+                        <div class="metric-card-value">6</div>
+                        <div class="metric-card-label">Roles</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">🔐</div>
+                        <div class="metric-card-value">148</div>
+                        <div class="metric-card-label">Grants</div>
+                        <div class="metric-card-trend up">↑ 4</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">❌</div>
+                        <div class="metric-card-value">3</div>
+                        <div class="metric-card-label">Failed Logins/day</div>
+                        <div class="metric-card-trend down">↓ 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAGNOSTICS TAB -->
+        <div id="diagnostics" class="tab-content">
+            <!-- Performance Schema -->
+            <div class="glass-card">
+                <div class="glass-card-title">Performance Schema</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📊</div>
+                        <div class="metric-card-value">2.4M</div>
+                        <div class="metric-card-label">Events/day</div>
+                        <div class="metric-card-trend up">↑ 150k</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📈</div>
+                        <div class="metric-card-value">8,500/s</div>
+                        <div class="metric-card-label">Table I/O/s</div>
+                        <div class="metric-card-trend up">↑ 200</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">🔍</div>
+                        <div class="metric-card-value">4,820/s</div>
+                        <div class="metric-card-label">Statements/s</div>
+                        <div class="metric-card-trend up">↑ 100</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">⚠️</div>
+                        <div class="metric-card-value">12</div>
+                        <div class="metric-card-label">Tracked Errors</div>
+                        <div class="metric-card-trend down">↓ 2</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process States -->
+            <div class="glass-card">
+                <div class="glass-card-title">Process States</div>
+                <div class="chart-container" style="max-width: 400px;">
+                    <canvas id="processStatesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ERROR LOG TAB -->
+        <div id="errorlog" class="tab-content">
+            <!-- Error Log Summary -->
+            <div class="glass-card">
+                <div class="glass-card-title">Error Log Summary</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">📝</div>
+                        <div class="metric-card-value">1,240</div>
+                        <div class="metric-card-label">Entries/day</div>
+                        <div class="metric-card-trend up">↑ 80</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">❌</div>
+                        <div class="metric-card-value">8</div>
+                        <div class="metric-card-label">Errors/day</div>
+                        <div class="metric-card-trend down">↓ 2</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">⚠️</div>
+                        <div class="metric-card-value">45</div>
+                        <div class="metric-card-label">Warnings/day</div>
+                        <div class="metric-card-trend up">↑ 5</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">🔴</div>
+                        <div class="metric-card-value">0</div>
+                        <div class="metric-card-label">Critical Issues</div>
+                        <div class="metric-card-trend down">↓ 0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BACKUP TAB -->
+        <div id="backup" class="tab-content">
+            <!-- Backup & Admin -->
+            <div class="glass-card">
+                <div class="glass-card-title">Backup & Recovery</div>
+                <div class="metrics-grid grid-6">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">💾</div>
+                        <div class="metric-card-value">10h ago</div>
+                        <div class="metric-card-label">Last Backup</div>
+                        <div class="metric-card-trend up">✓</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">📦</div>
+                        <div class="metric-card-value">45 GB</div>
+                        <div class="metric-card-label">Backup Size</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">⏱️</div>
+                        <div class="metric-card-value">22 min</div>
+                        <div class="metric-card-label">Restore Time</div>
+                        <div class="metric-card-trend down">↓ 2 min</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">✅</div>
+                        <div class="metric-card-value">100%</div>
+                        <div class="metric-card-label">Success Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon rose">🔌</div>
+                        <div class="metric-card-value"><span class="chip emerald">Active</span></div>
+                        <div class="metric-card-label">Clone Plugin</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">🔀</div>
+                        <div class="metric-card-value">2</div>
+                        <div class="metric-card-label">Router Instances</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIABLES TAB -->
+        <div id="variables" class="tab-content">
+            <!-- Server Variables -->
+            <div class="glass-card">
+                <div class="glass-card-title">Server Variables</div>
+                <div class="metrics-grid grid-4">
+                    <div class="metric-card">
+                        <div class="metric-card-icon cyan">⚙️</div>
+                        <div class="metric-card-value">584</div>
+                        <div class="metric-card-label">Total Variables</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon violet">🔧</div>
+                        <div class="metric-card-value">42</div>
+                        <div class="metric-card-label">Modified</div>
+                        <div class="metric-card-trend up">↑ 2</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon emerald">⚡</div>
+                        <div class="metric-card-value">380</div>
+                        <div class="metric-card-label">Dynamic Variables</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-card-icon amber">📅</div>
+                        <div class="metric-card-value">5d ago</div>
+                        <div class="metric-card-label">Last Change</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Chart.js color scheme
+        const chartColors = {
+            cyan: '#38bdf8',
+            violet: '#818cf8',
+            emerald: '#34d399',
+            amber: '#fbbf24',
+            rose: '#fb7185',
+            bgLight: 'rgba(10, 15, 30, 0.5)',
+            textPrimary: '#f0f4ff',
+            textSub: '#94a3b8',
+        };
+
+        // Tab switching
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all menu items
+            document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+
+            // Add active class to clicked menu item
+            event.target.classList.add('active');
+
+            // Initialize charts for the new tab
+            setTimeout(() => initCharts(), 100);
+        }
+
+        // Initialize all charts
+        function initCharts() {
+            // QPS Chart
+            const qpsCtx = document.getElementById('qpsChart');
+            if (qpsCtx && !window.qpsChartInstance) {
+                window.qpsChartInstance = new Chart(qpsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'QPS',
+                            data: [3200, 3800, 4200, 4820, 4600, 3900, 3400],
+                            borderColor: chartColors.cyan,
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: chartColors.cyan,
+                            pointBorderColor: chartColors.bgLight,
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(56, 189, 248, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // TPS Chart
+            const tpsCtx = document.getElementById('tpsChart');
+            if (tpsCtx && !window.tpsChartInstance) {
+                window.tpsChartInstance = new Chart(tpsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'TPS',
+                            data: [1200, 1400, 1500, 1580, 1520, 1300, 1100],
+                            borderColor: chartColors.violet,
+                            backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: chartColors.violet,
+                            pointBorderColor: chartColors.bgLight,
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(129, 140, 248, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Command Breakdown Chart
+            const commandCtx = document.getElementById('commandChart');
+            if (commandCtx && !window.commandChartInstance) {
+                window.commandChartInstance = new Chart(commandCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
+                        datasets: [{
+                            data: [3200, 820, 580, 220],
+                            backgroundColor: [chartColors.cyan, chartColors.violet, chartColors.emerald, chartColors.amber],
+                            borderColor: chartColors.bgLight,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: chartColors.textSub, padding: 15 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Latency Chart
+            const latencyCtx = document.getElementById('latencyChart');
+            if (latencyCtx && !window.latencyChartInstance) {
+                window.latencyChartInstance = new Chart(latencyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'Latency (ms)',
+                            data: [3.8, 3.5, 3.1, 3.2, 3.4, 3.6, 3.9],
+                            borderColor: chartColors.rose,
+                            backgroundColor: 'rgba(251, 113, 133, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(251, 113, 133, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Scan Distribution Chart
+            const scanCtx = document.getElementById('scanChart');
+            if (scanCtx && !window.scanChartInstance) {
+                window.scanChartInstance = new Chart(scanCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Index Scans', 'Full Scans'],
+                        datasets: [{
+                            data: [93.2, 6.8],
+                            backgroundColor: [chartColors.emerald, chartColors.rose],
+                            borderColor: chartColors.bgLight,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: chartColors.textSub, padding: 15 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Buffer Pool Chart
+            const bpCtx = document.getElementById('bufferPoolChart');
+            if (bpCtx && !window.bpChartInstance) {
+                window.bpChartInstance = new Chart(bpCtx, {
+                    type: 'area',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'Buffer Pool Usage (%)',
+                            data: [75, 76, 78, 82, 81, 80, 79],
+                            borderColor: chartColors.emerald,
+                            backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(52, 211, 153, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Connection History Chart
+            const connCtx = document.getElementById('connHistoryChart');
+            if (connCtx && !window.connChartInstance) {
+                window.connChartInstance = new Chart(connCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'Active Connections',
+                            data: [68, 72, 88, 95, 92, 80, 70],
+                            borderColor: chartColors.cyan,
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 300,
+                                grid: { color: 'rgba(56, 189, 248, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Object Distribution Chart
+            const objCtx = document.getElementById('objectDistChart');
+            if (objCtx && !window.objChartInstance) {
+                window.objChartInstance = new Chart(objCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Tables', 'Views', 'Procedures', 'Triggers', 'Indexes'],
+                        datasets: [{
+                            label: 'Count',
+                            data: [342, 28, 15, 22, 1240],
+                            backgroundColor: [chartColors.cyan, chartColors.violet, chartColors.emerald, chartColors.amber, chartColors.rose],
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(56, 189, 248, 0.1)' },
+                                ticks: { color: chartColors.textSub }
+                            },
+                            y: {
+                                ticks: { color: chartColors.textSub }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Process States Chart
+            const procCtx = document.getElementById('processStatesChart');
+            if (procCtx && !window.procChartInstance) {
+                window.procChartInstance = new Chart(procCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Sleeping'],
+                        datasets: [{
+                            data: [42, 53],
+                            backgroundColor: [chartColors.emerald, chartColors.amber],
+                            borderColor: chartColors.bgLight,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: chartColors.textSub, padding: 15 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>

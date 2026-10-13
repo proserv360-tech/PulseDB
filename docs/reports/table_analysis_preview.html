@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table Analysis — Redesign Preview</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d0d0f;
+    --surface:#111113;
+    --panel:#16161a;
+    --border:#222228;
+    --border2:#2a2a32;
+    --text:#e8e8f0;
+    --muted:#8888a0;
+    --dim:#4a4a60;
+    --blue:#4f8fff;
+    --green:#3dd68c;
+    --yellow:#f5c842;
+    --red:#ff5252;
+    --purple:#a78bfa;
+    --cyan:#22d3ee;
+    --orange:#fb923c;
+    --mono:'JetBrains Mono','Fira Code',monospace;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.4}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+  /* ── LAYOUT ── */
+  .shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+  /* Top bar */
+  .topbar{
+    height:44px;min-height:44px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;
+    padding:0 16px;gap:12px;
+    flex-shrink:0;
+  }
+  .topbar-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+  .topbar-title .icon{width:22px;height:22px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px}
+  .topbar-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+  .topbar-filter{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .topbar-filter label{font-size:11px;color:var(--muted)}
+  .topbar-filter select{
+    background:var(--panel);border:1px solid var(--border2);color:var(--text);
+    font-size:11px;padding:3px 8px;border-radius:5px;font-family:var(--mono);cursor:pointer;
+  }
+  .topbar-filter select:focus{outline:none;border-color:var(--blue)}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:8px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .topbar-time{font-family:var(--mono);font-size:10px;color:var(--dim)}
+
+  /* Body = sidebar + main */
+  .body{display:flex;flex:1;overflow:hidden}
+
+  /* LEFT SIDEBAR NAV */
+  .sidebar{
+    width:188px;min-width:188px;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    overflow-y:auto;
+    flex-shrink:0;
+  }
+  .nav-group{padding:16px 0 4px}
+  .nav-group-label{
+    padding:0 14px 6px;
+    font-size:9px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--dim);
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 14px;
+    cursor:pointer;
+    font-size:12px;color:var(--muted);
+    border-left:2px solid transparent;
+    transition:all .12s;
+    user-select:none;
+  }
+  .nav-item:hover{color:var(--text);background:#ffffff04}
+  .nav-item.active{
+    color:var(--blue);
+    background:rgba(79,143,255,.07);
+    border-left-color:var(--blue);
+    font-weight:600;
+  }
+  .nav-item .dot{
+    width:5px;height:5px;border-radius:50%;
+    background:currentColor;opacity:.5;flex-shrink:0;
+  }
+  .nav-badge{
+    margin-left:auto;font-size:9px;font-weight:700;
+    padding:1px 5px;border-radius:3px;
+    background:rgba(255,82,82,.15);color:var(--red);
+  }
+  .nav-badge.warn{background:rgba(245,200,66,.12);color:var(--yellow)}
+  .nav-badge.ok{background:rgba(61,214,140,.12);color:var(--green)}
+
+  /* MAIN CONTENT */
+  .main{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column}
+
+  /* Section header inside main */
+  .section-bar{
+    padding:14px 24px 12px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface);
+    flex-shrink:0;
+    position:sticky;top:0;z-index:10;
+  }
+  .section-bar h2{font-size:14px;font-weight:700;color:var(--text)}
+  .section-bar p{font-size:11px;color:var(--muted);margin-top:1px}
+  .section-bar .metrics{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .metric-pill{
+    display:flex;align-items:center;gap:5px;
+    padding:4px 10px;
+    background:var(--panel);border:1px solid var(--border2);
+    border-radius:5px;font-size:11px;font-family:var(--mono);
+  }
+  .metric-pill .val{font-weight:700}
+  .metric-pill.bad{border-color:rgba(255,82,82,.3);background:rgba(255,82,82,.06)}
+  .metric-pill.bad .val{color:var(--red)}
+  .metric-pill.warn{border-color:rgba(245,200,66,.3);background:rgba(245,200,66,.06)}
+  .metric-pill.warn .val{color:var(--yellow)}
+  .metric-pill.ok{border-color:rgba(61,214,140,.3);background:rgba(61,214,140,.06)}
+  .metric-pill.ok .val{color:var(--green)}
+  .metric-pill.info{border-color:rgba(79,143,255,.3);background:rgba(79,143,255,.06)}
+  .metric-pill.info .val{color:var(--blue)}
+
+  /* Content area */
+  .content{flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+
+  /* ── DATA TABLE ── */
+  .tbl{width:100%;border-collapse:collapse}
+  .tbl thead tr{border-bottom:1px solid var(--border2)}
+  .tbl thead th{
+    padding:7px 10px;
+    font-size:10px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--dim);
+    text-align:left;white-space:nowrap;
+  }
+  .tbl thead th:first-child{padding-left:0}
+  .tbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:default}
+  .tbl tbody tr:hover{background:#ffffff04}
+  .tbl tbody tr:last-child{border-bottom:none}
+  .tbl td{padding:8px 10px;vertical-align:middle}
+  .tbl td:first-child{padding-left:0}
+  .tbl .mono{font-family:var(--mono);font-size:11px}
+  .tbl .name{font-weight:600;color:var(--text);font-size:13px}
+  .tbl .sub{font-size:10px;color:var(--dim);font-family:var(--mono);margin-top:2px}
+  .tbl .num{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
+  .tbl .dimnum{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+  /* Inline bar */
+  .bar-wrap{display:flex;align-items:center;gap:8px}
+  .bar-track{flex:1;height:4px;background:var(--border2);border-radius:4px;overflow:hidden;min-width:60px}
+  .bar-fill{height:100%;border-radius:4px;transition:width .4s}
+  .bar-label{font-family:var(--mono);font-size:11px;font-weight:700;min-width:38px;text-align:right}
+
+  /* Status badge */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.03em}
+  .badge.red{background:rgba(255,82,82,.12);color:var(--red);border:1px solid rgba(255,82,82,.2)}
+  .badge.yellow{background:rgba(245,200,66,.1);color:var(--yellow);border:1px solid rgba(245,200,66,.2)}
+  .badge.green{background:rgba(61,214,140,.1);color:var(--green);border:1px solid rgba(61,214,140,.2)}
+  .badge.blue{background:rgba(79,143,255,.1);color:var(--blue);border:1px solid rgba(79,143,255,.2)}
+  .badge.purple{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+  .badge.cyan{background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.2)}
+
+  /* Stack ratio bar */
+  .ratio{display:flex;height:6px;border-radius:4px;overflow:hidden;gap:1px}
+  .ratio-seg{height:100%}
+
+  /* Section divider label */
+  .tbl-section-head{
+    padding:6px 0;
+    font-size:10px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--dim);
+    border-bottom:1px solid var(--border);
+    display:flex;gap:8px;align-items:center;
+  }
+
+  /* Alert / info strip */
+  .strip{
+    padding:10px 14px;border-radius:5px;
+    display:flex;align-items:flex-start;gap:10px;
+    font-size:12px;
+  }
+  .strip.err{background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.2);color:#ff8a8a}
+  .strip.warn{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);color:#f5c842}
+  .strip.info{background:rgba(79,143,255,.06);border:1px solid rgba(79,143,255,.2);color:#7aabff}
+  .strip .ico{font-size:14px;flex-shrink:0;margin-top:0px}
+  .strip strong{font-weight:700;display:block;margin-bottom:2px}
+
+  /* Two-column grid for scorecard */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+  /* Stat box */
+  .stat-box{
+    background:var(--panel);border:1px solid var(--border2);
+    border-radius:6px;padding:14px 16px;
+  }
+  .stat-box .sb-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .stat-box .sb-val{font-size:22px;font-weight:800;font-family:var(--mono);margin:4px 0 2px;line-height:1}
+  .stat-box .sb-sub{font-size:11px;color:var(--muted)}
+  .stat-box .sb-bar{margin-top:8px}
+
+  /* mini heatmap */
+  .heatmap{display:grid;grid-template-columns:repeat(24,1fr);gap:2px}
+  .hm-cell{
+    aspect-ratio:1;border-radius:2px;
+    background:var(--border2);
+    transition:transform .1s;cursor:default;
+  }
+  .hm-cell:hover{transform:scale(1.3)}
+
+  /* Timeline bars (activity) */
+  .timeline{display:flex;gap:2px;align-items:flex-end;height:60px}
+  .tl-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;transition:opacity .1s}
+  .tl-bar:hover{opacity:.7}
+
+  /* SQL code block */
+  .code-block{
+    background:var(--panel);border:1px solid var(--border2);
+    border-radius:5px;padding:12px 14px;
+    font-family:var(--mono);font-size:11px;color:var(--text);
+    overflow-x:auto;white-space:pre;line-height:1.6;
+  }
+  .code-kw{color:var(--blue)}
+  .code-str{color:var(--green)}
+  .code-num{color:var(--orange)}
+  .code-cmt{color:var(--dim)}
+
+  /* Dependency map */
+  .dep-map{position:relative;overflow:hidden;height:320px;background:var(--panel);border:1px solid var(--border2);border-radius:6px}
+  .dep-map svg{width:100%;height:100%}
+
+  /* AI insight card */
+  .insight{
+    background:var(--panel);border:1px solid var(--border2);
+    border-radius:6px;padding:14px 16px;
+    border-left:3px solid transparent;
+  }
+  .insight.crit{border-left-color:var(--red)}
+  .insight.warn{border-left-color:var(--yellow)}
+  .insight.info{border-left-color:var(--blue)}
+  .insight.ok{border-left-color:var(--green)}
+  .insight-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .insight-title{font-weight:700;font-size:13px;color:var(--text)}
+  .insight-body{font-size:12px;color:var(--muted);line-height:1.6}
+  .insight-meta{display:flex;gap:8px;margin-top:8px}
+  .insight-tag{font-size:10px;font-family:var(--mono);color:var(--dim);background:var(--border2);padding:2px 7px;border-radius:3px}
+
+  /* Hidden panels */
+  .panel{display:none}
+  .panel.active{display:flex;flex-direction:column}
+
+  /* Forecast chart */
+  .forecast-chart{display:flex;gap:3px;align-items:flex-end;height:80px;padding:0 4px}
+  .fc-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;cursor:default;position:relative}
+  .fc-bar.forecast{opacity:.5;border:1px dashed rgba(255,255,255,.15);border-bottom:none}
+
+  /* Autovacuum timeline */
+  .av-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .av-row:last-child{border-bottom:none}
+  .av-name{width:160px;min-width:160px}
+  .av-track{flex:1;height:18px;background:var(--border2);border-radius:3px;overflow:hidden;position:relative}
+  .av-segment{height:100%;position:absolute;border-radius:2px}
+  .av-label{font-size:10px;color:var(--dim);font-family:var(--mono);width:80px;text-align:right}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title">
+      <div class="icon">⊞</div>
+      Table Analysis
+    </div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-filter">
+      <label>Schema</label>
+      <select id="sel-schema" onchange="filterChange()">
+        <option value="">All schemas</option>
+        <option value="public" selected>public</option>
+        <option value="config">config</option>
+        <option value="audit">audit</option>
+      </select>
+      <label>Table</label>
+      <select id="sel-table" onchange="filterChange()">
+        <option value="">All tables</option>
+        <option value="users">users</option>
+        <option value="orders">orders</option>
+        <option value="webhook_delivery_attempts">webhook_delivery_attempts</option>
+        <option value="events">events</option>
+        <option value="sessions">sessions</option>
+      </select>
+      <div class="live-dot"></div>
+      <span class="topbar-time" id="clock"></span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="nav-group">
+        <div class="nav-group-label">Health</div>
+        <div class="nav-item active" onclick="show('scorecard',this)"><span class="dot"></span>Scorecard</div>
+        <div class="nav-item" onclick="show('activity',this)"><span class="dot"></span>Activity</div>
+        <div class="nav-item" onclick="show('forecast',this)"><span class="dot"></span>Growth Forecast</div>
+        <div class="nav-item" onclick="show('rowcounts',this)"><span class="dot"></span>Row Counts</div>
+        <div class="nav-item" onclick="show('autovacuum',this)"><span class="dot"></span>Autovacuum</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Diagnostics</div>
+        <div class="nav-item" onclick="show('columns',this)"><span class="dot"></span>Column Stats <span class="nav-badge warn">3</span></div>
+        <div class="nav-item" onclick="show('toast',this)"><span class="dot"></span>TOAST Bloat</div>
+        <div class="nav-item" onclick="show('queryperf',this)"><span class="dot"></span>Query Perf <span class="nav-badge">2</span></div>
+        <div class="nav-item" onclick="show('locks',this)"><span class="dot"></span>Lock Monitor</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Architecture</div>
+        <div class="nav-item" onclick="show('schema',this)"><span class="dot"></span>Schema History</div>
+        <div class="nav-item" onclick="show('deps',this)"><span class="dot"></span>Dependencies</div>
+        <div class="nav-item" onclick="show('write',this)"><span class="dot"></span>Write Amp.</div>
+        <div class="nav-item" onclick="show('indexes',this)"><span class="dot"></span>Indexes <span class="nav-badge warn">1</span></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">AI</div>
+        <div class="nav-item" onclick="show('ai',this)"><span class="dot"></span>AI Deep Analysis <span class="nav-badge ok">4</span></div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- ═══ SCORECARD ═══ -->
+      <div id="panel-scorecard" class="panel active">
+        <div class="section-bar">
+          <div>
+            <h2>Health Scorecard</h2>
+            <p>Overall table health across bloat, activity and index efficiency</p>
+          </div>
+          <div class="metrics">
+            <div class="metric-pill ok"><span class="val">82</span><span style="color:var(--muted)">/100 health</span></div>
+            <div class="metric-pill bad"><span class="val">3</span><span style="color:var(--muted)">critical</span></div>
+            <div class="metric-pill warn"><span class="val">7</span><span style="color:var(--muted)">warnings</span></div>
+            <div class="metric-pill info"><span class="val">42</span><span style="color:var(--muted)">tables</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="four-col">
+            <div class="stat-box">
+              <div class="sb-label">Dead Tuples</div>
+              <div class="sb-val" style="color:var(--red)">18.4%</div>
+              <div class="sb-sub">↑ 3.2% from last scan</div>
+              <div class="sb-bar"><div class="bar-track"><div class="bar-fill" style="width:18.4%;background:var(--red)"></div></div></div>
+            </div>
+            <div class="stat-box">
+              <div class="sb-label">Bloat Ratio</div>
+              <div class="sb-val" style="color:var(--yellow)">11.2%</div>
+              <div class="sb-sub">3 tables above threshold</div>
+              <div class="sb-bar"><div class="bar-track"><div class="bar-fill" style="width:11.2%;background:var(--yellow)"></div></div></div>
+            </div>
+            <div class="stat-box">
+              <div class="sb-label">Cache Hit Rate</div>
+              <div class="sb-val" style="color:var(--green)">99.1%</div>
+              <div class="sb-sub">Excellent — above 98% target</div>
+              <div class="sb-bar"><div class="bar-track"><div class="bar-fill" style="width:99.1%;background:var(--green)"></div></div></div>
+            </div>
+            <div class="stat-box">
+              <div class="sb-label">Index Usage</div>
+              <div class="sb-val" style="color:var(--blue)">94.7%</div>
+              <div class="sb-sub">1 unused index detected</div>
+              <div class="sb-bar"><div class="bar-track"><div class="bar-fill" style="width:94.7%;background:var(--blue)"></div></div></div>
+            </div>
+          </div>
+
+          <div class="strip warn">
+            <span class="ico">⚠</span>
+            <div><strong>3 tables need VACUUM</strong> webhook_delivery_attempts (dead 28%), events (dead 22%), sessions (dead 19%) — autovacuum may be falling behind write rate.</div>
+          </div>
+
+          <table class="tbl">
+            <thead><tr>
+              <th>Table</th><th>Rows (live)</th><th>Size</th><th>Dead %</th><th>Bloat %</th><th>Cache Hit</th><th>Last Vacuum</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="num">2,847,391</td>
+                <td class="dimnum">4.2 GB</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:28%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">28.0%</span>
+                  </div>
+                </td>
+                <td><span class="bar-label" style="color:var(--red)">22.4%</span></td>
+                <td class="dimnum" style="color:var(--green)">99.4%</td>
+                <td class="dimnum">3d 14h ago</td>
+                <td><span class="badge red">VACUUM NOW</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td class="num">14,203,847</td>
+                <td class="dimnum">18.7 GB</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:22%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">22.0%</span>
+                  </div>
+                </td>
+                <td><span class="bar-label" style="color:var(--yellow)">8.1%</span></td>
+                <td class="dimnum" style="color:var(--green)">98.9%</td>
+                <td class="dimnum">2d 8h ago</td>
+                <td><span class="badge red">VACUUM NOW</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td class="num">892,104</td>
+                <td class="dimnum">1.1 GB</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:19%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">19.0%</span>
+                  </div>
+                </td>
+                <td><span class="bar-label" style="color:var(--yellow)">5.2%</span></td>
+                <td class="dimnum" style="color:var(--green)">99.7%</td>
+                <td class="dimnum">18h ago</td>
+                <td><span class="badge yellow">MONITOR</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="num">5,481,920</td>
+                <td class="dimnum">7.3 GB</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:6%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">6.0%</span>
+                  </div>
+                </td>
+                <td><span class="bar-label" style="color:var(--green)">2.1%</span></td>
+                <td class="dimnum" style="color:var(--green)">99.1%</td>
+                <td class="dimnum">4h ago</td>
+                <td><span class="badge green">HEALTHY</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td class="num">1,204,831</td>
+                <td class="dimnum">980 MB</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:3%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">3.0%</span>
+                  </div>
+                </td>
+                <td><span class="bar-label" style="color:var(--green)">1.4%</span></td>
+                <td class="dimnum" style="color:var(--green)">99.8%</td>
+                <td class="dimnum">2h ago</td>
+                <td><span class="badge green">HEALTHY</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ ACTIVITY ═══ -->
+      <div id="panel-activity" class="panel">
+        <div class="section-bar">
+          <div><h2>Activity Heatmap</h2><p>Read/write operations over the last 7 days by hour</p></div>
+          <div class="metrics">
+            <div class="metric-pill info"><span class="val">847K</span><span style="color:var(--muted)"> reads/hr peak</span></div>
+            <div class="metric-pill warn"><span class="val">09–11</span><span style="color:var(--muted)"> hottest hours</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="two-col">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600">READS — last 7 days (24h × 7d)</div>
+              <div id="hm-reads"></div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--dim)">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600">WRITES — last 7 days</div>
+              <div id="hm-writes"></div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--dim)">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600">TOP TABLES BY ACTIVITY (last 24h)</div>
+            <table class="tbl">
+              <thead><tr><th>Table</th><th>Seq Scans</th><th>Index Scans</th><th>Inserts</th><th>Updates</th><th>Deletes</th><th>Rows Returned</th></tr></thead>
+              <tbody>
+                <tr><td><div class="name">events</div><div class="sub">public</div></td><td class="dimnum">12,847</td><td class="dimnum" style="color:var(--green)">4,201,938</td><td class="dimnum">892,041</td><td class="dimnum">44,821</td><td class="dimnum">12,039</td><td class="num">89,204,831</td></tr>
+                <tr><td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td><td class="dimnum" style="color:var(--red)">48,291</td><td class="dimnum">892,041</td><td class="dimnum">442,018</td><td class="dimnum">882,041</td><td class="dimnum">1,204</td><td class="num">12,048,291</td></tr>
+                <tr><td><div class="name">sessions</div><div class="sub">public</div></td><td class="dimnum">4,821</td><td class="dimnum">2,801,047</td><td class="dimnum">304,821</td><td class="dimnum">204,918</td><td class="dimnum">198,041</td><td class="num">8,204,918</td></tr>
+                <tr><td><div class="name">orders</div><div class="sub">public</div></td><td class="dimnum">1,204</td><td class="dimnum">1,482,091</td><td class="dimnum">48,201</td><td class="dimnum">12,048</td><td class="dimnum">820</td><td class="num">4,820,481</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ FORECAST ═══ -->
+      <div id="panel-forecast" class="panel">
+        <div class="section-bar">
+          <div><h2>Growth Forecast</h2><p>Projected table growth — 30/60/90 day estimates based on rolling avg</p></div>
+          <div class="metrics">
+            <div class="metric-pill bad"><span class="val">events</span><span style="color:var(--muted)"> exceeds 50GB in 47d</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Table</th><th>Current Size</th><th>Daily Growth</th><th>+30 Days</th><th>+60 Days</th><th>+90 Days</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">events</div><div class="sub">18.7 GB now</div></td>
+                <td class="num">18.7 GB</td>
+                <td class="dimnum" style="color:var(--red)">+340 MB/d</td>
+                <td class="dimnum">28.9 GB</td>
+                <td><span style="color:var(--yellow);font-family:var(--mono);font-size:11px">39.1 GB</span></td>
+                <td><span style="color:var(--red);font-family:var(--mono);font-size:11px;font-weight:700">49.3 GB ⚠</span></td>
+                <td><span class="badge red">PARTITION</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">4.2 GB now</div></td>
+                <td class="num">4.2 GB</td>
+                <td class="dimnum" style="color:var(--yellow)">+120 MB/d</td>
+                <td class="dimnum">7.8 GB</td>
+                <td class="dimnum">11.4 GB</td>
+                <td><span style="color:var(--yellow);font-family:var(--mono);font-size:11px">15.0 GB</span></td>
+                <td><span class="badge yellow">REVIEW TTL</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">7.3 GB now</div></td>
+                <td class="num">7.3 GB</td>
+                <td class="dimnum">+48 MB/d</td>
+                <td class="dimnum">8.7 GB</td>
+                <td class="dimnum">10.2 GB</td>
+                <td class="dimnum">11.7 GB</td>
+                <td><span class="badge green">STABLE</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">980 MB now</div></td>
+                <td class="num">980 MB</td>
+                <td class="dimnum">+8 MB/d</td>
+                <td class="dimnum">1.2 GB</td>
+                <td class="dimnum">1.5 GB</td>
+                <td class="dimnum">1.7 GB</td>
+                <td><span class="badge green">STABLE</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="strip info">
+            <span class="ico">ℹ</span>
+            <div><strong>Recommendation</strong> Consider range partitioning <code style="font-family:var(--mono);background:var(--border2);padding:1px 5px;border-radius:3px">events</code> by month — at current growth it will exceed 50 GB in ~47 days and autovacuum performance will degrade significantly.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ ROW COUNTS ═══ -->
+      <div id="panel-rowcounts" class="panel">
+        <div class="section-bar">
+          <div><h2>Row Counts</h2><p>Live vs dead tuple ratio per table with bloat visualization</p></div>
+          <div class="metrics">
+            <div class="metric-pill info"><span class="val">42</span><span style="color:var(--muted)"> tables</span></div>
+            <div class="metric-pill bad"><span class="val">24.8M</span><span style="color:var(--muted)"> dead tuples</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Table</th><th>Total Rows</th><th>Live Rows</th><th>Dead Rows</th><th>Live / Dead Ratio</th><th>Dead %</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td class="num">18,204,831</td>
+                <td class="num" style="color:var(--green)">14,203,847</td>
+                <td class="num" style="color:var(--red)">4,000,984</td>
+                <td>
+                  <div class="ratio">
+                    <div class="ratio-seg" style="width:78%;background:var(--green);opacity:.7"></div>
+                    <div class="ratio-seg" style="width:22%;background:var(--red);opacity:.7"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:22%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">22.0%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="num">3,644,898</td>
+                <td class="num" style="color:var(--green)">2,847,391</td>
+                <td class="num" style="color:var(--red)">797,507</td>
+                <td>
+                  <div class="ratio">
+                    <div class="ratio-seg" style="width:72%;background:var(--green);opacity:.7"></div>
+                    <div class="ratio-seg" style="width:28%;background:var(--red);opacity:.7"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:28%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">28.0%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td class="num">1,061,720</td>
+                <td class="num" style="color:var(--green)">892,104</td>
+                <td class="num" style="color:var(--yellow)">169,616</td>
+                <td>
+                  <div class="ratio">
+                    <div class="ratio-seg" style="width:81%;background:var(--green);opacity:.7"></div>
+                    <div class="ratio-seg" style="width:19%;background:var(--yellow);opacity:.7"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:19%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">19.0%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="num">5,813,990</td>
+                <td class="num" style="color:var(--green)">5,481,920</td>
+                <td class="num" style="color:var(--green)">332,070</td>
+                <td>
+                  <div class="ratio">
+                    <div class="ratio-seg" style="width:94%;background:var(--green);opacity:.7"></div>
+                    <div class="ratio-seg" style="width:6%;background:var(--green);opacity:.4"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:6%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">6.0%</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td class="num">1,241,997</td>
+                <td class="num" style="color:var(--green)">1,204,831</td>
+                <td class="num" style="color:var(--green)">37,166</td>
+                <td>
+                  <div class="ratio">
+                    <div class="ratio-seg" style="width:97%;background:var(--green);opacity:.7"></div>
+                    <div class="ratio-seg" style="width:3%;background:var(--green);opacity:.3"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:3%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">3.0%</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ AUTOVACUUM ═══ -->
+      <div id="panel-autovacuum" class="panel">
+        <div class="section-bar">
+          <div><h2>Autovacuum</h2><p>Vacuum and analyze history with next scheduled run estimates</p></div>
+          <div class="metrics">
+            <div class="metric-pill bad"><span class="val">2</span><span style="color:var(--muted)"> overdue</span></div>
+            <div class="metric-pill ok"><span class="val">3</span><span style="color:var(--muted)"> on schedule</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Table</th><th>Last Vacuum</th><th>Last Analyze</th><th>Vacuums</th><th>Analyzes</th><th>Dead Threshold</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="dimnum" style="color:var(--red)">3d 14h ago</td>
+                <td class="dimnum">2d 2h ago</td>
+                <td class="dimnum">48</td>
+                <td class="dimnum">102</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:90%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">90%</span>
+                  </div>
+                </td>
+                <td><span class="badge red">OVERDUE</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td class="dimnum" style="color:var(--red)">2d 8h ago</td>
+                <td class="dimnum">1d 4h ago</td>
+                <td class="dimnum">62</td>
+                <td class="dimnum">148</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:74%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">74%</span>
+                  </div>
+                </td>
+                <td><span class="badge red">OVERDUE</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td class="dimnum">18h ago</td>
+                <td class="dimnum">12h ago</td>
+                <td class="dimnum">284</td>
+                <td class="dimnum">612</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:48%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">48%</span>
+                  </div>
+                </td>
+                <td><span class="badge yellow">MONITOR</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="dimnum">4h ago</td>
+                <td class="dimnum">3h ago</td>
+                <td class="dimnum">891</td>
+                <td class="dimnum">1,842</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">18%</span>
+                  </div>
+                </td>
+                <td><span class="badge green">OK</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td class="dimnum">2h ago</td>
+                <td class="dimnum">1h ago</td>
+                <td class="dimnum">1,204</td>
+                <td class="dimnum">2,891</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">8%</span>
+                  </div>
+                </td>
+                <td><span class="badge green">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ COLUMNS ═══ -->
+      <div id="panel-columns" class="panel">
+        <div class="section-bar">
+          <div><h2>Column Stats</h2><p>MCV lists, null rates, correlation and bloat per column</p></div>
+          <div class="metrics">
+            <div class="metric-pill warn"><span class="val">3</span><span style="color:var(--muted)"> high null rate</span></div>
+            <div class="metric-pill info"><span class="val">webhook_delivery_attempts</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Column</th><th>Type</th><th>Null %</th><th>Distinct</th><th>Avg Width</th><th>Correlation</th><th>MCV Sample</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">id</div></td>
+                <td><span class="badge blue">bigint</span></td>
+                <td class="dimnum" style="color:var(--green)">0.0%</td>
+                <td class="dimnum">−1 (unique)</td>
+                <td class="dimnum">8 B</td>
+                <td class="dimnum" style="color:var(--green)">0.998</td>
+                <td class="dimnum">—</td>
+              </tr>
+              <tr>
+                <td><div class="name">payload</div></td>
+                <td><span class="badge purple">jsonb</span></td>
+                <td class="dimnum" style="color:var(--green)">0.2%</td>
+                <td class="dimnum">2,847,391</td>
+                <td class="dimnum">842 B</td>
+                <td class="dimnum">0.012</td>
+                <td class="dimnum">—</td>
+              </tr>
+              <tr>
+                <td><div class="name">status</div></td>
+                <td><span class="badge cyan">text</span></td>
+                <td class="dimnum" style="color:var(--green)">0.0%</td>
+                <td class="dimnum">4</td>
+                <td class="dimnum">9 B</td>
+                <td class="dimnum">0.241</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">pending(42%) delivered(38%) failed(18%) retry(2%)</td>
+              </tr>
+              <tr>
+                <td><div class="name">retry_count</div></td>
+                <td><span class="badge blue">integer</span></td>
+                <td class="dimnum" style="color:var(--yellow)">12.4%</td>
+                <td class="dimnum">8</td>
+                <td class="dimnum">4 B</td>
+                <td class="dimnum">−0.043</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">0(68%) 1(18%) 2(9%) 3+(5%)</td>
+              </tr>
+              <tr>
+                <td><div class="name">error_message</div></td>
+                <td><span class="badge cyan">text</span></td>
+                <td class="dimnum" style="color:var(--red)">61.8%</td>
+                <td class="dimnum">9,842</td>
+                <td class="dimnum">128 B</td>
+                <td class="dimnum">0.008</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">connection timeout(44%) 404 not found(22%)…</td>
+              </tr>
+              <tr>
+                <td><div class="name">created_at</div></td>
+                <td><span class="badge yellow">timestamptz</span></td>
+                <td class="dimnum" style="color:var(--green)">0.0%</td>
+                <td class="dimnum">2,847,391</td>
+                <td class="dimnum">8 B</td>
+                <td class="dimnum" style="color:var(--green)">0.994</td>
+                <td class="dimnum">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="strip warn">
+            <span class="ico">⚠</span>
+            <div><strong>High null rate detected</strong> <code style="font-family:var(--mono);background:var(--border2);padding:1px 5px;border-radius:3px">error_message</code> has 61.8% nulls. Consider using a partial index or a separate error_log table to avoid wasting storage on null-heavy columns.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TOAST ═══ -->
+      <div id="panel-toast" class="panel">
+        <div class="section-bar">
+          <div><h2>TOAST Bloat</h2><p>Out-of-line storage for oversized columns and dead chunk tracking</p></div>
+          <div class="metrics">
+            <div class="metric-pill info"><span class="val">3</span><span style="color:var(--muted)"> TOAST tables</span></div>
+            <div class="metric-pill warn"><span class="val">840 MB</span><span style="color:var(--muted)"> total TOAST</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Main Table</th><th>TOAST Table</th><th>TOAST Size</th><th>Dead Chunks</th><th>Dead %</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">pg_toast.pg_toast_24819</td>
+                <td class="num" style="color:var(--cyan)">620 MB</td>
+                <td class="dimnum">4,820,481</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:34%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">34.2%</span>
+                  </div>
+                </td>
+                <td><span class="badge red">VACUUM</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">pg_toast.pg_toast_24801</td>
+                <td class="num" style="color:var(--cyan)">180 MB</td>
+                <td class="dimnum">820,481</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:11%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">11.4%</span>
+                  </div>
+                </td>
+                <td><span class="badge yellow">MONITOR</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">pg_toast.pg_toast_24788</td>
+                <td class="num" style="color:var(--cyan)">40 MB</td>
+                <td class="dimnum">48,291</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:3%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">3.1%</span>
+                  </div>
+                </td>
+                <td><span class="badge green">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ QUERY PERF ═══ -->
+      <div id="panel-queryperf" class="panel">
+        <div class="section-bar">
+          <div><h2>Query Performance</h2><p>Slowest and most frequent queries from pg_stat_statements</p></div>
+          <div class="metrics">
+            <div class="metric-pill bad"><span class="val">2</span><span style="color:var(--muted)"> slow queries &gt;500ms</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Query</th><th>Calls</th><th>Avg Time</th><th>Total Time</th><th>Rows/Call</th><th>Cache Hit</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="name" style="font-size:11px">SELECT * FROM webhook_delivery_attempts WHERE…</div>
+                  <div class="sub">Full table scan — missing index on status+created_at</div>
+                </td>
+                <td class="dimnum">48,291</td>
+                <td class="dimnum" style="color:var(--red);font-weight:700">842 ms</td>
+                <td class="dimnum">40,661 s</td>
+                <td class="dimnum">18,204</td>
+                <td class="dimnum" style="color:var(--yellow)">71.2%</td>
+                <td><span class="badge red">ADD INDEX</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name" style="font-size:11px">UPDATE events SET processed=true WHERE batch_id…</div>
+                  <div class="sub">Seq scan, 4M rows affected per batch</div>
+                </td>
+                <td class="dimnum">1,204</td>
+                <td class="dimnum" style="color:var(--red);font-weight:700">612 ms</td>
+                <td class="dimnum">736 s</td>
+                <td class="dimnum">4,201,938</td>
+                <td class="dimnum" style="color:var(--green)">98.8%</td>
+                <td><span class="badge yellow">REVIEW</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name" style="font-size:11px">SELECT COUNT(*) FROM events WHERE user_id=$1</div>
+                  <div class="sub">Index scan on idx_events_user_id</div>
+                </td>
+                <td class="dimnum">204,918</td>
+                <td class="dimnum" style="color:var(--green)">4.2 ms</td>
+                <td class="dimnum">861 s</td>
+                <td class="dimnum">1</td>
+                <td class="dimnum" style="color:var(--green)">99.7%</td>
+                <td><span class="badge green">OK</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name" style="font-size:11px">INSERT INTO sessions (user_id, token, expires_at)…</div>
+                  <div class="sub">Heap insert, high frequency</div>
+                </td>
+                <td class="dimnum">304,821</td>
+                <td class="dimnum" style="color:var(--green)">1.1 ms</td>
+                <td class="dimnum">335 s</td>
+                <td class="dimnum">1</td>
+                <td class="dimnum">—</td>
+                <td><span class="badge green">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="strip err">
+            <span class="ico">✕</span>
+            <div><strong>Missing composite index</strong> Add <code style="font-family:var(--mono);background:var(--border2);padding:1px 5px;border-radius:3px">CREATE INDEX CONCURRENTLY ON webhook_delivery_attempts (status, created_at)</code> — estimated 98% reduction in query time for the top slow query.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ LOCKS ═══ -->
+      <div id="panel-locks" class="panel">
+        <div class="section-bar">
+          <div><h2>Lock Monitor</h2><p>Active and waiting locks from pg_locks + pg_stat_activity</p></div>
+          <div class="metrics">
+            <div class="metric-pill ok"><span class="val">0</span><span style="color:var(--muted)"> deadlocks</span></div>
+            <div class="metric-pill info"><span class="val">3</span><span style="color:var(--muted)"> waits now</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Table</th><th>Lock Type</th><th>Mode</th><th>PID</th><th>State</th><th>Wait Time</th><th>Query Snippet</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td><span class="badge yellow">relation</span></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">RowExclusiveLock</td>
+                <td class="dimnum">48291</td>
+                <td><span class="badge green">GRANTED</span></td>
+                <td class="dimnum">—</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis">UPDATE events SET processed…</td>
+              </tr>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td><span class="badge red">relation</span></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">AccessShareLock</td>
+                <td class="dimnum">48302</td>
+                <td><span class="badge yellow">WAITING</span></td>
+                <td class="dimnum" style="color:var(--yellow)">4.2s</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">SELECT * FROM events WHERE…</td>
+              </tr>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td><span class="badge blue">transactionid</span></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">ExclusiveLock</td>
+                <td class="dimnum">49012</td>
+                <td><span class="badge green">GRANTED</span></td>
+                <td class="dimnum">—</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">DELETE FROM sessions WHERE…</td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td><span class="badge blue">tuple</span></td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">ShareLock</td>
+                <td class="dimnum">50128</td>
+                <td><span class="badge yellow">WAITING</span></td>
+                <td class="dimnum" style="color:var(--yellow)">1.8s</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">UPDATE users SET last_login…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ SCHEMA ═══ -->
+      <div id="panel-schema" class="panel">
+        <div class="section-bar">
+          <div><h2>Schema History</h2><p>DDL audit log — requires pgAudit extension</p></div>
+          <div class="metrics">
+            <div class="metric-pill warn"><span class="val">2</span><span style="color:var(--muted)"> high-risk changes</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Timestamp</th><th>Object</th><th>Operation</th><th>Risk</th><th>User</th><th>Detail</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">2026-05-25 14:32:01</td>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td><span class="badge red">DROP COLUMN</span></td>
+                <td><span class="badge red">HIGH</span></td>
+                <td class="dimnum">dilip</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">Dropped legacy_data (text, nullable)</td>
+              </tr>
+              <tr>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">2026-05-24 09:14:22</td>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td><span class="badge yellow">ADD COLUMN</span></td>
+                <td><span class="badge yellow">MED</span></td>
+                <td class="dimnum">deploy_bot</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">Added retry_deadline timestamptz DEFAULT NULL</td>
+              </tr>
+              <tr>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">2026-05-23 16:48:55</td>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td><span class="badge blue">CREATE INDEX</span></td>
+                <td><span class="badge green">LOW</span></td>
+                <td class="dimnum">dilip</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">CREATE INDEX CONCURRENTLY idx_users_email</td>
+              </tr>
+              <tr>
+                <td class="dimnum" style="font-family:var(--mono);font-size:11px">2026-05-22 11:02:18</td>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td><span class="badge blue">ALTER COLUMN</span></td>
+                <td><span class="badge yellow">MED</span></td>
+                <td class="dimnum">deploy_bot</td>
+                <td class="dimnum" style="font-family:var(--mono);font-size:10px">Changed total_amount precision from (10,2) to (14,4)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ DEPENDENCIES ═══ -->
+      <div id="panel-deps" class="panel">
+        <div class="section-bar">
+          <div><h2>Dependencies</h2><p>FK relationships, view dependencies and trigger chains</p></div>
+          <div class="metrics">
+            <div class="metric-pill info"><span class="val">12</span><span style="color:var(--muted)"> FK constraints</span></div>
+            <div class="metric-pill info"><span class="val">4</span><span style="color:var(--muted)"> views</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>From Table</th><th>Column</th><th>→ References</th><th>On Delete</th><th>On Update</th><th>Validated</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono)">webhook_id</td>
+                <td><span style="color:var(--blue);font-family:var(--mono);font-size:11px">webhooks(id)</span></td>
+                <td><span class="badge yellow">CASCADE</span></td>
+                <td><span class="badge green">NO ACTION</span></td>
+                <td><span class="badge green">✓ YES</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono)">user_id</td>
+                <td><span style="color:var(--blue);font-family:var(--mono);font-size:11px">users(id)</span></td>
+                <td><span class="badge red">RESTRICT</span></td>
+                <td><span class="badge green">NO ACTION</span></td>
+                <td><span class="badge green">✓ YES</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono)">user_id</td>
+                <td><span style="color:var(--blue);font-family:var(--mono);font-size:11px">users(id)</span></td>
+                <td><span class="badge yellow">CASCADE</span></td>
+                <td><span class="badge green">NO ACTION</span></td>
+                <td><span class="badge green">✓ YES</span></td>
+              </tr>
+              <tr>
+                <td><div class="name">events</div><div class="sub">public</div></td>
+                <td class="dimnum" style="font-family:var(--mono)">session_id</td>
+                <td><span style="color:var(--blue);font-family:var(--mono);font-size:11px">sessions(id)</span></td>
+                <td><span class="badge yellow">SET NULL</span></td>
+                <td><span class="badge green">NO ACTION</span></td>
+                <td><span class="badge red">✗ NOT VALID</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ WRITE AMP ═══ -->
+      <div id="panel-write" class="panel">
+        <div class="section-bar">
+          <div><h2>Write Amplification</h2><p>HOT update ratio — low HOT % means excessive index churn</p></div>
+          <div class="metrics">
+            <div class="metric-pill bad"><span class="val">sessions</span><span style="color:var(--muted)"> only 12% HOT</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Table</th><th>Updates</th><th>HOT Updates</th><th>HOT %</th><th>Heap Fetches</th><th>Recommendation</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="name">sessions</div><div class="sub">public</div></td>
+                <td class="num">204,918</td>
+                <td class="dimnum">24,590</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:12%;background:var(--red)"></div></div>
+                    <span class="bar-label" style="color:var(--red)">12%</span>
+                  </div>
+                </td>
+                <td class="dimnum" style="color:var(--red)">180,328</td>
+                <td class="dimnum" style="color:var(--yellow)">Lower fillfactor to 70</td>
+              </tr>
+              <tr>
+                <td><div class="name">webhook_delivery_attempts</div><div class="sub">public</div></td>
+                <td class="num">882,041</td>
+                <td class="dimnum">512,384</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:58%;background:var(--yellow)"></div></div>
+                    <span class="bar-label" style="color:var(--yellow)">58%</span>
+                  </div>
+                </td>
+                <td class="dimnum">369,657</td>
+                <td class="dimnum">Consider fillfactor 80</td>
+              </tr>
+              <tr>
+                <td><div class="name">users</div><div class="sub">public</div></td>
+                <td class="num">48,201</td>
+                <td class="dimnum">44,745</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:93%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">93%</span>
+                  </div>
+                </td>
+                <td class="dimnum" style="color:var(--green)">3,456</td>
+                <td class="dimnum" style="color:var(--green)">No action needed</td>
+              </tr>
+              <tr>
+                <td><div class="name">orders</div><div class="sub">public</div></td>
+                <td class="num">12,048</td>
+                <td class="dimnum">11,444</td>
+                <td>
+                  <div class="bar-wrap">
+                    <div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--green)"></div></div>
+                    <span class="bar-label" style="color:var(--green)">95%</span>
+                  </div>
+                </td>
+                <td class="dimnum" style="color:var(--green)">604</td>
+                <td class="dimnum" style="color:var(--green)">No action needed</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ INDEXES ═══ -->
+      <div id="panel-indexes" class="panel">
+        <div class="section-bar">
+          <div><h2>Index Analysis</h2><p>Usage, size and redundancy across all indexes</p></div>
+          <div class="metrics">
+            <div class="metric-pill warn"><span class="val">1</span><span style="color:var(--muted)"> unused</span></div>
+            <div class="metric-pill info"><span class="val">18</span><span style="color:var(--muted)"> total indexes</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <table class="tbl">
+            <thead><tr><th>Index</th><th>Table</th><th>Type</th><th>Size</th><th>Scans</th><th>Rows Read</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="name" style="font-family:var(--mono);font-size:11px">idx_wda_endpoint_created</div>
+                  <div class="sub">webhook_delivery_attempts (endpoint_url, created_at)</div>
+                </td>
+                <td class="dimnum">webhook_delivery_attempts</td>
+                <td><span class="badge blue">BTREE</span></td>
+                <td class="dimnum">280 MB</td>
+                <td class="dimnum" style="color:var(--red);font-weight:700">0</td>
+                <td class="dimnum" style="color:var(--red)">0</td>
+                <td><span class="badge red">UNUSED — DROP</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name" style="font-family:var(--mono);font-size:11px">idx_events_user_id</div>
+                  <div class="sub">events (user_id)</div>
+                </td>
+                <td class="dimnum">events</td>
+                <td><span class="badge blue">BTREE</span></td>
+                <td class="dimnum">420 MB</td>
+                <td class="dimnum" style="color:var(--green)">4,201,938</td>
+                <td class="dimnum" style="color:var(--green)">89.2B</td>
+                <td><span class="badge green">ACTIVE</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="name" style="font-family:var(--mono);font-size:11px">users_pkey</div>
+                  <div class="sub">users (id) — PRIMARY KEY</div>
+                </td>
+                <td class="dimnum">users</td>
+                <td><span class="badge purple">BTREE</span></td>
+                <td class="dimnum">42 MB</td>
+                <td class="dimnum" style="color:var(--green)">2,801,047</td>
+                <td class="dimnum" style="color:var(--green)">2.8B</td>
+                <td><span class="badge green">ACTIVE</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="strip warn">
+            <span class="ico">⚠</span>
+            <div><strong>Unused index consuming 280 MB</strong> <code style="font-family:var(--mono);background:var(--border2);padding:1px 5px;border-radius:3px">idx_wda_endpoint_created</code> has 0 scans since last stats reset. Safe to drop with <code style="font-family:var(--mono);background:var(--border2);padding:1px 5px;border-radius:3px">DROP INDEX CONCURRENTLY idx_wda_endpoint_created</code></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ AI ANALYSIS ═══ -->
+      <div id="panel-ai" class="panel">
+        <div class="section-bar">
+          <div><h2>AI Deep Analysis</h2><p>Pattern-based insights across all table health dimensions</p></div>
+          <div class="metrics">
+            <div class="metric-pill bad"><span class="val">2</span><span style="color:var(--muted)"> critical</span></div>
+            <div class="metric-pill warn"><span class="val">3</span><span style="color:var(--muted)"> warnings</span></div>
+            <div class="metric-pill ok"><span class="val">4</span><span style="color:var(--muted)"> optimizations</span></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="insight crit">
+            <div class="insight-head"><span style="font-size:16px">🔴</span><span class="insight-title">Autovacuum falling behind on webhook_delivery_attempts</span></div>
+            <div class="insight-body">Dead tuple ratio has reached 28% — autovacuum has been running every 3+ days but the table receives ~882K updates/day. The autovacuum cost_delay and cost_limit settings are likely throttling it too aggressively. At current rate, transaction ID wraparound risk will appear in ~14 days.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">autovacuum</span>
+              <span class="insight-tag">bloat</span>
+              <span class="insight-tag">webhook_delivery_attempts</span>
+              <span style="font-size:10px;color:var(--red);font-weight:700;margin-left:auto">CRITICAL — act within 48h</span>
+            </div>
+          </div>
+          <div class="insight crit">
+            <div class="insight-head"><span style="font-size:16px">🔴</span><span class="insight-title">events table on track to exceed 50GB in 47 days</span></div>
+            <div class="insight-body">Growing at 340 MB/day. Without partitioning, a single VACUUM on this table will take 20+ minutes and cause write amplification. Recommended: range-partition by month using <code style="font-family:var(--mono);background:var(--border2);padding:1px 4px;border-radius:3px">pg_partman</code> with a 3-month retention window. This alone will reduce table bloat by ~60%.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">partitioning</span>
+              <span class="insight-tag">growth</span>
+              <span class="insight-tag">events</span>
+              <span style="font-size:10px;color:var(--red);font-weight:700;margin-left:auto">CRITICAL — plan within 1 week</span>
+            </div>
+          </div>
+          <div class="insight warn">
+            <div class="insight-head"><span style="font-size:16px">🟡</span><span class="insight-title">Missing composite index causing 842ms query time</span></div>
+            <div class="insight-body">The most-called query on webhook_delivery_attempts performs a sequential scan because there is no index on <code style="font-family:var(--mono);background:var(--border2);padding:1px 4px;border-radius:3px">(status, created_at)</code>. With 48,291 calls/day this represents 40,000+ seconds of cumulative query time daily. Adding this index CONCURRENTLY would reduce avg query time from 842ms to ~8ms.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">index</span>
+              <span class="insight-tag">query-perf</span>
+              <span class="insight-tag">webhook_delivery_attempts</span>
+              <span style="font-size:10px;color:var(--yellow);font-weight:700;margin-left:auto">HIGH IMPACT</span>
+            </div>
+          </div>
+          <div class="insight warn">
+            <div class="insight-head"><span style="font-size:16px">🟡</span><span class="insight-title">sessions table HOT update rate only 12%</span></div>
+            <div class="insight-body">Only 12% of updates to sessions are HOT updates — meaning 88% cause new index entries to be written. This is likely because frequently-updated columns (last_seen, status) are indexed. Consider lowering the fillfactor to 70–75% to leave room on heap pages for HOT updates, or removing low-value indexes on those columns.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">write-amplification</span>
+              <span class="insight-tag">hot-updates</span>
+              <span class="insight-tag">sessions</span>
+              <span style="font-size:10px;color:var(--yellow);font-weight:700;margin-left:auto">MEDIUM IMPACT</span>
+            </div>
+          </div>
+          <div class="insight info">
+            <div class="insight-head"><span style="font-size:16px">🔵</span><span class="insight-title">Unused index idx_wda_endpoint_created consuming 280MB</span></div>
+            <div class="insight-body">This index has had 0 scans since statistics were last reset. It adds write overhead on every insert/update to webhook_delivery_attempts with no read benefit. Dropping it CONCURRENTLY is safe and will recover 280MB.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">index</span>
+              <span class="insight-tag">storage</span>
+              <span class="insight-tag">webhook_delivery_attempts</span>
+              <span style="font-size:10px;color:var(--blue);font-weight:700;margin-left:auto">QUICK WIN</span>
+            </div>
+          </div>
+          <div class="insight ok">
+            <div class="insight-head"><span style="font-size:16px">🟢</span><span class="insight-title">Cache hit rate excellent across all tables (99.1% avg)</span></div>
+            <div class="insight-body">All monitored tables have &gt;98% buffer cache hit rates. Shared_buffers allocation appears adequate for current working set. No memory pressure detected — primary concerns are write-side (bloat, index churn) not read-side.</div>
+            <div class="insight-meta">
+              <span class="insight-tag">memory</span>
+              <span class="insight-tag">cache</span>
+              <span style="font-size:10px;color:var(--green);font-weight:700;margin-left:auto">ALL GOOD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /shell -->
+
+<script>
+// Clock
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=n.toLocaleTimeString('en-US',{hour12:false});
+}
+tick(); setInterval(tick,1000);
+
+// Nav
+function show(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// Heatmaps
+function makeHeatmap(id, baseColor){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display='grid';
+  el.style.gridTemplateColumns='repeat(24,1fr)';
+  el.style.gap='2px';
+  for(let d=0;d<7;d++){
+    for(let h=0;h<24;h++){
+      const hot = (h>=9&&h<=11)||(h>=14&&h<=16) ? 0.7+Math.random()*0.3 : 0.1+Math.random()*0.4;
+      const cell=document.createElement('div');
+      cell.style.cssText=`aspect-ratio:1;border-radius:2px;background:${baseColor};opacity:${hot.toFixed(2)};cursor:default;transition:transform .1s`;
+      cell.title=`${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][d]} ${h}:00 — ${Math.round(hot*847)}K ops`;
+      cell.onmouseenter=()=>cell.style.transform='scale(1.4)';
+      cell.onmouseleave=()=>cell.style.transform='';
+      el.appendChild(cell);
+    }
+  }
+}
+makeHeatmap('hm-reads','#4f8fff');
+makeHeatmap('hm-writes','#f5c842');
+</script>
+</body>
+</html>

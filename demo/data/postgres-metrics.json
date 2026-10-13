@@ -1,0 +1,298 @@
+{
+    "snapshot_time": "2026-03-26T14:30:00Z",
+    "server": {
+        "version": "PostgreSQL 16.2",
+        "uptime_days": 47,
+        "host": "pg-prod-01.fathom.demo",
+        "port": 5432,
+        "data_directory": "/var/lib/postgresql/16/main"
+    },
+    "health": {
+        "score": 87,
+        "cache_hit_ratio": 99.4,
+        "connection_usage_pct": 34,
+        "disk_usage_pct": 62,
+        "replication_healthy": true
+    },
+    "connections": {
+        "active": 42,
+        "idle": 78,
+        "waiting": 3,
+        "max": 200,
+        "total": 123,
+        "history": [28, 31, 35, 38, 42, 39, 45, 50, 48, 42, 38, 35, 40, 42, 44, 47, 50, 48, 45, 42, 39, 36, 33, 30]
+    },
+    "transactions": {
+        "commits_per_sec": 1247,
+        "rollbacks_per_sec": 3,
+        "tps": 1250,
+        "tps_history": [
+            980, 1020, 1100, 1180, 1247, 1300, 1280, 1200, 1150, 1100, 1050, 980, 920, 950, 1020, 1100, 1180, 1247,
+            1300, 1280, 1200, 1150, 1100, 1050
+        ]
+    },
+    "latency": {
+        "p50_ms": 2.4,
+        "p95_ms": 12.8,
+        "p99_ms": 45.2,
+        "avg_ms": 4.1,
+        "p50_history": [
+            2.1, 2.3, 2.4, 2.6, 2.8, 2.5, 2.3, 2.4, 2.5, 2.7, 2.9, 3.0, 2.8, 2.6, 2.4, 2.3, 2.4, 2.5, 2.6, 2.4, 2.3,
+            2.2, 2.3, 2.4
+        ],
+        "p95_history": [
+            10.2, 11.5, 12.8, 14.1, 15.0, 13.5, 12.0, 12.8, 13.5, 14.8, 16.0, 17.2, 15.5, 14.0, 12.8, 11.5, 12.8, 13.5,
+            14.1, 12.8, 11.5, 10.8, 11.2, 12.8
+        ],
+        "p99_history": [
+            38.0, 42.1, 45.2, 48.5, 52.0, 47.0, 43.0, 45.2, 47.8, 50.5, 54.0, 58.0, 52.0, 48.0, 45.2, 42.0, 45.2, 47.8,
+            48.5, 45.2, 42.0, 39.5, 40.8, 45.2
+        ]
+    },
+    "queries": {
+        "slow_queries_24h": 14,
+        "avg_query_time_ms": 4.1,
+        "queries_per_sec": 3420,
+        "sequential_scans_pct": 8.2,
+        "index_scans_pct": 91.8,
+        "jit_functions": 28,
+        "jit_time_ms": 120,
+        "parallel_workers": 6,
+        "parallel_query_pct": 15.2,
+        "temp_file_queries": 5,
+        "temp_file_size_mb": 42,
+        "generic_plan_pct": 72,
+        "custom_plan_pct": 28,
+        "top_slow": [
+            {
+                "query": "SELECT o.*, c.name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.created_at > NOW() - INTERVAL '7 days' ORDER BY o.total DESC",
+                "avg_time_ms": 892,
+                "calls": 1420,
+                "rows": 8500
+            },
+            {
+                "query": "SELECT p.*, array_agg(t.name) FROM products p LEFT JOIN product_tags pt ON p.id = pt.product_id LEFT JOIN tags t ON pt.tag_id = t.id GROUP BY p.id",
+                "avg_time_ms": 654,
+                "calls": 890,
+                "rows": 12000
+            },
+            {
+                "query": "WITH monthly_stats AS (SELECT date_trunc('month', created_at) as month, SUM(total) as revenue FROM orders GROUP BY 1) SELECT * FROM monthly_stats ORDER BY month",
+                "avg_time_ms": 445,
+                "calls": 240,
+                "rows": 24
+            },
+            {
+                "query": "SELECT u.*, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.id HAVING COUNT(o.id) > 10",
+                "avg_time_ms": 312,
+                "calls": 560,
+                "rows": 3200
+            },
+            {
+                "query": "UPDATE inventory SET quantity = quantity - $1 WHERE product_id = $2 AND warehouse_id = $3 AND quantity >= $1",
+                "avg_time_ms": 28,
+                "calls": 45000,
+                "rows": 45000
+            }
+        ]
+    },
+    "sessions": {
+        "active": 42,
+        "long_running": 2,
+        "idle": 78,
+        "blocked": 1,
+        "wait_events": {
+            "io_pct": 12.5,
+            "lock_pct": 3.2,
+            "cpu_pct": 18.7,
+            "network_pct": 5.1,
+            "other_pct": 60.5
+        }
+    },
+    "locks": {
+        "total_locks": 156,
+        "lock_waits": 3,
+        "deadlocks_24h": 1,
+        "deadlocks_7d": 4,
+        "most_affected_table": "orders",
+        "avg_wait_time_ms": 45
+    },
+    "replication": {
+        "lag_bytes": 1024,
+        "lag_ms": 0.8,
+        "streaming_replicas": 2,
+        "wal_generation_rate_mb_s": 2.4,
+        "replicas": [
+            {
+                "name": "pg-replica-01",
+                "lag_ms": 0.8,
+                "state": "streaming",
+                "sent_lsn": "5/A3C01000",
+                "replay_lsn": "5/A3C00F80"
+            },
+            {
+                "name": "pg-replica-02",
+                "lag_ms": 1.2,
+                "state": "streaming",
+                "sent_lsn": "5/A3C01000",
+                "replay_lsn": "5/A3C00E00"
+            }
+        ]
+    },
+    "wal": {
+        "generation_rate_mb_s": 2.4,
+        "wal_files_count": 128,
+        "checkpoints_per_day": 48,
+        "checkpoint_duration_s": 12.4,
+        "avg_interval_s": 1800
+    },
+    "cache": {
+        "hit_ratio_pct": 99.4,
+        "dirty_pages_pct": 2.1,
+        "bgwriter_checkpoints_hr": 2,
+        "evictions_per_sec": 12,
+        "shared_buffers_gb": 4,
+        "effective_cache_gb": 12
+    },
+    "system": {
+        "cpu": {
+            "total_pct": 28,
+            "user_pct": 22,
+            "system_pct": 6,
+            "load_1m": 2.4,
+            "load_5m": 2.1,
+            "load_15m": 1.8,
+            "cores": 8,
+            "history": [18, 20, 22, 25, 28, 32, 30, 28, 26, 24, 22, 20, 18, 19, 21, 24, 27, 30, 28, 26, 24, 22, 20, 18]
+        },
+        "memory": {
+            "ram_used_gb": 12.4,
+            "ram_total_gb": 32,
+            "swap_used_gb": 0.2,
+            "shared_buffers_gb": 4,
+            "work_mem_mb": 64,
+            "history": [
+                11.8, 12.0, 12.2, 12.4, 12.6, 12.8, 12.6, 12.4, 12.2, 12.0, 11.8, 11.9, 12.0, 12.2, 12.4, 12.6, 12.4,
+                12.2, 12.0, 11.8, 11.9, 12.0, 12.2, 12.4
+            ]
+        },
+        "disk": {
+            "read_mb_s": 45,
+            "write_mb_s": 28,
+            "avg_latency_ms": 1.2,
+            "queue_depth": 4,
+            "p95_latency_ms": 3.8,
+            "p99_latency_ms": 8.2,
+            "total_gb": 500,
+            "used_gb": 310,
+            "history_read": [
+                30, 35, 40, 45, 50, 48, 42, 38, 35, 40, 45, 50, 48, 42, 38, 35, 40, 45, 50, 48, 42, 38, 35, 40
+            ],
+            "history_write": [
+                18, 20, 22, 25, 28, 30, 27, 24, 22, 20, 22, 25, 28, 30, 27, 24, 22, 20, 22, 25, 28, 30, 27, 24
+            ]
+        },
+        "network": {
+            "bytes_in_kb_s": 2400,
+            "bytes_out_kb_s": 1800,
+            "connections_per_sec": 12,
+            "packet_errors": 0
+        }
+    },
+    "storage": {
+        "total_size_gb": 310,
+        "table_count": 142,
+        "index_count": 298,
+        "growth_rate_mb_day": 145,
+        "bloated_tables": 8,
+        "total_bloat_mb": 420,
+        "unused_indexes": 12,
+        "index_hit_ratio_pct": 99.1,
+        "top_tables": [
+            {
+                "name": "orders",
+                "size_mb": 12400,
+                "rows": 45000000,
+                "bloat_pct": 8.2,
+                "last_vacuum": "2026-03-26T12:00:00Z",
+                "seq_scan": 120,
+                "idx_scan": 890000
+            },
+            {
+                "name": "order_items",
+                "size_mb": 8200,
+                "rows": 120000000,
+                "bloat_pct": 5.1,
+                "last_vacuum": "2026-03-26T11:30:00Z",
+                "seq_scan": 45,
+                "idx_scan": 1200000
+            },
+            {
+                "name": "products",
+                "size_mb": 2400,
+                "rows": 500000,
+                "bloat_pct": 3.4,
+                "last_vacuum": "2026-03-26T10:00:00Z",
+                "seq_scan": 200,
+                "idx_scan": 450000
+            },
+            {
+                "name": "customers",
+                "size_mb": 1800,
+                "rows": 2000000,
+                "bloat_pct": 2.8,
+                "last_vacuum": "2026-03-26T09:00:00Z",
+                "seq_scan": 80,
+                "idx_scan": 670000
+            },
+            {
+                "name": "inventory",
+                "size_mb": 980,
+                "rows": 800000,
+                "bloat_pct": 1.5,
+                "last_vacuum": "2026-03-26T13:00:00Z",
+                "seq_scan": 15,
+                "idx_scan": 980000
+            },
+            {
+                "name": "audit_log",
+                "size_mb": 5600,
+                "rows": 80000000,
+                "bloat_pct": 12.4,
+                "last_vacuum": "2026-03-25T22:00:00Z",
+                "seq_scan": 5,
+                "idx_scan": 120000
+            },
+            {
+                "name": "sessions",
+                "size_mb": 420,
+                "rows": 150000,
+                "bloat_pct": 18.2,
+                "last_vacuum": "2026-03-26T08:00:00Z",
+                "seq_scan": 300,
+                "idx_scan": 50000
+            },
+            {
+                "name": "analytics_events",
+                "size_mb": 15200,
+                "rows": 200000000,
+                "bloat_pct": 4.8,
+                "last_vacuum": "2026-03-26T06:00:00Z",
+                "seq_scan": 2,
+                "idx_scan": 3400000
+            }
+        ],
+        "storage_breakdown": {
+            "tables_gb": 180,
+            "indexes_gb": 85,
+            "wal_gb": 25,
+            "temp_gb": 5,
+            "system_gb": 15
+        }
+    },
+    "xid_freeze": {
+        "oldest_xid_age": 180000000,
+        "autovacuum_freeze_max_age": 200000000,
+        "urgency_pct": 90
+    }
+}

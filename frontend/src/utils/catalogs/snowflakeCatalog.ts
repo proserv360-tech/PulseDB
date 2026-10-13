@@ -1,0 +1,103 @@
+/* Auto-generated metric catalog. */
+
+import { MetricCatalog, Metric, MetricSection, MetricTier } from '../metricsCatalog';
+
+const ACCENT = '#29B5E8';
+
+const sections: MetricSection[] = [
+    { key: 'overview', label: 'Overview', order: 1, color: '#29B5E8' },
+    { key: 'warehouses', label: 'Warehouses', order: 2, color: '#0078D4' },
+    { key: 'credits', label: 'Credits & Cost', order: 3, color: '#F2C744' },
+    { key: 'queries', label: 'Query History', order: 4, color: '#107C10' },
+    { key: 'storage', label: 'Storage', order: 5, color: '#5C2D91' },
+    { key: 'clustering', label: 'Clustering', order: 6, color: '#D83B01' },
+    { key: 'sharing', label: 'Data Sharing', order: 7, color: '#00B7C3' },
+    { key: 'replication', label: 'Replication', order: 8, color: '#8764B8' },
+    { key: 'tasks', label: 'Tasks & Streams', order: 9, color: '#E3008C' },
+    { key: 'security', label: 'Security', order: 10, color: '#A4262C' },
+];
+
+const m = (
+    id: string, label: string, section: string, tier: MetricTier,
+    unit = '', description = '', extras: Partial<Metric> = {},
+): Metric => ({ id, label, section, tier, unit, description, ...extras });
+
+const metrics: Metric[] = [
+    m('sf.account.region', 'Region', 'overview', 'basic', '', 'CURRENT_REGION().', { baseValue: 2, range: 0 }),
+    m('sf.account.edition', 'Edition', 'overview', 'basic', '', 'Business Critical, Enterprise, Standard.', { baseValue: 3, range: 0 }),
+    m('sf.account.warehouses', 'Total warehouses', 'overview', 'basic', '', 'SHOW WAREHOUSES count.', { format: 'count', baseValue: 12, range: 2 }),
+    m('sf.account.databases', 'Databases', 'overview', 'basic', '', 'SHOW DATABASES count.', { format: 'count', baseValue: 8, range: 2 }),
+    m('sf.account.users', 'Active users (24h)', 'overview', 'intermediate', '', 'distinct user_name from history.', { format: 'count', baseValue: 124, range: 20 }),
+    m('sf.account.queries_24h', 'Queries (24h)', 'overview', 'basic', '', 'QUERY_HISTORY count past 24h.', { format: 'count', baseValue: 84200, range: 18000 }),
+    m('sf.account.failed_24h', 'Failed queries (24h)', 'overview', 'basic', '', 'execution_status = FAILED.', { format: 'count', baseValue: 84, range: 40 }),
+    m('sf.account.cancelled_24h', 'Cancelled queries (24h)', 'overview', 'intermediate', '', 'execution_status = CANCELLED.', { format: 'count', baseValue: 42, range: 18 }),
+    m('sf.account.cost_24h', 'Cost today', 'overview', 'basic', '$', 'estimated cost in $ for credits.', { format: 'currency', baseValue: 412, range: 120 }),
+    m('sf.account.cost_mtd', 'Cost MTD', 'overview', 'basic', '$', 'cost month-to-date.', { format: 'currency', baseValue: 8420, range: 1200 }),
+    m('sf.wh.running', 'Running warehouses', 'warehouses', 'basic', '', 'state = STARTED.', { format: 'count', baseValue: 6, range: 2 }),
+    m('sf.wh.suspended', 'Suspended', 'warehouses', 'basic', '', 'state = SUSPENDED.', { format: 'count', baseValue: 6, range: 2 }),
+    m('sf.wh.queued_queries', 'Queued queries', 'warehouses', 'basic', '', 'SUM(queued_load).', { format: 'count', baseValue: 4, range: 8 }),
+    m('sf.wh.queue_overload', 'Queue overload events', 'warehouses', 'intermediate', '', 'QUERY_HISTORY queued_overload_time > 0.', { format: 'count', baseValue: 18, range: 12 }),
+    m('sf.wh.avg_queue_time', 'Avg queue wait', 'warehouses', 'basic', 's', 'avg queued_provisioning_time.', { baseValue: 1.8, range: 1.4 }),
+    m('sf.wh.spillage_local', 'Local disk spillage', 'warehouses', 'intermediate', 'GB', 'SUM(bytes_spilled_to_local_storage).', { format: 'number', baseValue: 42, range: 22 }),
+    m('sf.wh.spillage_remote', 'Remote spillage', 'warehouses', 'intermediate', 'GB', 'SUM(bytes_spilled_to_remote_storage).', { format: 'number', baseValue: 8, range: 12 }),
+    m('sf.wh.multi_cluster', 'Multi-cluster WH', 'warehouses', 'advanced', '', 'Warehouses with min_cluster_count > 1.', { format: 'count', baseValue: 3, range: 0 }),
+    m('sf.wh.auto_suspend_sec', 'Auto-suspend (sec)', 'warehouses', 'advanced', 's', 'avg auto_suspend.', { baseValue: 300, range: 120 }),
+    m('sf.wh.scale_events_24h', 'Scale events (24h)', 'warehouses', 'advanced', '', 'auto_resume / auto_suspend events.', { format: 'count', baseValue: 84, range: 22 }),
+    m('sf.cr.used_today', 'Credits used today', 'credits', 'basic', '', 'WAREHOUSE_METERING_HISTORY today.', { baseValue: 142, range: 40 }),
+    m('sf.cr.used_mtd', 'Credits MTD', 'credits', 'basic', '', 'month-to-date credits.', { baseValue: 2840, range: 500 }),
+    m('sf.cr.budget_pct', 'Budget consumed %', 'credits', 'basic', '%', 'mtd / monthly_budget.', { format: 'percent', baseValue: 72, range: 15 }),
+    m('sf.cr.cloud_services', 'Cloud services credits', 'credits', 'intermediate', '', 'Cloud services adjusted.', { baseValue: 12, range: 4 }),
+    m('sf.cr.serverless', 'Serverless credits', 'credits', 'advanced', '', 'serverless task credits.', { baseValue: 8, range: 4 }),
+    m('sf.cr.materialized_views', 'Materialized view credits', 'credits', 'advanced', '', 'MV maintenance credits.', { baseValue: 4, range: 2 }),
+    m('sf.cr.snowpipe', 'Snowpipe credits', 'credits', 'advanced', '', 'Snowpipe ingestion credits.', { baseValue: 18, range: 8 }),
+    m('sf.cr.replication', 'Replication credits', 'credits', 'advanced', '', 'Database replication credits.', { baseValue: 6, range: 3 }),
+    m('sf.cr.forecast_eom', 'Forecast EOM', 'credits', 'intermediate', '', 'Linear projection EOM credits.', { baseValue: 4200, range: 600 }),
+    m('sf.q.rate_per_min', 'Queries / min', 'queries', 'basic', '/min', 'QUERY_HISTORY last minute.', { format: 'count', baseValue: 584, range: 120 }),
+    m('sf.q.avg_duration', 'Avg query duration', 'queries', 'basic', 's', 'mean execution_time / 1000.', { baseValue: 4.2, range: 1.6 }),
+    m('sf.q.p95_duration', 'p95 query duration', 'queries', 'intermediate', 's', 'p95 execution_time.', { baseValue: 24, range: 8 }),
+    m('sf.q.p99_duration', 'p99 query duration', 'queries', 'intermediate', 's', 'p99 execution_time.', { baseValue: 84, range: 22 }),
+    m('sf.q.cache_hits', 'Query cache hits %', 'queries', 'intermediate', '%', 'queries_with_result_cache_hit.', { format: 'percent', baseValue: 42, range: 12, higherIsBetter: true }),
+    m('sf.q.pruning_eff', 'Avg pruning efficiency', 'queries', 'intermediate', '%', 'avg (1 - partitions_scanned/partitions_total).', { format: 'percent', baseValue: 72, range: 10, higherIsBetter: true }),
+    m('sf.q.compilation_time', 'Avg compile time', 'queries', 'advanced', 'ms', 'avg compilation_time.', { format: 'duration', baseValue: 320, range: 80 }),
+    m('sf.q.bytes_scanned_avg', 'Avg bytes scanned', 'queries', 'intermediate', 'MB', 'avg bytes_scanned per query.', { format: 'number', baseValue: 18.4, range: 8 }),
+    m('sf.q.failed_pct', 'Failed query %', 'queries', 'basic', '%', 'failed / total.', { format: 'percent', baseValue: 0.4, range: 0.3 }),
+    m('sf.st.active_tb', 'Active storage', 'storage', 'basic', 'TB', 'sum active_bytes.', { format: 'number', baseValue: 14.2, range: 2.4 }),
+    m('sf.st.timetravel_tb', 'Time Travel storage', 'storage', 'intermediate', 'TB', 'sum time_travel_bytes.', { format: 'number', baseValue: 4.8, range: 1.2 }),
+    m('sf.st.failsafe_tb', 'Fail-safe storage', 'storage', 'intermediate', 'TB', 'sum failsafe_bytes.', { format: 'number', baseValue: 2.4, range: 0.4 }),
+    m('sf.st.stages_gb', 'Internal stages', 'storage', 'advanced', 'GB', 'STAGE_STORAGE_USAGE_HISTORY.', { format: 'number', baseValue: 420, range: 80 }),
+    m('sf.st.cost_per_day', 'Storage cost/day', 'storage', 'intermediate', '$', 'storage cost per day.', { format: 'currency', baseValue: 84, range: 22 }),
+    m('sf.st.tables', 'Tables', 'storage', 'basic', '', 'tables count.', { format: 'count', baseValue: 1842, range: 240 }),
+    m('sf.st.databases_size_avg', 'Avg DB size', 'storage', 'intermediate', 'TB', 'avg db.bytes.', { format: 'number', baseValue: 1.8, range: 0.4 }),
+    m('sf.cl.tables_clustered', 'Clustered tables', 'clustering', 'intermediate', '', 'tables with CLUSTER BY.', { format: 'count', baseValue: 42, range: 8 }),
+    m('sf.cl.avg_depth', 'Avg clustering depth', 'clustering', 'intermediate', '', 'avg SYSTEM$CLUSTERING_INFORMATION depth.', { baseValue: 3.2, range: 0.8 }),
+    m('sf.cl.poor_clustered', 'Poorly clustered (>10)', 'clustering', 'advanced', '', 'depth > 10 count.', { format: 'count', baseValue: 4, range: 4 }),
+    m('sf.cl.reclustering_cr', 'Reclustering credits', 'clustering', 'advanced', '', 'auto-reclustering credits.', { baseValue: 18, range: 6 }),
+    m('sf.share.outbound', 'Outbound shares', 'sharing', 'intermediate', '', 'SHOW SHARES kind=OUTBOUND.', { format: 'count', baseValue: 12, range: 2 }),
+    m('sf.share.inbound', 'Inbound shares', 'sharing', 'intermediate', '', 'kind=INBOUND.', { format: 'count', baseValue: 4, range: 2 }),
+    m('sf.share.listings', 'Marketplace listings', 'sharing', 'advanced', '', 'PROVIDER listings active.', { format: 'count', baseValue: 2, range: 2 }),
+    m('sf.share.consumers', 'Listing consumers', 'sharing', 'advanced', '', 'distinct consumers.', { format: 'count', baseValue: 42, range: 12 }),
+    m('sf.repl.databases', 'Replicated DBs', 'replication', 'intermediate', '', 'replication_database count.', { format: 'count', baseValue: 3, range: 0 }),
+    m('sf.repl.lag_sec', 'Replication lag', 'replication', 'intermediate', 's', 'avg replication_lag.', { baseValue: 42, range: 18 }),
+    m('sf.repl.failover_ready', 'Failover-ready DBs', 'replication', 'advanced', '', 'failover_database_history.', { format: 'count', baseValue: 2, range: 0 }),
+    m('sf.repl.failed_24h', 'Failed replications', 'replication', 'advanced', '/d', 'replication errors past 24h.', { format: 'count', baseValue: 0, range: 2 }),
+    m('sf.task.active', 'Active tasks', 'tasks', 'intermediate', '', 'SHOW TASKS state=started.', { format: 'count', baseValue: 84, range: 20 }),
+    m('sf.task.failed_24h', 'Failed tasks (24h)', 'tasks', 'basic', '', 'TASK_HISTORY failed.', { format: 'count', baseValue: 4, range: 4 }),
+    m('sf.task.suspended', 'Suspended tasks', 'tasks', 'intermediate', '', 'state=suspended.', { format: 'count', baseValue: 12, range: 4 }),
+    m('sf.stream.active', 'Active streams', 'tasks', 'intermediate', '', 'SHOW STREAMS count.', { format: 'count', baseValue: 42, range: 8 }),
+    m('sf.stream.stale', 'Stale streams', 'tasks', 'advanced', '', 'streams with stale_after expired.', { format: 'count', baseValue: 2, range: 2 }),
+    m('sf.sec.failed_logins', 'Failed logins (24h)', 'security', 'basic', '', 'LOGIN_HISTORY error_message NOT NULL.', { format: 'count', baseValue: 24, range: 12 }),
+    m('sf.sec.mfa_enabled_pct', 'MFA enabled %', 'security', 'intermediate', '%', 'users with mfa = true.', { format: 'percent', baseValue: 92, range: 4, higherIsBetter: true }),
+    m('sf.sec.network_policies', 'Network policies', 'security', 'intermediate', '', 'SHOW NETWORK POLICIES.', { format: 'count', baseValue: 4, range: 0 }),
+    m('sf.sec.roles', 'Roles', 'security', 'intermediate', '', 'SHOW ROLES count.', { format: 'count', baseValue: 84, range: 8 }),
+    m('sf.sec.scim_groups', 'SCIM-managed groups', 'security', 'advanced', '', 'GROUPS source=SCIM.', { format: 'count', baseValue: 24, range: 4 }),
+];
+
+const catalog: MetricCatalog = {
+    engineId: 'demo-snowflake',
+    engineLabel: 'Snowflake',
+    accentColor: ACCENT,
+    sections,
+    metrics,
+};
+
+export default catalog;

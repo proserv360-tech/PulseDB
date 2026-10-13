@@ -1,0 +1,164 @@
+# .github/actions/db-migration-review/action.yml
+# ──────────────────────────────────────────────────────────────────────────────
+# FATHOM — DB Migration Review
+#
+# Composite GitHub Action that scans the SQL migration files changed in a
+# pull request, lints them for risky statements (e.g. blocking ALTERs on
+# big tables, destructive drops, missing CONCURRENTLY on index builds), and
+# posts a consolidated review comment on the PR.
+#
+# Usage (in a repo that consumes FATHOM as a tool):
+#
+#   name: DB migration review
+#   on: pull_request
+#   jobs:
+#     review:
+#       runs-on: ubuntu-latest
+#       permissions:
+#         contents: read
+#         pull-requests: write
+#       steps:
+#         - uses: actions/checkout@v4
+#           with: { fetch-depth: 0 }
+#         - uses: ./.github/actions/db-migration-review
+#           with:
+#             migrations-glob: 'db/migrations/**/*.sql'
+#             engine: postgres            # postgres | mysql | mongo
+#             block-on-error: 'true'      # fail the job if any ERROR-level findings
+#             fathom-api-url: ${{ secrets.FATHOM_API_URL }}      # optional
+#             fathom-api-token: ${{ secrets.FATHOM_API_TOKEN }}  # optional
+
+name: FATHOM DB Migration Review
+description: Review SQL migration files in a pull request for risky operations.
+branding: { icon: database, color: blue }
+
+inputs:
+  migrations-glob:
+    description: Glob pattern for migration files relative to repo root.
+    required: false
+    default: 'db/migrations/**/*.sql'
+  engine:
+    description: Database engine — postgres | mysql | mongo.
+    required: false
+    default: postgres
+  block-on-error:
+    description: Fail the job if any ERROR-level findings are produced.
+    required: false
+    default: 'false'
+  fathom-api-url:
+    description: Optional FATHOM API endpoint. If set, findings are also recorded there.
+    required: false
+    default: ''
+  fathom-api-token:
+    description: Optional FATHOM API token (paired with fathom-api-url).
+    required: false
+    default: ''
+
+outputs:
+  findings-json:
+    description: Path to the JSON findings report.
+    value: ${{ steps.review.outputs.findings-json }}
+  error-count:
+    description: Number of ERROR-level findings.
+    value: ${{ steps.review.outputs.error-count }}
+
+runs:
+  using: composite
+  steps:
+    # SECURITY: all user-controlled values flow through env, never inline via
+    # ${{ … }}. GitHub Actions expression substitution happens before the
+    # shell runs, so inline interpolation of an action input is a known
+    # command-injection vector. See HIGH-3 in ROADMAP_CODE_AUDIT.md.
+    - name: Discover changed migrations
+      id: files
+      shell: bash
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        MIGRATIONS_GLOB: ${{ inputs.migrations-glob }}
+      run: |
+        set -eo pipefail
+        base="$BASE_SHA"
+        head="$HEAD_SHA"
+        if [ -z "$base" ] || [ -z "$head" ]; then
+          base=$(git rev-parse HEAD~1 2>/dev/null || echo "")
+          head=$(git rev-parse HEAD)
+        fi
+        echo "Base: $base  Head: $head"
+        if [ -n "$base" ]; then
+          git diff --name-only --diff-filter=AMR "$base" "$head" > /tmp/changed.txt || true
+        else
+          git ls-files > /tmp/changed.txt
+        fi
+        pattern="$MIGRATIONS_GLOB"
+        shopt -s globstar nullglob extglob
+        > /tmp/targets.txt
+        while IFS= read -r f; do
+          # Quoted "$pattern" on the RHS keeps shell from re-parsing it as code.
+          # Pattern matching in `case` respects the pathname wildcards.
+          case "$f" in
+            $pattern) printf '%s\n' "$f" >> /tmp/targets.txt ;;
+          esac
+        done < /tmp/changed.txt
+        count=$(wc -l < /tmp/targets.txt | tr -d ' ')
+        {
+          printf 'targets=%s\n' /tmp/targets.txt
+          printf 'count=%s\n' "$count"
+        } >> "$GITHUB_OUTPUT"
+        echo "Discovered $count migration files:"
+        cat /tmp/targets.txt || true
+
+    - name: Run FATHOM migration linter
+      id: review
+      if: steps.files.outputs.count != '0'
+      shell: bash
+      env:
+        ENGINE: ${{ inputs.engine }}
+      run: |
+        set -eo pipefail
+        # Engine is constrained to an enum-like value; still, pass via env so
+        # a malicious workflow can't break the command line.
+        case "$ENGINE" in
+          postgres|mysql|mongo) ;;
+          *) echo "::error::unknown engine '$ENGINE'"; exit 2 ;;
+        esac
+        node "$GITHUB_ACTION_PATH/lint.mjs" \
+          "--engine=$ENGINE" \
+          --targets=/tmp/targets.txt \
+          --out=/tmp/findings.json
+        echo "findings-json=/tmp/findings.json" >> "$GITHUB_OUTPUT"
+        errors=$(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/findings.json','utf8')).counts.error || 0)")
+        echo "error-count=$errors" >> "$GITHUB_OUTPUT"
+        echo "ERROR-level findings: $errors"
+
+    - name: Post review comment
+      if: steps.files.outputs.count != '0' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO:    ${{ github.repository }}
+        PR:      ${{ github.event.pull_request.number }}
+      run: |
+        set -eo pipefail
+        node "$GITHUB_ACTION_PATH/comment.mjs" \
+          --findings=/tmp/findings.json \
+          "--repo=$REPO" \
+          "--pr=$PR"
+
+    - name: Report findings to FATHOM API (optional)
+      if: steps.files.outputs.count != '0' && inputs.fathom-api-url != ''
+      shell: bash
+      env:
+        FATHOM_API_URL:   ${{ inputs.fathom-api-url }}
+        FATHOM_API_TOKEN: ${{ inputs.fathom-api-token }}
+      run: node "$GITHUB_ACTION_PATH/report.mjs" --findings=/tmp/findings.json
+
+    - name: Enforce error gate
+      if: steps.files.outputs.count != '0' && inputs.block-on-error == 'true'
+      shell: bash
+      run: |
+        errors="${{ steps.review.outputs.error-count }}"
+        if [ "${errors:-0}" -gt 0 ]; then
+          echo "::error::$errors ERROR-level migration findings — failing job."
+          exit 1
+        fi

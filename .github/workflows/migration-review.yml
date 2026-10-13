@@ -1,0 +1,50 @@
+name: Migration Review
+
+# Gate for database migration changes. Runs static safety checks on any PR that
+# touches backend/db/migrations so schema changes get explicit review attention.
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/db/migrations/**'
+      - 'scripts/review-migrations.mjs'
+      - '.github/workflows/migration-review.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review-migrations:
+    name: Review DB migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run migration review checks
+        run: node scripts/review-migrations.mjs
+
+      - name: List migrations changed in this PR
+        run: |
+          echo "Migrations touched by this PR:"
+          git diff --name-only origin/${{ github.base_ref }}...HEAD -- backend/db/migrations || true
+
+      - name: Guard against editing already-merged migrations
+        run: |
+          # Migrations are immutable once merged to the base branch. Flag any PR
+          # that MODIFIES (vs adds) an existing migration file -- this usually
+          # means rewriting applied history, which is unsafe.
+          BASE="origin/${{ github.base_ref }}"
+          CHANGED=$(git diff --name-status "$BASE"...HEAD -- backend/db/migrations | awk '$1 ~ /^M/ {print $2}')
+          if [ -n "$CHANGED" ]; then
+            echo "::error::The following already-merged migration files were modified. Migrations are immutable once merged -- add a new migration instead:"
+            echo "$CHANGED"
+            exit 1
+          fi
+          echo "No edits to existing migration files. OK."

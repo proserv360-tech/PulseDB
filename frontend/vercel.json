@@ -1,0 +1,4 @@
+{
+    "installCommand": "npm install --include=dev --loglevel=verbose || (echo '=== NPM DEBUG LOG ===' ; tail -n 2000 /vercel/.npm/_logs/*-debug-*.log ; exit 1)",
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

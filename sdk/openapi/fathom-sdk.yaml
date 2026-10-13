@@ -1,0 +1,665 @@
+openapi: 3.0.3
+info:
+  title: FATHOM SDK Ingest API
+  version: 1.0.0
+  description: |
+    Source of truth for FATHOM SDK wire formats across all client implementations (JavaScript, Python, Go, Java).
+    Every SDK implementation MUST conform to this contract. Wire compatibility is enforced by OpenAPI spec;
+    SDK clients are generated from this spec, and any wire contract change must originate here before SDK updates.
+
+servers:
+  - url: https://{host}/api
+    variables:
+      host:
+        default: fathom.example.com
+        description: The FATHOM server hostname
+
+components:
+  securitySchemes:
+    SdkKey:
+      type: apiKey
+      in: header
+      name: X-SDK-Key
+      description: SDK authentication key in the format sk_live_<random>
+
+  schemas:
+    SdkEvent:
+      type: object
+      required:
+        - type
+        - title
+        - severity
+        - timestamp
+      properties:
+        type:
+          type: string
+          enum:
+            - api
+            - error
+            - audit
+            - metric
+          description: Event type; can be extended with custom values
+        title:
+          type: string
+          maxLength: 500
+          description: Event title or summary
+        severity:
+          type: string
+          enum:
+            - debug
+            - info
+            - warning
+            - error
+            - critical
+          description: Event severity level
+        message:
+          type: string
+          nullable: true
+          description: Detailed message body
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Event metadata; structure varies by event type
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp (e.g., 2026-04-22T10:30:00Z)
+        sessionId:
+          type: string
+          description: Optional session identifier
+        appName:
+          type: string
+          description: Optional application name
+        environment:
+          type: string
+          enum:
+            - production
+            - staging
+            - development
+          description: Deployment environment
+        tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Optional event tags
+
+    ApiCallEvent:
+      allOf:
+        - $ref: '#/components/schemas/SdkEvent'
+        - type: object
+          properties:
+            type:
+              enum:
+                - api
+            metadata:
+              type: object
+              additionalProperties: true
+              properties:
+                method:
+                  type: string
+                  enum:
+                    - GET
+                    - POST
+                    - PUT
+                    - PATCH
+                    - DELETE
+                    - HEAD
+                    - OPTIONS
+                  description: HTTP method
+                endpoint:
+                  type: string
+                  description: API endpoint path
+                statusCode:
+                  type: integer
+                  minimum: 100
+                  maximum: 599
+                  description: HTTP response status code
+                durationMs:
+                  type: number
+                  minimum: 0
+                  description: Request duration in milliseconds
+                requestSize:
+                  type: integer
+                  minimum: 0
+                  description: Request body size in bytes
+                responseSize:
+                  type: integer
+                  minimum: 0
+                  description: Response body size in bytes
+              required:
+                - method
+                - endpoint
+                - statusCode
+                - durationMs
+
+    ErrorEvent:
+      allOf:
+        - $ref: '#/components/schemas/SdkEvent'
+        - type: object
+          properties:
+            type:
+              enum:
+                - error
+            metadata:
+              type: object
+              additionalProperties: true
+              properties:
+                errorCode:
+                  type: string
+                  description: Error code or exception type
+                stackTrace:
+                  type: string
+                  description: Stack trace string
+                errorMessage:
+                  type: string
+                  description: Error message detail
+                source:
+                  type: string
+                  description: Source of the error (e.g., sdk, application, external)
+              required:
+                - errorCode
+
+    AuditEvent:
+      allOf:
+        - $ref: '#/components/schemas/SdkEvent'
+        - type: object
+          properties:
+            type:
+              enum:
+                - audit
+            metadata:
+              type: object
+              additionalProperties: true
+              properties:
+                action:
+                  type: string
+                  description: Audit action (e.g., login, logout, data_access, data_modification)
+                actor:
+                  type: string
+                  description: User or system that performed the action
+                resource:
+                  type: string
+                  description: Resource that was acted upon
+                changes:
+                  type: object
+                  additionalProperties: true
+                  description: Before/after change details
+                status:
+                  type: string
+                  enum:
+                    - success
+                    - failure
+                  description: Whether the action succeeded
+              required:
+                - action
+
+    MetricEvent:
+      allOf:
+        - $ref: '#/components/schemas/SdkEvent'
+        - type: object
+          properties:
+            type:
+              enum:
+                - metric
+            metadata:
+              type: object
+              additionalProperties: true
+              properties:
+                metricName:
+                  type: string
+                  description: Metric identifier
+                value:
+                  type: number
+                  description: Numeric metric value
+                unit:
+                  type: string
+                  description: Unit of measurement (e.g., ms, bytes, count)
+                tags:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Metric tags for filtering
+              required:
+                - metricName
+                - value
+
+    IngestRequest:
+      type: object
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/SdkEvent'
+          minItems: 1
+          maxItems: 100
+          description: Batch of events (1-100 per request)
+
+    IngestResponse:
+      type: object
+      required:
+        - ingested
+      properties:
+        ingested:
+          type: integer
+          minimum: 0
+          description: Number of events successfully ingested
+
+    HeartbeatRequest:
+      type: object
+      required:
+        - status
+        - sessionId
+        - appName
+        - environment
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - down
+          description: SDK/application health status
+        sessionId:
+          type: string
+          description: Unique session identifier
+        appName:
+          type: string
+          description: Application name
+        environment:
+          type: string
+          enum:
+            - production
+            - staging
+            - development
+          description: Deployment environment
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+        queueSize:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Optional number of queued events
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Optional metadata (e.g., memory usage, CPU, version info)
+
+    HeartbeatResponse:
+      type: object
+      required:
+        - acknowledged
+      properties:
+        acknowledged:
+          type: boolean
+          enum:
+            - true
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+          description: Health status
+        version:
+          type: string
+          description: API version
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp of response
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code (e.g., VALIDATION_ERROR, UNAUTHORIZED, INTERNAL_ERROR)
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Additional error context
+
+    SpanKind:
+      type: integer
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+      description: |
+        OTLP span kind enum.
+        0=UNSPECIFIED, 1=INTERNAL, 2=SERVER, 3=CLIENT, 4=PRODUCER, 5=CONSUMER
+
+    StatusCode:
+      type: integer
+      enum:
+        - 0
+        - 1
+        - 2
+      description: |
+        OTLP status code.
+        0=UNSET, 1=OK, 2=ERROR
+
+    OtlpAttribute:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Attribute key
+        value:
+          type: object
+          oneOf:
+            - type: object
+              properties:
+                stringValue:
+                  type: string
+            - type: object
+              properties:
+                intValue:
+                  type: string
+            - type: object
+              properties:
+                doubleValue:
+                  type: number
+            - type: object
+              properties:
+                boolValue:
+                  type: boolean
+          description: Attribute value (one of string, int, double, bool)
+
+    OtlpSpan:
+      type: object
+      required:
+        - traceId
+        - spanId
+        - name
+        - kind
+        - startTimeUnixNano
+        - status
+      properties:
+        traceId:
+          type: string
+          minLength: 32
+          maxLength: 32
+          description: 16-byte trace ID as hex string
+        spanId:
+          type: string
+          minLength: 16
+          maxLength: 16
+          description: 8-byte span ID as hex string
+        parentSpanId:
+          type: string
+          minLength: 16
+          maxLength: 16
+          nullable: true
+          description: Optional parent span ID as hex string
+        name:
+          type: string
+          description: Span name
+        kind:
+          $ref: '#/components/schemas/SpanKind'
+        startTimeUnixNano:
+          type: string
+          description: Start time in nanoseconds since Unix epoch
+        endTimeUnixNano:
+          type: string
+          nullable: true
+          description: End time in nanoseconds since Unix epoch
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OtlpAttribute'
+          nullable: true
+          description: Span attributes
+        status:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              $ref: '#/components/schemas/StatusCode'
+            message:
+              type: string
+              nullable: true
+              description: Status message (for error status)
+          description: Span status
+
+    ScopeSpans:
+      type: object
+      required:
+        - scope
+        - spans
+      properties:
+        scope:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: Instrumentation scope name
+            version:
+              type: string
+              nullable: true
+              description: Instrumentation scope version
+        spans:
+          type: array
+          items:
+            $ref: '#/components/schemas/OtlpSpan'
+          minItems: 1
+          description: Spans within this scope
+
+    ResourceSpans:
+      type: object
+      required:
+        - resource
+        - scopeSpans
+      properties:
+        resource:
+          type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              type: array
+              items:
+                $ref: '#/components/schemas/OtlpAttribute'
+              description: Resource attributes (e.g., service.name, service.version)
+        scopeSpans:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeSpans'
+          minItems: 1
+          description: Spans organized by instrumentation scope
+
+    OtlpTracesRequest:
+      type: object
+      required:
+        - resourceSpans
+      properties:
+        resourceSpans:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceSpans'
+          minItems: 1
+          description: Resource spans (1+ per request)
+
+    OtlpTracesResponse:
+      type: object
+      required:
+        - ingested
+      properties:
+        ingested:
+          type: integer
+          minimum: 0
+          description: Number of spans successfully ingested
+
+paths:
+  /sdk/ingest:
+    post:
+      operationId: ingestEvents
+      summary: Batch ingest events
+      description: |
+        Ingest a batch of up to 100 SDK events. All events in the request are processed atomically;
+        if validation fails, no events are ingested and a 400 response is returned.
+      security:
+        - SdkKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Events successfully ingested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '400':
+          description: Validation error (malformed events, exceeds max count, invalid timestamp format, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized; invalid or missing SDK key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error; ingestion service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sdk/heartbeat:
+    post:
+      operationId: sendHeartbeat
+      summary: SDK liveness pulse
+      description: |
+        Periodic heartbeat to signal SDK health. Heartbeats are used to monitor SDK session state
+        and detect stalled or degraded clients. Includes optional queue metrics and metadata.
+      security:
+        - SdkKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Heartbeat acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeartbeatResponse'
+        '400':
+          description: Validation error in heartbeat payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized; invalid or missing SDK key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error; heartbeat service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sdk/health:
+    get:
+      operationId: checkHealth
+      summary: Public health probe
+      description: |
+        Public, unauthenticated health check. Used by load balancers and monitoring systems
+        to verify API readiness. Does not require SDK authentication.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /otlp/v1/traces:
+    post:
+      operationId: ingestOtlpTraces
+      summary: Ingest OTLP/HTTP traces
+      description: |
+        Ingest distributed traces in OTLP/HTTP JSON format.
+        Spans are aggregated by resource and scope, and persisted for trace storage and analysis.
+        This is a dedicated endpoint separate from /sdk/ingest (which ingests events).
+      security:
+        - SdkKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtlpTracesRequest'
+      responses:
+        '200':
+          description: Traces successfully ingested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtlpTracesResponse'
+        '400':
+          description: Validation error (malformed trace data, invalid format, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized; invalid or missing SDK key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error; trace ingest service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

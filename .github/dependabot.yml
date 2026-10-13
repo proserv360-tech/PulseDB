@@ -1,0 +1,110 @@
+# Dependabot — weekly dependency PRs across every ecosystem we ship.
+#
+# Added 2026-06-02 as part of Wave A task A2.
+#
+# Convention:
+#   - Production / non-dev deps: minor + patch only on the auto cadence.
+#     Major bumps land via explicit PRs so we never silently break SDK
+#     consumers or bump a peer driver under us.
+#   - Dev deps: group into "dev" — bumps are noisy and rarely break prod.
+#   - Open PR limit kept low per ecosystem so the queue is reviewable.
+
+version: 2
+updates:
+  # ── Root monorepo (highcharts override etc.) ─────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 3
+    labels: ["deps", "monorepo-root"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      dev:
+        dependency-type: "development"
+
+  # ── Backend ──────────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 5
+    labels: ["deps", "backend"]
+    commit-message:
+      prefix: "chore(deps,backend)"
+      include: "scope"
+    groups:
+      dev:
+        dependency-type: "development"
+    ignore:
+      # Optional peer drivers — adapter code uses dynamic import with
+      # graceful fallback. Pin manually so a major bump never breaks
+      # platforms where the driver can't build (oracledb / mssql).
+      - dependency-name: "oracledb"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "mssql"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "snowflake-sdk"
+        update-types: ["version-update:semver-major"]
+
+  # ── Frontend ─────────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 5
+    labels: ["deps", "frontend"]
+    commit-message:
+      prefix: "chore(deps,frontend)"
+      include: "scope"
+    groups:
+      dev:
+        dependency-type: "development"
+
+  # ── SDK (JS) ─────────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/sdk"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 3
+    labels: ["deps", "sdk-js"]
+    commit-message:
+      prefix: "chore(deps,sdk)"
+      include: "scope"
+    groups:
+      dev:
+        dependency-type: "development"
+
+  # ── SDK (Python) ─────────────────────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/sdk/python"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 3
+    labels: ["deps", "sdk-python"]
+    commit-message:
+      prefix: "chore(deps,sdk-py)"
+
+  # ── Python analytics worker ──────────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/python"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 3
+    labels: ["deps", "python"]
+    commit-message:
+      prefix: "chore(deps,python)"
+
+  # ── SDK (Go) ─────────────────────────────────────────────────────────
+  - package-ecosystem: "gomod"
+    directory: "/sdk/go"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 3
+    labels: ["deps", "sdk-go"]
+    commit-message:
+      prefix: "chore(deps,sdk-go)"
+
+  # ── GitHub Actions themselves ────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly", day: "monday", time: "06:00", timezone: "UTC" }
+    open-pull-requests-limit: 2
+    labels: ["deps", "ci"]
+    commit-message:
+      prefix: "chore(deps,ci)"

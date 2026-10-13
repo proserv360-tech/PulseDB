@@ -1,0 +1,21 @@
+{
+    "name": "fathom-collector",
+    "version": "0.1.0",
+    "description": "FATHOM managed monitoring agent — samples wait events and query stats from Postgres and ships them to your FATHOM instance.",
+    "type": "module",
+    "bin": {
+        "fathom-collector": "./fathom-collector.mjs",
+        "fathom-autoexplain-shipper": "./fathom-autoexplain-shipper.mjs"
+    },
+    "scripts": {
+        "start": "node fathom-collector.mjs",
+        "start:autoexplain": "node fathom-autoexplain-shipper.mjs"
+    },
+    "dependencies": {
+        "pg": "^8.18.0",
+        "@aws-sdk/client-cloudwatch-logs": "^3.600.0"
+    },
+    "engines": {
+        "node": ">=20"
+    }
+}

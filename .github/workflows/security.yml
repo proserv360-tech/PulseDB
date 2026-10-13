@@ -1,0 +1,175 @@
+# .github/workflows/security.yml
+# ──────────────────────────────────
+# Supply-chain and static-analysis gates for FATHOM.
+#
+# Three layers:
+#   1. gitleaks   — block commits that introduce secrets (API keys, tokens,
+#                   credential strings) on every push and pull request.
+#   2. semgrep    — SAST sweep with OWASP / Node.js / Python rulesets plus our
+#                   own house rules in .semgrep/.
+#   3. iac-drift  — nightly snapshot of rendered Kubernetes / compose / Terraform
+#                   output diffed against the committed baseline so reviewers
+#                   see infra drift as a PR-sized artifact.
+#
+# Each job is gated with continue-on-error: false — failures block the PR.
+# Exception: npm audit stays advisory (see ci.yml); this file is for findings
+# we want to treat as red.
+#
+# Secrets required:
+#   - SEMGREP_APP_TOKEN   (optional; enables rule sync from Semgrep Cloud. Not
+#                          required — local rules run without it.)
+#
+# Permissions: read-only by default; the SARIF upload step needs security-events
+# write, which is scoped to just that step.
+
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly drift + secret sweep at 04:17 UTC (odd minute avoids the
+    # top-of-hour GitHub Actions thundering herd).
+    - cron: '17 4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  # ── 1. Secret scanning ─────────────────────────────────────────────────
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so gitleaks can scan every commit on this branch,
+          # not just HEAD. This catches secrets that were added then
+          # "rotated away" in a later commit — they're still in history.
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use repo-local config if present, otherwise the built-in rules.
+          GITLEAKS_CONFIG: .gitleaks.toml
+          GITLEAKS_ENABLE_COMMENTS: true
+          GITLEAKS_ENABLE_SUMMARY: true
+
+  # ── 2. SAST ────────────────────────────────────────────────────────────
+  semgrep:
+    name: SAST (semgrep)
+    runs-on: ubuntu-latest
+    # Semgrep's official runner image ships the binary and rule fetcher.
+    container:
+      image: returntocorp/semgrep:latest
+    permissions:
+      contents: read
+      security-events: write  # upload SARIF to GitHub Advanced Security
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run semgrep
+        run: |
+          semgrep ci \
+            --config p/owasp-top-ten \
+            --config p/javascript \
+            --config p/nodejsscan \
+            --config p/python \
+            --config p/secrets \
+            --config .semgrep/ \
+            --sarif --output semgrep.sarif \
+            --error \
+            --metrics=off
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        # --error makes semgrep exit non-zero on findings (any severity).
+        # For a softer landing on first rollout, change to --severity=ERROR.
+
+      - name: Upload SARIF to GitHub code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  # ── 3. Infrastructure drift ────────────────────────────────────────────
+  iac-drift:
+    name: IaC drift snapshot
+    runs-on: ubuntu-latest
+    # Drift runs on schedule + on PRs that touch infra paths. That means a PR
+    # intentionally changing infra will flag itself — reviewers see the diff.
+    if: |
+      github.event_name == 'schedule' ||
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.changed_files, 'deploy/') ||
+      contains(github.event.pull_request.changed_files, 'infra/') ||
+      contains(github.event.pull_request.changed_files, 'docker-compose')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rendering tools
+        run: |
+          # kustomize for k8s manifests, helm for charts, docker compose for
+          # compose files, terraform fmt/validate for any .tf we ship.
+          curl -sSLo /tmp/kustomize.tgz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.2/kustomize_v5.4.2_linux_amd64.tar.gz
+          tar -xzf /tmp/kustomize.tgz -C /usr/local/bin
+          curl -sSL https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz | tar -xz
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends jq
+
+      - name: Render infra manifests to snapshot
+        run: |
+          mkdir -p .iac-snapshot
+          # Kustomize overlays (if any)
+          if [ -d deploy/k8s ]; then
+            for overlay in deploy/k8s/overlays/*; do
+              [ -d "$overlay" ] || continue
+              name=$(basename "$overlay")
+              kustomize build "$overlay" > ".iac-snapshot/k8s-$name.yaml" || true
+            done
+          fi
+          # Helm charts
+          if [ -d deploy/helm ]; then
+            for chart in deploy/helm/*/; do
+              [ -d "$chart" ] || continue
+              name=$(basename "$chart")
+              helm template "$chart" > ".iac-snapshot/helm-$name.yaml" || true
+            done
+          fi
+          # docker-compose — config-render normalises variables and merges files
+          if [ -f docker-compose.yml ]; then
+            docker compose -f docker-compose.yml config > .iac-snapshot/compose.yaml || true
+          fi
+
+      - name: Diff against committed baseline
+        run: |
+          if [ -d .iac-baseline ]; then
+            # Create annotated, contextless diff so PR reviewers see only substance.
+            diff -u -r .iac-baseline .iac-snapshot > iac-drift.diff || true
+            if [ -s iac-drift.diff ]; then
+              echo "::warning::IaC drift detected. Review iac-drift.diff artefact."
+              echo "### IaC drift detected" >> "$GITHUB_STEP_SUMMARY"
+              echo '```diff' >> "$GITHUB_STEP_SUMMARY"
+              head -c 60000 iac-drift.diff >> "$GITHUB_STEP_SUMMARY"
+              echo '```' >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No drift from baseline."
+            fi
+          else
+            echo "::notice::No .iac-baseline/ committed yet. See docs/runbooks/iac-drift.md to establish one."
+          fi
+
+      - name: Upload drift artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iac-drift-${{ github.run_id }}
+          path: |
+            .iac-snapshot/
+            iac-drift.diff
+          if-no-files-found: ignore
+          retention-days: 30

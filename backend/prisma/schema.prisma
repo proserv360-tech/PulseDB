@@ -1,0 +1,317 @@
+// Prisma schema — derived from db/schema.ts (Drizzle) which is the source of truth.
+// All tables live in the "pgmonitoringtool" schema.
+// Connection URL is supplied via prisma.config.ts (Prisma 7 style).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["pgmonitoringtool"]
+}
+
+// ── Users ──────────────────────────────────────────────────────────────────
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  username           String    @unique @db.VarChar(50)
+  passwordHash       String    @map("password_hash")
+  name               String    @db.VarChar(100)
+  email              String    @unique @db.VarChar(255)
+  role               String    @default("viewer") @db.VarChar(20)
+  accessLevel        String    @default("read") @map("access_level") @db.VarChar(10)
+  allowedScreens     String[]  @default([]) @map("allowed_screens")
+  dataAccess         String?   @default("internal") @map("data_access") @db.VarChar(20)
+  department         String?   @db.VarChar(100)
+  location           String?   @db.VarChar(100)
+  mfaEnabled         Boolean   @default(true) @map("mfa_enabled")
+  apiAccess          Boolean   @default(false) @map("api_access")
+  status             String    @default("active") @db.VarChar(20)
+  mustChangePassword Boolean   @default(false) @map("must_change_password")
+  passwordChangedAt  DateTime  @default(now()) @map("password_changed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  lastLoginAt        DateTime? @map("last_login_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  connections             Connection[]
+  sessions                UserSession[]
+  apiKeys                 ApiKey[]
+  loginActivity           LoginActivity[]
+  passwordResetTokens     PasswordResetToken[]
+  alertRules              AlertRule[]
+  sdkApplications         SdkApplication[]
+  notificationDests       NotificationDestination[]
+
+  @@index([status])
+  @@map("users")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Password Reset Tokens ─────────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  token     String    @unique @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@map("password_reset_tokens")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Connections ────────────────────────────────────────────────────────────
+
+model Connection {
+  id                 Int       @id @default(autoincrement())
+  userId             Int?      @map("user_id")
+  name               String
+  host               String    @default("")
+  port               Int       @default(5432)
+  dbName             String    @default("postgres") @map("db_name")
+  username           String?   @default("")
+  passwordEncrypted  String?   @default("") @map("password_encrypted")
+  ssl                Boolean   @default(true)
+  color              String?   @default("#06b6d4") @db.VarChar(7)
+  isDefault          Boolean   @default(false) @map("is_default")
+  connectionType     String?   @default("postgresql") @map("connection_type") @db.VarChar(20)
+  environment        String?   @default("production") @db.VarChar(50)
+  region             String?   @db.VarChar(100)
+  notes              String?
+  healthStatus       String?   @default("unknown") @map("health_status") @db.VarChar(20)
+  lastHealthCheck    DateTime? @map("last_health_check")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("fathom_connections")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Sessions ───────────────────────────────────────────────────────────────
+
+model UserSession {
+  id          String    @id @default(uuid())
+  userId      Int       @map("user_id")
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  deviceLabel String?   @map("device_label") @db.VarChar(100)
+  location    String?   @db.VarChar(100)
+  riskLevel   String?   @default("low") @map("risk_level") @db.VarChar(20)
+  isActive    Boolean   @default(true) @map("is_active")
+  expiresAt   DateTime  @default(now()) @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  revokedBy   Int?      @map("revoked_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("user_sessions")
+  @@schema("pgmonitoringtool")
+}
+
+// ── API Keys ───────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  name       String    @db.VarChar(100)
+  keyPrefix  String    @map("key_prefix") @db.VarChar(20)
+  keyHash    String    @unique @map("key_hash") @db.VarChar(64)
+  scope      String?   @default("read:all") @db.VarChar(50)
+  totalCalls Int       @default(0) @map("total_calls")
+  lastUsedAt DateTime? @map("last_used_at")
+  status     String    @default("active") @db.VarChar(20)
+  revokedAt  DateTime? @map("revoked_at")
+  revokedBy  Int?      @map("revoked_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("user_api_keys")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────────────
+
+model Alert {
+  id               Int       @id @default(autoincrement())
+  type             String    @db.VarChar(50)
+  severity         String    @default("warning") @db.VarChar(20)
+  message          String
+  details          Json      @default("{}")
+  status           String    @default("active") @db.VarChar(20)
+  connectionId     Int?      @map("connection_id")
+  acknowledgedBy   String?   @map("acknowledged_by") @db.VarChar(100)
+  acknowledgedAt   DateTime? @map("acknowledged_at")
+  resolvedAt       DateTime? @map("resolved_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("alerts")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Alert Rules ────────────────────────────────────────────────────────────
+
+model AlertRule {
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(200)
+  description      String?   @default("")
+  metric           String    @db.VarChar(100)
+  condition        String    @db.VarChar(10)
+  threshold        Float
+  severity         String    @default("warning") @db.VarChar(20)
+  enabled          Boolean   @default(true)
+  cooldownMinutes  Int?      @default(15) @map("cooldown_minutes")
+  notifyEmail      Boolean?  @default(false) @map("notify_email")
+  notifySlack      Boolean?  @default(false) @map("notify_slack")
+  connectionId     Int?      @map("connection_id")
+  createdBy        Int?      @map("created_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  creator User? @relation(fields: [createdBy], references: [id])
+
+  @@map("alert_rules")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Login Activity ─────────────────────────────────────────────────────────
+
+model LoginActivity {
+  userId      Int      @map("user_id")
+  day         DateTime @db.Date
+  loginCount  Int      @default(0) @map("login_count")
+  failedCount Int      @default(0) @map("failed_count")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, day])
+  @@map("user_login_activity")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Audit Log ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id            Int      @id @default(autoincrement())
+  actorUsername String?  @map("actor_username") @db.VarChar(100)
+  action        String   @db.VarChar(100)
+  details       Json     @default("{}")
+  timestamp     DateTime @default(now())
+
+  @@index([timestamp])
+  @@map("audit_log")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Feedback ───────────────────────────────────────────────────────────────
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  rating    Int
+  category  String?  @db.VarChar(50)
+  message   String?
+  page      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("feedback")
+  @@schema("pgmonitoringtool")
+}
+
+// ── SDK Applications ───────────────────────────────────────────────────────
+
+model SdkApplication {
+  id               Int       @id @default(autoincrement())
+  name             String
+  appType          String    @default("custom") @map("app_type")
+  environment      String    @default("production")
+  apiKeyHash       String    @unique @map("api_key_hash")
+  apiKeyPrefix     String    @map("api_key_prefix")
+  status           String    @default("active")
+  config           Json      @default("{}")
+  lastHeartbeatAt  DateTime? @map("last_heartbeat_at")
+  createdBy        Int?      @map("created_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  creator User?      @relation(fields: [createdBy], references: [id])
+  events  SdkEvent[]
+
+  @@index([status])
+  @@map("sdk_applications")
+  @@schema("pgmonitoringtool")
+}
+
+// ── SDK Events ─────────────────────────────────────────────────────────────
+
+model SdkEvent {
+  id           Int      @id @default(autoincrement())
+  appId        Int      @map("app_id")
+  eventType    String   @map("event_type")
+  severity     String   @default("info")
+  title        String
+  message      String?
+  metadata     Json     @default("{}")
+  tags         String[] @default([])
+  durationMs   Int?     @map("duration_ms")
+  statusCode   Int?     @map("status_code")
+  endpoint     String?
+  httpMethod   String?  @map("http_method")
+  errorType    String?  @map("error_type")
+  stackTrace   String?  @map("stack_trace")
+  fingerprint  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  app SdkApplication @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId, createdAt])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("sdk_events")
+  @@schema("pgmonitoringtool")
+}
+
+// ── Notification Destinations ──────────────────────────────────────────────
+
+model NotificationDestination {
+  id           Int       @id @default(autoincrement())
+  orgId        Int       @map("org_id")
+  name         String    @db.VarChar(120)
+  provider     String    @db.VarChar(32)
+  minSeverity  String    @default("warning") @map("min_severity") @db.VarChar(16)
+  enabled      Boolean   @default(true)
+  config       Json      @default("{}")
+  secretEnc    String?   @map("secret_enc")
+  createdBy    Int?      @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  lastUsedAt   DateTime? @map("last_used_at")
+  lastStatus   String?   @map("last_status") @db.VarChar(16)
+  lastError    String?   @map("last_error")
+
+  creator User? @relation(fields: [createdBy], references: [id])
+
+  @@index([orgId])
+  @@index([orgId, enabled])
+  @@map("notification_destinations")
+  @@schema("pgmonitoringtool")
+}

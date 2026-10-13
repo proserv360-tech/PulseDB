@@ -1,0 +1,19 @@
+apiVersion: v2
+name: fathom
+description: FATHOM — Multi-database monitoring + observability + query workbench
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://fathom.dev
+sources:
+  - https://github.com/fathom-dev/fathom
+maintainers:
+  - name: FATHOM Engineering
+    email: engineering@fathom.dev
+keywords:
+  - database
+  - monitoring
+  - observability
+  - postgres
+  - mysql
+  - mongodb

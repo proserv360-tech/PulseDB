@@ -1,0 +1,103 @@
+/* Auto-generated metric catalog. */
+
+import { MetricCatalog, Metric, MetricSection, MetricTier } from '../metricsCatalog';
+
+const ACCENT = '#4053D6';
+
+const sections: MetricSection[] = [
+    { key: 'overview', label: 'Overview', order: 1, color: '#4053D6' },
+    { key: 'capacity', label: 'Capacity', order: 2, color: '#0078D4' },
+    { key: 'throttling', label: 'Throttling', order: 3, color: '#F2C744' },
+    { key: 'latency', label: 'Latency', order: 4, color: '#107C10' },
+    { key: 'gsi', label: 'Indexes (GSI/LSI)', order: 5, color: '#5C2D91' },
+    { key: 'streams', label: 'Streams & DAX', order: 6, color: '#D83B01' },
+    { key: 'backup', label: 'Backup & PITR', order: 7, color: '#00B7C3' },
+    { key: 'global', label: 'Global Tables', order: 8, color: '#8764B8' },
+    { key: 'security', label: 'Security & IAM', order: 9, color: '#A4262C' },
+    { key: 'cost', label: 'Cost', order: 10, color: '#E3008C' },
+];
+
+const m = (
+    id: string, label: string, section: string, tier: MetricTier,
+    unit = '', description = '', extras: Partial<Metric> = {},
+): Metric => ({ id, label, section, tier, unit, description, ...extras });
+
+const metrics: Metric[] = [
+    m('dy.tables.count', 'Tables', 'overview', 'basic', '', 'ListTables count.', { format: 'count', baseValue: 82, range: 14 }),
+    m('dy.tables.size_total', 'Total table size', 'overview', 'basic', 'GB', 'sum TableSizeBytes.', { format: 'number', baseValue: 420, range: 80 }),
+    m('dy.tables.items_total', 'Total items', 'overview', 'basic', '', 'sum ItemCount.', { format: 'count', baseValue: 482000000, range: 40000000 }),
+    m('dy.tables.regions', 'Regions', 'overview', 'intermediate', '', 'distinct regions w/ tables.', { format: 'count', baseValue: 4, range: 0 }),
+    m('dy.tables.on_demand_pct', 'On-demand tables %', 'overview', 'basic', '%', 'tables w/ PAY_PER_REQUEST.', { format: 'percent', baseValue: 42, range: 10 }),
+    m('dy.tables.provisioned_pct', 'Provisioned tables %', 'overview', 'intermediate', '%', 'PROVISIONED billing mode.', { format: 'percent', baseValue: 58, range: 10 }),
+    m('dy.tables.tag_coverage', 'Tag coverage', 'overview', 'advanced', '%', 'tables with required tags.', { format: 'percent', baseValue: 84, range: 8 }),
+    m('dy.cap.rcu_used', 'RCU consumed', 'capacity', 'basic', '', 'ConsumedReadCapacityUnits avg.', { format: 'count', baseValue: 3400, range: 600 }),
+    m('dy.cap.rcu_provisioned', 'RCU provisioned', 'capacity', 'basic', '', 'ProvisionedReadCapacityUnits.', { format: 'count', baseValue: 5000, range: 0 }),
+    m('dy.cap.rcu_util', 'RCU utilization', 'capacity', 'basic', '%', 'consumed / provisioned.', { format: 'percent', baseValue: 68, range: 14 }),
+    m('dy.cap.wcu_used', 'WCU consumed', 'capacity', 'basic', '', 'ConsumedWriteCapacityUnits avg.', { format: 'count', baseValue: 1200, range: 240 }),
+    m('dy.cap.wcu_provisioned', 'WCU provisioned', 'capacity', 'basic', '', 'ProvisionedWriteCapacityUnits.', { format: 'count', baseValue: 2000, range: 0 }),
+    m('dy.cap.wcu_util', 'WCU utilization', 'capacity', 'basic', '%', 'WCU consumed / provisioned.', { format: 'percent', baseValue: 60, range: 15 }),
+    m('dy.cap.peak_rcu', 'Peak RCU (24h)', 'capacity', 'intermediate', '', 'max consumed RCU.', { format: 'count', baseValue: 4800, range: 420 }),
+    m('dy.cap.peak_wcu', 'Peak WCU (24h)', 'capacity', 'intermediate', '', 'max consumed WCU.', { format: 'count', baseValue: 1842, range: 240 }),
+    m('dy.cap.autoscale_targets', 'Autoscale targets', 'capacity', 'advanced', '', 'app autoscale targets.', { format: 'count', baseValue: 24, range: 4 }),
+    m('dy.cap.burst_used', 'Burst capacity used', 'capacity', 'advanced', '%', 'burst credits consumed.', { format: 'percent', baseValue: 18, range: 12 }),
+    m('dy.thr.read', 'Read throttles', 'throttling', 'basic', '/min', 'ReadThrottleEvents.', { format: 'count', baseValue: 2, range: 6 }),
+    m('dy.thr.write', 'Write throttles', 'throttling', 'basic', '/min', 'WriteThrottleEvents.', { format: 'count', baseValue: 1, range: 4 }),
+    m('dy.thr.user_errors', '4xx user errors', 'throttling', 'basic', '/min', 'UserErrors.', { format: 'count', baseValue: 4, range: 8 }),
+    m('dy.thr.system_errors', '5xx system errors', 'throttling', 'basic', '/min', 'SystemErrors.', { format: 'count', baseValue: 0, range: 2 }),
+    m('dy.thr.cond_failed', 'Conditional check failures', 'throttling', 'intermediate', '/min', 'ConditionalCheckFailedRequests.', { format: 'count', baseValue: 84, range: 42 }),
+    m('dy.thr.txn_conflicts', 'Transaction conflicts', 'throttling', 'intermediate', '/min', 'TransactionConflict.', { format: 'count', baseValue: 12, range: 12 }),
+    m('dy.thr.hot_partitions', 'Hot partitions detected', 'throttling', 'advanced', '', 'partitions over threshold.', { format: 'count', baseValue: 2, range: 2 }),
+    m('dy.lat.read_p50', 'Read p50', 'latency', 'basic', 'ms', 'SuccessfulRequestLatency p50 GetItem.', { format: 'duration', baseValue: 2.1, range: 0.6 }),
+    m('dy.lat.read_p95', 'Read p95', 'latency', 'basic', 'ms', 'p95 read.', { format: 'duration', baseValue: 4.8, range: 1.4 }),
+    m('dy.lat.read_p99', 'Read p99', 'latency', 'basic', 'ms', 'p99 read.', { format: 'duration', baseValue: 12, range: 4 }),
+    m('dy.lat.write_p50', 'Write p50', 'latency', 'basic', 'ms', 'p50 write.', { format: 'duration', baseValue: 3.4, range: 0.8 }),
+    m('dy.lat.write_p95', 'Write p95', 'latency', 'basic', 'ms', 'p95 write.', { format: 'duration', baseValue: 8.2, range: 2.4 }),
+    m('dy.lat.write_p99', 'Write p99', 'latency', 'basic', 'ms', 'p99 write.', { format: 'duration', baseValue: 22, range: 6 }),
+    m('dy.lat.scan_avg', 'Scan avg latency', 'latency', 'intermediate', 'ms', 'Scan latency avg.', { format: 'duration', baseValue: 84, range: 22 }),
+    m('dy.lat.query_avg', 'Query avg latency', 'latency', 'intermediate', 'ms', 'Query latency avg.', { format: 'duration', baseValue: 4.2, range: 1.2 }),
+    m('dy.idx.gsi_count', 'GSI total', 'gsi', 'basic', '', 'sum GSI per table.', { format: 'count', baseValue: 84, range: 12 }),
+    m('dy.idx.lsi_count', 'LSI total', 'gsi', 'basic', '', 'sum LSI per table.', { format: 'count', baseValue: 18, range: 4 }),
+    m('dy.idx.gsi_rcu_used', 'GSI RCU used', 'gsi', 'intermediate', '', 'ConsumedReadCapacityUnits index dim.', { format: 'count', baseValue: 1240, range: 200 }),
+    m('dy.idx.gsi_wcu_used', 'GSI WCU used', 'gsi', 'intermediate', '', 'ConsumedWriteCapacityUnits index.', { format: 'count', baseValue: 620, range: 120 }),
+    m('dy.idx.gsi_throttled', 'GSI throttles', 'gsi', 'intermediate', '/min', 'index ThrottledRequests.', { format: 'count', baseValue: 0, range: 4 }),
+    m('dy.idx.gsi_replication', 'GSI replication lag', 'gsi', 'advanced', 'ms', 'avg index replication delay.', { format: 'duration', baseValue: 120, range: 60 }),
+    m('dy.str.enabled', 'Streams enabled', 'streams', 'basic', '', 'tables w/ Streams ON.', { format: 'count', baseValue: 42, range: 4 }),
+    m('dy.str.iter_age', 'Stream iterator age', 'streams', 'intermediate', 'ms', 'IteratorAge max.', { format: 'duration', baseValue: 240, range: 120 }),
+    m('dy.str.records_sec', 'Stream records / sec', 'streams', 'intermediate', '/s', 'PutRecords/sec.', { format: 'count', baseValue: 4200, range: 1200 }),
+    m('dy.str.failed_24h', 'Failed deliveries (24h)', 'streams', 'advanced', '/d', 'failed records.', { format: 'count', baseValue: 0, range: 4 }),
+    m('dy.dax.cluster', 'DAX clusters', 'streams', 'intermediate', '', 'DAX clusters running.', { format: 'count', baseValue: 2, range: 0 }),
+    m('dy.dax.cache_hit', 'DAX cache hit', 'streams', 'intermediate', '%', 'cache hit ratio.', { format: 'percent', baseValue: 88, range: 6, higherIsBetter: true }),
+    m('dy.dax.evictions', 'DAX evictions /min', 'streams', 'advanced', '/min', 'evictions per minute.', { baseValue: 42, range: 18 }),
+    m('dy.bk.pitr_enabled', 'PITR enabled tables', 'backup', 'basic', '', 'tables w/ PITR.', { format: 'count', baseValue: 68, range: 8 }),
+    m('dy.bk.pitr_pct', 'PITR coverage', 'backup', 'basic', '%', 'PITR / total tables.', { format: 'percent', baseValue: 84, range: 8, higherIsBetter: true }),
+    m('dy.bk.scheduled_jobs', 'Scheduled backups', 'backup', 'intermediate', '', 'AWS Backup plans.', { format: 'count', baseValue: 12, range: 2 }),
+    m('dy.bk.last_age_h', 'Last backup age', 'backup', 'basic', 'h', 'hours since last backup.', { baseValue: 8, range: 4 }),
+    m('dy.bk.size_total', 'Total backup size', 'backup', 'intermediate', 'TB', 'aggregate backup size.', { format: 'number', baseValue: 1.4, range: 0.4 }),
+    m('dy.bk.failed_24h', 'Failed backups (24h)', 'backup', 'basic', '', 'failed backup jobs.', { format: 'count', baseValue: 0, range: 2 }),
+    m('dy.gt.tables', 'Global tables', 'global', 'intermediate', '', 'GlobalTable count.', { format: 'count', baseValue: 14, range: 2 }),
+    m('dy.gt.regions', 'Global table regions', 'global', 'intermediate', '', 'regions used by GT.', { format: 'count', baseValue: 4, range: 0 }),
+    m('dy.gt.replication_lat', 'GT replication latency', 'global', 'intermediate', 'ms', 'avg cross-region replication.', { format: 'duration', baseValue: 84, range: 40 }),
+    m('dy.gt.conflicts', 'GT conflicts /min', 'global', 'advanced', '/min', 'conflicting writes.', { format: 'count', baseValue: 2, range: 4 }),
+    m('dy.sec.encryption_pct', 'Encrypted tables %', 'security', 'basic', '%', 'tables w/ encryption.', { format: 'percent', baseValue: 100, range: 0, higherIsBetter: true }),
+    m('dy.sec.kms_key_count', 'Custom KMS keys', 'security', 'intermediate', '', 'CMK count.', { format: 'count', baseValue: 4, range: 2 }),
+    m('dy.sec.iam_bindings', 'IAM bindings', 'security', 'intermediate', '', 'IAM principals.', { format: 'count', baseValue: 82, range: 12 }),
+    m('dy.sec.public_tables', 'Publicly accessible', 'security', 'basic', '', 'tables w/ wildcard policy.', { format: 'count', baseValue: 0, range: 2 }),
+    m('dy.sec.failed_calls', 'AccessDenied (24h)', 'security', 'intermediate', '/d', 'CloudTrail AccessDenied.', { format: 'count', baseValue: 18, range: 12 }),
+    m('dy.sec.audit_size', 'CloudTrail size (24h)', 'security', 'advanced', 'GB', 'CloudTrail volume.', { format: 'number', baseValue: 2.4, range: 0.8 }),
+    m('dy.cost.today', 'Cost today', 'cost', 'basic', '$', 'estimated DynamoDB cost.', { format: 'currency', baseValue: 84, range: 22 }),
+    m('dy.cost.mtd', 'Cost MTD', 'cost', 'basic', '$', 'month-to-date cost.', { format: 'currency', baseValue: 1840, range: 240 }),
+    m('dy.cost.forecast_eom', 'Forecast EOM', 'cost', 'intermediate', '$', 'projected EOM cost.', { format: 'currency', baseValue: 4200, range: 600 }),
+    m('dy.cost.backup', 'Backup cost (24h)', 'cost', 'intermediate', '$', 'PITR + on-demand backups.', { format: 'currency', baseValue: 8, range: 4 }),
+    m('dy.cost.streams', 'Stream read cost (24h)', 'cost', 'advanced', '$', 'GetRecords cost.', { format: 'currency', baseValue: 2, range: 2 }),
+    m('dy.cost.global_tables', 'GT cost (24h)', 'cost', 'advanced', '$', 'global tables replication cost.', { format: 'currency', baseValue: 12, range: 4 }),
+];
+
+const catalog: MetricCatalog = {
+    engineId: 'demo-dynamodb',
+    engineLabel: 'Amazon DynamoDB',
+    accentColor: ACCENT,
+    sections,
+    metrics,
+};
+
+export default catalog;

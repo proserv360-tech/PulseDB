@@ -1,0 +1,107 @@
+# Default values for the FATHOM chart.
+# Override with `-f values.production.yaml` or `--set`.
+
+image:
+  repository: fathom/fathom
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  # For air-gapped installs, push the image to your internal registry
+  # and set `repository` accordingly. See docs/runbooks/AIR_GAPPED.md.
+
+imagePullSecrets: []
+
+replicaCount: 2
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 384Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: fathom.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Control-plane Postgres — either DATABASE_URL or discrete PG* vars.
+database:
+  # Set one of these two. If `url` is set, it takes precedence.
+  url: ""                         # postgresql://user:pass@host:5432/db?sslmode=require
+  host: ""
+  port: 5432
+  name: fathom
+  user: fathom
+  # Prefer `existingSecret` over plaintext values in production.
+  password: ""
+  existingSecret: ""              # name of a secret with key PGPASSWORD / DATABASE_URL
+
+# Core secrets — MUST be set or the pod fails fast. Generate with:
+#   node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+secrets:
+  jwtSecret: ""                   # REQUIRED, 32+ chars
+  encryptionKey: ""               # REQUIRED, 32+ chars, MUST differ from jwtSecret
+  existingSecret: ""              # if set, secrets are read from this secret (keys: JWT_SECRET, ENCRYPTION_KEY)
+
+# HIPAA mode — see docs/compliance/HIPAA.md.
+hipaa:
+  enabled: false
+
+# BYOK / KMS
+kms:
+  backend: "local"                # local | aws-kms | gcp-kms | vault
+  keyId: ""                       # when backend=aws-kms, the ARN
+  serviceAccountName: ""          # for IRSA / workload identity
+
+# Integrations
+integrations:
+  slack:
+    enabled: false
+    existingSecret: ""            # keys: SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET, SLACK_CHANNEL_ID
+  github:
+    enabled: false
+    existingSecret: ""            # key: GITHUB_WEBHOOK_SECRET
+  gitlab:
+    enabled: false
+    existingSecret: ""            # key: GITLAB_WEBHOOK_TOKEN
+
+# Observability
+observability:
+  # Expose /metrics (Prometheus scrape format) on port 5000.
+  prometheusScrape: true
+  # Expose OTLP logs ingest and related endpoints.
+  otlpIngest: true
+
+# Affinity / tolerations / nodeSelector
+affinity: {}
+nodeSelector: {}
+tolerations: []
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

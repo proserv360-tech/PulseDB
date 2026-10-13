@@ -1,0 +1,48 @@
+{
+    "name": "postgrestool-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "packageManager": "npm@10.9.2",
+    "workspaces": [
+        "frontend",
+        "backend",
+        "shared/*"
+    ],
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "type-check": "turbo run type-check",
+        "test": "turbo run test",
+        "lint": "turbo run lint",
+        "prepare": "node --input-type=commonjs -e \"try{require('husky')()}catch(e){}\""
+    },
+    "devDependencies": {
+        "husky": "^9.1.0",
+        "lint-staged": "^15.3.0",
+        "prettier": "^3.4.0",
+        "turbo": "^2.5.0"
+    },
+    "overrides": {
+        "esbuild": "^0.25.0",
+        "@esbuild-kit/core-utils": {
+            "esbuild": "^0.25.0"
+        },
+        "@esbuild-kit/esm-loader": {
+            "esbuild": "^0.25.0"
+        },
+        "eventemitter3": "^5.0.1"
+    },
+    "lint-staged": {
+        "frontend/**/*.{js,jsx,ts,tsx}": [
+            "prettier --write"
+        ],
+        "backend/**/*.{js,ts}": [
+            "prettier --write"
+        ],
+        "*.{json,md,css}": [
+            "prettier --write"
+        ]
+    },
+    "dependencies": {}
+}

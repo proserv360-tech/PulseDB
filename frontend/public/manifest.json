@@ -1,0 +1,25 @@
+{
+    "name": "FATHOM — PostgreSQL Monitor",
+    "short_name": "FATHOM",
+    "description": "Real-time PostgreSQL monitoring, performance analysis, and database administration",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#04060f",
+    "theme_color": "#38bdf8",
+    "orientation": "any",
+    "categories": ["developer", "utilities", "productivity"],
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

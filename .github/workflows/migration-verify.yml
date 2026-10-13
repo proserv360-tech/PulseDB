@@ -1,0 +1,71 @@
+# ============================================================================
+#  Neon → Supabase migration verification gate
+#  Runs backend/scripts/verify-migration.sh to confirm every control-plane
+#  table has matching row counts between the source (Neon) and target
+#  (Supabase) databases.
+#
+#  Manual trigger only — it needs live DB credentials, supplied as repo secrets:
+#    MIGRATION_SOURCE_URL   Neon connection string
+#    MIGRATION_TARGET_URL   Supabase connection string (direct, port 5432)
+#
+#  Settings → Secrets and variables → Actions → New repository secret.
+# ============================================================================
+name: Migration Verify (Neon → Supabase)
+
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'Optional note for this verification run'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify row-count parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The verify script uses psql; install the v16 client so it matches
+      # modern Neon/Supabase server majors.
+      - name: Install PostgreSQL client (v16)
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+          psql --version
+
+      - name: Guard — secrets present
+        env:
+          SRC: ${{ secrets.MIGRATION_SOURCE_URL }}
+          TGT: ${{ secrets.MIGRATION_TARGET_URL }}
+        run: |
+          if [ -z "$SRC" ] || [ -z "$TGT" ]; then
+            echo "::error::MIGRATION_SOURCE_URL and MIGRATION_TARGET_URL repo secrets are required."
+            exit 1
+          fi
+
+      - name: Run verification
+        env:
+          SOURCE_URL: ${{ secrets.MIGRATION_SOURCE_URL }}
+          TARGET_URL: ${{ secrets.MIGRATION_TARGET_URL }}
+        run: |
+          chmod +x backend/scripts/verify-migration.sh
+          ./backend/scripts/verify-migration.sh | tee migration-verify-report.txt
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-verify-report
+          path: migration-verify-report.txt
+          retention-days: 14

@@ -1,0 +1,221 @@
+{
+    "snapshot_time": "2026-03-26T14:30:00Z",
+    "server": {
+        "version": "MySQL 8.4.0",
+        "uptime_days": 34,
+        "host": "mysql-prod-01.fathom.demo",
+        "port": 3306,
+        "data_directory": "/var/lib/mysql"
+    },
+    "vitals": {
+        "qps": 4820,
+        "tps": 1580,
+        "connections": 95,
+        "uptime_days": 34,
+        "handler_read_rate": 28400,
+        "handler_write_rate": 8200,
+        "table_open_cache_hit_pct": 97.8,
+        "thread_cache_hit_pct": 99.2,
+        "qps_history": [
+            3800, 4000, 4200, 4500, 4820, 5100, 4900, 4600, 4400, 4200, 4000, 3800, 3600, 3800, 4000, 4200, 4500, 4820,
+            5100, 4900, 4600, 4400, 4200, 4000
+        ],
+        "tps_history": [
+            1200, 1300, 1400, 1500, 1580, 1650, 1600, 1520, 1450, 1380, 1300, 1200, 1150, 1200, 1300, 1400, 1500, 1580,
+            1650, 1600, 1520, 1450, 1380, 1300
+        ]
+    },
+    "performance": {
+        "avg_query_time_ms": 3.2,
+        "slow_queries": 22,
+        "query_count_day": 416208000,
+        "p95_latency_ms": 15.4,
+        "com_select_per_sec": 3200,
+        "com_insert_per_sec": 820,
+        "com_update_per_sec": 580,
+        "com_delete_per_sec": 220,
+        "latency_history": [
+            2.8, 3.0, 3.2, 3.4, 3.6, 3.4, 3.2, 3.0, 2.8, 3.0, 3.2, 3.4, 3.6, 3.4, 3.2, 3.0, 2.8, 3.0, 3.2, 3.4, 3.6,
+            3.4, 3.2, 3.0
+        ],
+        "command_breakdown": {
+            "SELECT": 3200,
+            "INSERT": 820,
+            "UPDATE": 580,
+            "DELETE": 220
+        },
+        "top_slow": [
+            {
+                "query": "SELECT c.*, COUNT(o.id) order_count, SUM(o.total) total_spent FROM customers c JOIN orders o ON c.id = o.customer_id WHERE o.created_at > DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY c.id ORDER BY total_spent DESC LIMIT 100",
+                "avg_time_ms": 1240,
+                "calls": 480,
+                "rows_examined": 5200000
+            },
+            {
+                "query": "SELECT p.*, GROUP_CONCAT(t.name) tags FROM products p LEFT JOIN product_tags pt ON p.id = pt.product_id LEFT JOIN tags t ON pt.tag_id = t.id WHERE p.status = 'active' GROUP BY p.id",
+                "avg_time_ms": 780,
+                "calls": 1200,
+                "rows_examined": 2800000
+            },
+            {
+                "query": "INSERT INTO analytics_events (user_id, event_type, payload, created_at) SELECT u.id, 'daily_summary', JSON_OBJECT('orders', COALESCE(oc.cnt,0)), NOW() FROM users u LEFT JOIN (SELECT user_id, COUNT(*) cnt FROM orders WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 DAY) GROUP BY user_id) oc ON u.id = oc.user_id",
+                "avg_time_ms": 2100,
+                "calls": 24,
+                "rows_examined": 4000000
+            }
+        ]
+    },
+    "resources": {
+        "cpu_usage_pct": 35,
+        "memory_usage_pct": 68,
+        "disk_io_mb_s": 52,
+        "swap_usage_mb": 128,
+        "created_tmp_tables_hr": 420,
+        "created_tmp_disk_tables_hr": 18,
+        "cpu_history": [25, 28, 30, 32, 35, 38, 36, 34, 32, 30, 28, 25, 24, 26, 28, 30, 32, 35, 38, 36, 34, 32, 30, 28],
+        "memory_history": [
+            62, 64, 65, 66, 68, 70, 69, 68, 67, 66, 65, 63, 62, 63, 64, 65, 66, 68, 70, 69, 68, 67, 66, 65
+        ]
+    },
+    "reliability": {
+        "error_rate_pct": 0.02,
+        "failed_transactions_hr": 8,
+        "recovery_time_s": 12,
+        "availability_pct": 99.97,
+        "aborted_clients_hr": 5,
+        "aborted_connects_hr": 2
+    },
+    "query_optimizer": {
+        "full_scans_pct": 6.8,
+        "index_scans_pct": 93.2,
+        "avg_cost": 142,
+        "query_cache_hit_pct": 45.2,
+        "select_full_join_hr": 34,
+        "adaptive_hash_hit_pct": 98.5,
+        "sort_merge_passes_hr": 12,
+        "filesort_ops_hr": 280
+    },
+    "slow_query_log": {
+        "slow_per_hour": 0.92,
+        "avg_time_s": 2.8,
+        "lock_waits": 4,
+        "rows_examined_hr": 12000000,
+        "sort_merge_passes_hr": 12,
+        "filesort_ops_hr": 280
+    },
+    "indexes": {
+        "total": 485,
+        "unused": 18,
+        "duplicate": 5,
+        "hit_ratio_pct": 98.7
+    },
+    "innodb": {
+        "pool_usage_pct": 82,
+        "log_writes_per_sec": 450,
+        "page_reads_per_sec": 1200,
+        "page_writes_per_sec": 380,
+        "redo_log_size_gb": 2,
+        "undo_tablespaces": 4,
+        "buffer_pool_size_gb": 16,
+        "buffer_pool_utilization_pct": 82,
+        "buffer_reads_per_sec": 1200,
+        "buffer_hit_ratio_pct": 99.6,
+        "pool_history": [78, 79, 80, 81, 82, 84, 83, 82, 81, 80, 79, 78, 77, 78, 79, 80, 81, 82, 84, 83, 82, 81, 80, 79]
+    },
+    "connections_pool": {
+        "active": 95,
+        "max": 300,
+        "aborted": 7,
+        "efficiency_pct": 96.8,
+        "history": [70, 75, 80, 85, 90, 95, 100, 98, 92, 88, 85, 80, 75, 78, 82, 86, 90, 95, 100, 98, 92, 88, 85, 80]
+    },
+    "replication": {
+        "lag_seconds": 0.5,
+        "relay_log_size_mb": 128,
+        "worker_threads": 4,
+        "last_error": null,
+        "gtid_mode": "ON",
+        "semi_sync": true,
+        "group_replication_members": 3,
+        "replicas": [
+            {
+                "name": "mysql-replica-01",
+                "lag_s": 0.5,
+                "state": "Slave_SQL_Running",
+                "gtid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890:1-458920"
+            },
+            {
+                "name": "mysql-replica-02",
+                "lag_s": 0.8,
+                "state": "Slave_SQL_Running",
+                "gtid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890:1-458918"
+            }
+        ]
+    },
+    "binlog": {
+        "position": 458920,
+        "size_mb": 2400,
+        "purge_age_days": 7,
+        "format": "ROW",
+        "relay_log_recovery": true
+    },
+    "schema": {
+        "databases": 8,
+        "tables": 342,
+        "views": 28,
+        "procedures": 15,
+        "triggers": 22,
+        "events": 8,
+        "functions": 12,
+        "partitioned_tables": 6,
+        "foreign_keys": 89,
+        "generated_columns": 14
+    },
+    "security": {
+        "users": 24,
+        "roles": 6,
+        "grants": 148,
+        "host_restrictions": 18,
+        "failed_logins_day": 3,
+        "privilege_changes_day": 1,
+        "ddl_changes_day": 2
+    },
+    "diagnostics": {
+        "perf_schema_events_day": 2400000,
+        "table_io_per_sec": 8500,
+        "statements_per_sec": 4820,
+        "errors": 12,
+        "sys_schema_enabled": true,
+        "wait_events": 156,
+        "active_processes": 42,
+        "sleeping_processes": 53,
+        "avg_query_time_ms": 3.2,
+        "longest_query_s": 28
+    },
+    "error_log": {
+        "entries_day": 1240,
+        "errors_day": 8,
+        "warnings_day": 45,
+        "critical": 0
+    },
+    "backup": {
+        "last_backup": "2026-03-26T04:00:00Z",
+        "backup_size_gb": 45,
+        "restore_time_mins": 22,
+        "success_pct": 100,
+        "clone_plugin_active": true,
+        "router_instances": 2
+    },
+    "server_admin": {
+        "total_variables": 584,
+        "modified_vars": 42,
+        "dynamic_vars": 380,
+        "last_change_days": 5,
+        "imports_week": 3,
+        "exports_week": 8,
+        "data_transferred_gb": 12,
+        "avg_speed_mb_s": 85,
+        "tablespace_usage_pct": 72,
+        "firewall_rules": 15
+    }
+}

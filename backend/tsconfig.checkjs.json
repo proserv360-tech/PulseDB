@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "checkJs": true,
+        "allowJs": true,
+        "noEmit": true,
+        "noImplicitAny": false
+    },
+    "include": [
+        "middleware/*.ts",
+        "middleware/*.js",
+        "services/redisClient.js",
+        "services/queue.js",
+        "services/encryptionService.js",
+        "services/copilotService.js",
+        "services/workbookService.js",
+        "services/backupService.js",
+        "services/waitEventSampler.js",
+        "tests/**/*.test.js"
+    ]
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FATHOM Trust Center</title>
+<meta name="description" content="Security, privacy, and compliance posture for FATHOM." />
+<style>
+  :root {
+    --navy: #1f3a5f;
+    --navy-dark: #152a47;
+    --ink: #1f2328;
+    --muted: #57606a;
+    --line: #d0d7de;
+    --bg: #f6f8fa;
+    --green: #1a7f37;
+    --amber: #9a6700;
+    --red: #cf222e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    background: #fff;
+  }
+  header.hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    color: #fff;
+    padding: 64px 24px 80px;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header.hero h1 { font-size: 44px; margin: 0 0 12px; letter-spacing: -0.5px; }
+  header.hero p { font-size: 18px; opacity: 0.9; max-width: 760px; margin: 0; }
+  nav.sub { border-bottom: 1px solid var(--line); background: #fff; position: sticky; top: 0; z-index: 5; }
+  nav.sub ul { display: flex; gap: 8px; list-style: none; padding: 12px 0; margin: 0; flex-wrap: wrap; }
+  nav.sub a { color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 14px; }
+  nav.sub a:hover { background: var(--bg); color: var(--ink); }
+  section { padding: 48px 0; border-bottom: 1px solid var(--line); }
+  section h2 { font-size: 28px; margin: 0 0 8px; color: var(--navy); }
+  section .lead { color: var(--muted); font-size: 16px; margin: 0 0 24px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    background: #fff;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pill.ok { background: #dafbe1; color: var(--green); }
+  .pill.progress { background: #fff8c5; color: var(--amber); }
+  .pill.planned { background: #eaeef2; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; }
+  table th, table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); font-size: 14px; }
+  table th { background: var(--bg); font-weight: 600; color: var(--navy); }
+  dl.kv dt { font-weight: 600; color: var(--navy); margin-top: 16px; }
+  dl.kv dd { margin: 4px 0 0; color: var(--muted); }
+  footer { padding: 32px 0; color: var(--muted); font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <h1>FATHOM Trust Center</h1>
+    <p>How we protect the data you trust to FATHOM — security controls, privacy commitments, and compliance roadmap. Updated April 2026.</p>
+  </div>
+</header>
+
+<nav class="sub">
+  <div class="container">
+    <ul>
+      <li><a href="#compliance">Compliance</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#data">Data handling</a></li>
+      <li><a href="#availability">Availability</a></li>
+      <li><a href="#contact">Report a vulnerability</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section id="compliance">
+  <div class="container">
+    <h2>Compliance</h2>
+    <p class="lead">Status of our formal attestations and certifications.</p>
+    <table>
+      <thead><tr><th>Framework</th><th>Status</th><th>Target date</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>SOC 2 Type I</td>
+          <td><span class="pill progress">In progress</span></td>
+          <td>Q3 2026 — observation period started April 2026</td>
+        </tr>
+        <tr>
+          <td>SOC 2 Type II</td>
+          <td><span class="pill planned">Planned</span></td>
+          <td>Q1 2027 (6-month observation window)</td>
+        </tr>
+        <tr>
+          <td>GDPR (processor)</td>
+          <td><span class="pill ok">Compliant</span></td>
+          <td>DPA available on request</td>
+        </tr>
+        <tr>
+          <td>ISO/IEC 27001</td>
+          <td><span class="pill planned">Planned</span></td>
+          <td>2027</td>
+        </tr>
+        <tr>
+          <td>HIPAA</td>
+          <td><span class="pill planned">Roadmap</span></td>
+          <td>Enterprise tier, on demand</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:24px;color:var(--muted);font-size:14px;">
+      Questionnaire requests (CAIQ, SIG Lite, custom) — email
+      <a href="mailto:security@fathom.dev">security@fathom.dev</a>.
+    </p>
+  </div>
+</section>
+
+<section id="security">
+  <div class="container">
+    <h2>Security controls</h2>
+    <p class="lead">A sample of the controls tracked in our internal SOC 2 checklist.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="pill ok">Implemented</span>
+        <h3>AES-256-GCM encryption at rest</h3>
+        <p>Database connection secrets, SAML private keys, and API keys are encrypted with AES-256-GCM using a dedicated <code>ENCRYPTION_KEY</code>, never the JWT secret.</p>
+      </div>
+      <div class="card">
+        <span class="pill ok">Implemented</span>
+        <h3>TLS 1.2+ in transit</h3>
+        <p>All customer-database connections use strict TLS by default. Self-signed certs are rejected in production unless explicitly opted-in.</p>
+      </div>
+      <div class="card">
+        <span class="pill ok">Implemented</span>
+        <h3>JWT session auth with audience &amp; issuer</h3>
+        <p>Signed JWTs with short expiry, rotation, and audience/issuer claims. bcrypt for password hashing with per-user salt.</p>
+      </div>
+      <div class="card">
+        <span class="pill ok">Implemented</span>
+        <h3>Custom Semgrep + Gitleaks rules</h3>
+        <p>Every commit is scanned for secret leakage and for our application-specific anti-patterns before it can merge.</p>
+      </div>
+      <div class="card">
+        <span class="pill ok">Implemented</span>
+        <h3>Principle of least privilege</h3>
+        <p>Workspace-scoped RBAC (owner / admin / editor / viewer). Superadmin access is gated by separate controls and audit-logged.</p>
+      </div>
+      <div class="card">
+        <span class="pill progress">Rolling out</span>
+        <h3>SAML 2.0 SSO &amp; SCIM 2.0</h3>
+        <p>Okta, Entra ID, Google Workspace. SCIM provisioning for automated user and group sync. Available in the Business tier.</p>
+      </div>
+      <div class="card">
+        <span class="pill progress">Rolling out</span>
+        <h3>IP allow-listing</h3>
+        <p>Workspace-level CIDR allow-lists enforced before authentication. Available in the Business tier.</p>
+      </div>
+      <div class="card">
+        <span class="pill progress">Rolling out</span>
+        <h3>Immutable audit log export</h3>
+        <p>Export every control-plane event to your S3-compatible bucket or SIEM in near-real-time. Available in the Enterprise tier.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="container">
+    <h2>Privacy</h2>
+    <dl class="kv">
+      <dt>Data minimization</dt>
+      <dd>We collect only what is needed to render the dashboard and alert on your databases. Query text is optional and user-controlled.</dd>
+
+      <dt>Sub-processors</dt>
+      <dd>Neon (Postgres hosting, AWS Singapore), Vercel (edge + serverless), Railway/Fly.io (long-lived backend), AWS (object storage). Full list at <a href="/sub-processors">/sub-processors</a>.</dd>
+
+      <dt>Data residency</dt>
+      <dd>Default region is AWS Singapore. US and EU regions are available on the Business and Enterprise tiers.</dd>
+
+      <dt>Data deletion</dt>
+      <dd>Customer data is deleted within 30 days of account termination. Documented procedure and attestation on request.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="data">
+  <div class="container">
+    <h2>Data we process</h2>
+    <table>
+      <thead><tr><th>Category</th><th>Purpose</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td>Database metrics</td><td>Real-time dashboard + alerting</td><td>48h (free) → 13mo (enterprise)</td></tr>
+        <tr><td>SDK application events</td><td>Correlate app behaviour with DB health</td><td>24h (free) → 90d (enterprise)</td></tr>
+        <tr><td>Query plans</td><td>Performance analysis + diffing</td><td>90 days</td></tr>
+        <tr><td>Audit logs (control plane)</td><td>Security &amp; compliance</td><td>1 year minimum</td></tr>
+        <tr><td>User profile</td><td>Authentication, RBAC</td><td>Lifetime of workspace + 30 days</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="availability">
+  <div class="container">
+    <h2>Availability</h2>
+    <p class="lead">Posted RPO and RTO commitments.</p>
+    <dl class="kv">
+      <dt>RPO — Recovery Point Objective</dt>
+      <dd>≤ 15 minutes (Neon PITR, continuous WAL archival).</dd>
+
+      <dt>RTO — Recovery Time Objective</dt>
+      <dd>≤ 60 minutes from the declared start of a region-wide outage, governed by an IaC-provisioned standby.</dd>
+
+      <dt>Status page</dt>
+      <dd>Real-time at <a href="/status">status.fathom.dev</a>.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <h2>Report a vulnerability</h2>
+    <p>We welcome coordinated disclosure. Email <a href="mailto:security@fathom.dev">security@fathom.dev</a> with the details; please include reproduction steps. We acknowledge within one business day and target initial remediation within 30 days for High and Critical severity findings.</p>
+  </div>
+</section>
+
+<footer>
+  © 2026 FATHOM. Questions? <a href="mailto:security@fathom.dev">security@fathom.dev</a>
+</footer>
+</body>
+</html>

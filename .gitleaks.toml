@@ -1,0 +1,60 @@
+# .gitleaks.toml
+# ───────────────
+# Repository-specific tuning for gitleaks. The default ruleset is kept via
+# `extend.useDefault = true`; this file adds FATHOM-specific patterns and
+# silences known false positives.
+
+title = "FATHOM gitleaks config"
+
+[extend]
+useDefault = true
+
+# ── FATHOM-specific rules ─────────────────────────────────────────────────
+[[rules]]
+id = "fathom-scim-token"
+description = "FATHOM SCIM bearer token"
+# Shape: fathom_scim_<base64url 43 chars> — defined in scim/scimAuth.js.
+regex = '''fathom_scim_[A-Za-z0-9_-]{40,}'''
+tags  = ["fathom", "scim", "secret"]
+
+[[rules]]
+id = "fathom-api-key"
+description = "FATHOM internal API key"
+# Shape: fathom_api_<hex 32+>; emitted by admin API-key rotation script.
+regex = '''fathom_api_[a-f0-9]{32,}'''
+tags  = ["fathom", "api-key", "secret"]
+
+[[rules]]
+id = "fathom-webhook-hmac"
+description = "FATHOM webhook HMAC signing secret"
+# Webhook secrets are ≥ 32 hex chars; emit a distinct id for clarity in alerts.
+regex = '''(?i)webhook[_-]?(secret|signing[_-]?key)\s*[:=]\s*["']?[a-f0-9]{32,}'''
+tags  = ["fathom", "webhook", "secret"]
+
+# ── Allowlist: known safe patterns ───────────────────────────────────────
+[allowlist]
+description = "Paths and patterns exempt from scanning"
+
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+  '''(^|/)build/''',
+  '''(^|/)frontend/dist/''',
+  '''(^|/)coverage/''',
+  # SOC 2 and sample docs reference placeholder tokens; never real ones.
+  '''FATHOM_SOC2_Controls_Checklist\.md$''',
+  '''docs/runbooks/okta-scim\.md$''',
+  '''docs/runbooks/entra-scim\.md$''',
+  # Fixtures used by unit tests — seeded with deterministic fake values.
+  '''tests/fixtures/''',
+]
+
+# Specific literal strings that look like secrets but aren't.
+regexes = [
+  # Documentation placeholder for SCIM token in runbooks.
+  '''fathom_scim_REPLACE_WITH_REAL_TOKEN''',
+  # Genesis hash in audit chain — 64 zeros, not a secret.
+  '''0{64}''',
+  # Example hex string used in unit test fixtures.
+  '''deadbeef(cafe)?([0-9a-f]+)?''',
+]

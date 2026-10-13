@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fathom-python"
+version = "1.0.0"
+description = "FATHOM Python Backend - Analytics, ML, and Data Processing for PostgreSQL Monitoring"
+requires-python = ">=3.11"
+authors = [{name = "FATHOM Team"}]
+license = {text = "MIT"}
+
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn[standard]==0.32.0",
+    "pydantic==2.9.0",
+    "pydantic-settings==2.5.0",
+    "numpy==2.1.0",
+    "pandas==2.2.0",
+    "python-dotenv==1.0.0",
+    "httpx==0.27.0",
+    "python-multipart==0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+fathom-api = "api.main:app"
+
+[tool.setuptools]
+packages = ["api", "tests"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]

@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": ["ES2022"],
+
+        "strict": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowJs": true,
+        "checkJs": false,
+
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+
+        "baseUrl": ".",
+        "paths": {
+            "@fathom/types": ["../shared/types/index.ts"],
+            "@fathom/types/*": ["../shared/types/*"],
+            "@fathom/validators": ["../shared/validators/index.ts"]
+        },
+
+        "noEmit": true,
+        "skipLibCheck": true,
+
+        "types": ["node", "express", "cors", "jsonwebtoken", "pg", "ws", "uuid", "bcryptjs", "nodemailer"]
+    },
+    "include": ["**/*.ts", "**/*.js", "../shared/types/**/*.ts", "../shared/validators/**/*.ts"],
+    "exclude": ["node_modules", "dist", "tests", "db/schema.ts", "drizzle.config.ts"]
+}

@@ -1,0 +1,107 @@
+# Node - Dependencies
+**/node_modules/
+**/dist/
+**/build/
+
+# Environment Variables — NEVER commit real .env files
+.env
+.env.*
+.env.local
+.env.production
+**/.env
+**/.env.*
+**/.env.local
+**/.env.production.*
+frontend/.env*
+backend/.env
+backend/.env.*
+# ...but templates with no real values must stay tracked
+!.env.example
+!**/.env.example
+
+# Migration scripts with hardcoded credentials
+backend/neon-migrate.mjs
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Build output
+**/.next/
+**/out/
+
+# Connection data (contains passwords — do not commit)
+backend/data/connections.json
+
+# Test coverage
+coverage/
+**/coverage/
+
+# Credentials and keys
+**/*.pem
+**/*.key
+**/credentials.json
+**/.aws/
+
+# Source maps in builds (may contain source)
+**/dist/**/*.map
+**/build/**/*.map
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+.pytest_cache/
+.ruff_cache/
+python/.venv/
+python/venv/
+python/.env
+python/.env.*
+
+venv/
+**/venv/
+.venv/
+**/.venv/
+*.backup
+*.bak
+
+# FUSE artifacts
+.fuse_hidden*
+
+# Turbo cache
+.turbo/
+**/.turbo/
+
+# ── Migration artifacts & local credential scripts (NEVER commit) ──
+# Contain live DB passwords / full database dumps from the Neon→Supabase migration.
+backend/scripts/dump-neon.bat
+backend/scripts/restore-supabase.bat
+backend/scripts/verify-migration.bat
+backend/scripts/*.dump
+*.dump
+
+# Migration credential scripts + DB dumps — NEVER commit (added after Neon→Supabase migration)
+backend/scripts/*.bat
+backend/scripts/*.dump
+*.dump
+
+# Local DB backup dump (real user data) — never commit
+supabase_backup_tool_monitoring/

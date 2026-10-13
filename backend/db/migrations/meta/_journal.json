@@ -1,0 +1,146 @@
+{
+    "version": "7",
+    "dialect": "postgresql",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "7",
+            "when": 1774453074741,
+            "tag": "0000_sturdy_sharon_carter",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "7",
+            "when": 1774539474741,
+            "tag": "0001_saml_sso_rbac",
+            "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "7",
+            "when": 1774625874741,
+            "tag": "0002_plugins_marketplace",
+            "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "7",
+            "when": 1774712274741,
+            "tag": "0003_copilot",
+            "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "7",
+            "when": 1774798674741,
+            "tag": "0004_security_hardening",
+            "breakpoints": true
+        },
+        {
+            "idx": 5,
+            "version": "7",
+            "when": 1774885074741,
+            "tag": "0005_notification_destinations",
+            "breakpoints": true
+        },
+        {
+            "idx": 6,
+            "version": "7",
+            "when": 1774971474741,
+            "tag": "0006_otlp_traces",
+            "breakpoints": true
+        },
+        {
+            "idx": 8,
+            "version": "7",
+            "when": 1775144274741,
+            "tag": "0008_query_workbench",
+            "breakpoints": true
+        },
+        {
+            "idx": 10,
+            "version": "7",
+            "when": 1775317074741,
+            "tag": "0010_observability_ingest",
+            "breakpoints": true
+        },
+        {
+            "idx": 11,
+            "version": "7",
+            "when": 1775403474741,
+            "tag": "0011_wait_events",
+            "breakpoints": true
+        },
+        {
+            "idx": 12,
+            "version": "7",
+            "when": 1775489874741,
+            "tag": "0012_clusters",
+            "breakpoints": true
+        },
+        {
+            "idx": 13,
+            "version": "7",
+            "when": 1775576274741,
+            "tag": "0013_workbooks",
+            "breakpoints": true
+        },
+        {
+            "idx": 14,
+            "version": "7",
+            "when": 1775662674741,
+            "tag": "0014_dashboards",
+            "breakpoints": true
+        },
+        {
+            "idx": 15,
+            "version": "7",
+            "when": 1775749074741,
+            "tag": "0015_backups",
+            "breakpoints": true
+        },
+        {
+            "idx": 16,
+            "version": "7",
+            "when": 1775835474741,
+            "tag": "0016_auto_explain",
+            "breakpoints": true
+        },
+        {
+            "idx": 17,
+            "version": "7",
+            "when": 1775921874741,
+            "tag": "0017_alert_rca",
+            "breakpoints": true
+        },
+        {
+            "idx": 18,
+            "version": "7",
+            "when": 1776008274741,
+            "tag": "0018_agent_ingest",
+            "breakpoints": true
+        },
+        {
+            "idx": 19,
+            "version": "7",
+            "when": 1776094674741,
+            "tag": "0019_user_active_connection",
+            "breakpoints": true
+        },
+        {
+            "idx": 20,
+            "version": "7",
+            "when": 1776181074741,
+            "tag": "0020_otel_metrics",
+            "breakpoints": true
+        },
+        {
+            "idx": 21,
+            "version": "7",
+            "when": 1776267474741,
+            "tag": "0021_dba_tasks",
+            "breakpoints": true
+        }
+    ]
+}

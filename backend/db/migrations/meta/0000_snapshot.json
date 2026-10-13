@@ -1,0 +1,1078 @@
+{
+    "id": "18c69fe2-2b18-4d8c-b9a3-73740ac65747",
+    "prevId": "00000000-0000-0000-0000-000000000000",
+    "version": "7",
+    "dialect": "postgresql",
+    "tables": {
+        "pgmonitoringtool.alert_rules": {
+            "name": "alert_rules",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(200)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "''"
+                },
+                "metric": {
+                    "name": "metric",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "condition": {
+                    "name": "condition",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "threshold": {
+                    "name": "threshold",
+                    "type": "real",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "severity": {
+                    "name": "severity",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'warning'"
+                },
+                "enabled": {
+                    "name": "enabled",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "cooldown_minutes": {
+                    "name": "cooldown_minutes",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": 15
+                },
+                "notify_email": {
+                    "name": "notify_email",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": false
+                },
+                "notify_slack": {
+                    "name": "notify_slack",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": false
+                },
+                "connection_id": {
+                    "name": "connection_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_by": {
+                    "name": "created_by",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "alert_rules_created_by_users_id_fk": {
+                    "name": "alert_rules_created_by_users_id_fk",
+                    "tableFrom": "alert_rules",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["created_by"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.alerts": {
+            "name": "alerts",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "type": {
+                    "name": "type",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "severity": {
+                    "name": "severity",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'warning'"
+                },
+                "message": {
+                    "name": "message",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "details": {
+                    "name": "details",
+                    "type": "json",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'{}'::json"
+                },
+                "status": {
+                    "name": "status",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "connection_id": {
+                    "name": "connection_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "acknowledged_by": {
+                    "name": "acknowledged_by",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "acknowledged_at": {
+                    "name": "acknowledged_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "resolved_at": {
+                    "name": "resolved_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "alerts_status_idx": {
+                    "name": "alerts_status_idx",
+                    "columns": [
+                        {
+                            "expression": "status",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "alerts_severity_idx": {
+                    "name": "alerts_severity_idx",
+                    "columns": [
+                        {
+                            "expression": "severity",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "alerts_created_idx": {
+                    "name": "alerts_created_idx",
+                    "columns": [
+                        {
+                            "expression": "created_at",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.user_api_keys": {
+            "name": "user_api_keys",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "key_prefix": {
+                    "name": "key_prefix",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "key_hash": {
+                    "name": "key_hash",
+                    "type": "varchar(64)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "scope": {
+                    "name": "scope",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'read:all'"
+                },
+                "total_calls": {
+                    "name": "total_calls",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "last_used_at": {
+                    "name": "last_used_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "revoked_at": {
+                    "name": "revoked_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "revoked_by": {
+                    "name": "revoked_by",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "apikeys_user_idx": {
+                    "name": "apikeys_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "apikeys_hash_unique": {
+                    "name": "apikeys_hash_unique",
+                    "columns": [
+                        {
+                            "expression": "key_hash",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "user_api_keys_user_id_users_id_fk": {
+                    "name": "user_api_keys_user_id_users_id_fk",
+                    "tableFrom": "user_api_keys",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.audit_log": {
+            "name": "audit_log",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "actor_username": {
+                    "name": "actor_username",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "action": {
+                    "name": "action",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "details": {
+                    "name": "details",
+                    "type": "json",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'{}'::json"
+                },
+                "timestamp": {
+                    "name": "timestamp",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "audit_timestamp_idx": {
+                    "name": "audit_timestamp_idx",
+                    "columns": [
+                        {
+                            "expression": "timestamp",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.fathom_connections": {
+            "name": "fathom_connections",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "host": {
+                    "name": "host",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "''"
+                },
+                "port": {
+                    "name": "port",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 5432
+                },
+                "db_name": {
+                    "name": "db_name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'postgres'"
+                },
+                "username": {
+                    "name": "username",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "''"
+                },
+                "password_encrypted": {
+                    "name": "password_encrypted",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "''"
+                },
+                "ssl": {
+                    "name": "ssl",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "color": {
+                    "name": "color",
+                    "type": "varchar(7)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'#06b6d4'"
+                },
+                "is_default": {
+                    "name": "is_default",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "connection_type": {
+                    "name": "connection_type",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'postgresql'"
+                },
+                "environment": {
+                    "name": "environment",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'production'"
+                },
+                "region": {
+                    "name": "region",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "notes": {
+                    "name": "notes",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "health_status": {
+                    "name": "health_status",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'unknown'"
+                },
+                "last_health_check": {
+                    "name": "last_health_check",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "connections_user_idx": {
+                    "name": "connections_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "fathom_connections_user_id_users_id_fk": {
+                    "name": "fathom_connections_user_id_users_id_fk",
+                    "tableFrom": "fathom_connections",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.feedback": {
+            "name": "feedback",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "rating": {
+                    "name": "rating",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "category": {
+                    "name": "category",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "message": {
+                    "name": "message",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "page": {
+                    "name": "page",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "feedback_user_id_users_id_fk": {
+                    "name": "feedback_user_id_users_id_fk",
+                    "tableFrom": "feedback",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.user_login_activity": {
+            "name": "user_login_activity",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "day": {
+                    "name": "day",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "login_count": {
+                    "name": "login_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                },
+                "failed_count": {
+                    "name": "failed_count",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": 0
+                }
+            },
+            "indexes": {
+                "login_activity_user_day": {
+                    "name": "login_activity_user_day",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "day",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "user_login_activity_user_id_users_id_fk": {
+                    "name": "user_login_activity_user_id_users_id_fk",
+                    "tableFrom": "user_login_activity",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.user_sessions": {
+            "name": "user_sessions",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "uuid",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "default": "gen_random_uuid()"
+                },
+                "user_id": {
+                    "name": "user_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "ip_address": {
+                    "name": "ip_address",
+                    "type": "inet",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "device_label": {
+                    "name": "device_label",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "location": {
+                    "name": "location",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "risk_level": {
+                    "name": "risk_level",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'low'"
+                },
+                "is_active": {
+                    "name": "is_active",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "expires_at": {
+                    "name": "expires_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "revoked_at": {
+                    "name": "revoked_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "revoked_by": {
+                    "name": "revoked_by",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {
+                "sessions_user_idx": {
+                    "name": "sessions_user_idx",
+                    "columns": [
+                        {
+                            "expression": "user_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "sessions_active_idx": {
+                    "name": "sessions_active_idx",
+                    "columns": [
+                        {
+                            "expression": "is_active",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "user_sessions_user_id_users_id_fk": {
+                    "name": "user_sessions_user_id_users_id_fk",
+                    "tableFrom": "user_sessions",
+                    "tableTo": "users",
+                    "schemaTo": "pgmonitoringtool",
+                    "columnsFrom": ["user_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "pgmonitoringtool.users": {
+            "name": "users",
+            "schema": "pgmonitoringtool",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "username": {
+                    "name": "username",
+                    "type": "varchar(50)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "password_hash": {
+                    "name": "password_hash",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "email": {
+                    "name": "email",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "role": {
+                    "name": "role",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'viewer'"
+                },
+                "access_level": {
+                    "name": "access_level",
+                    "type": "varchar(10)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'read'"
+                },
+                "allowed_screens": {
+                    "name": "allowed_screens",
+                    "type": "text[]",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'{}'"
+                },
+                "data_access": {
+                    "name": "data_access",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'internal'"
+                },
+                "department": {
+                    "name": "department",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "location": {
+                    "name": "location",
+                    "type": "varchar(100)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "mfa_enabled": {
+                    "name": "mfa_enabled",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": true
+                },
+                "api_access": {
+                    "name": "api_access",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "varchar(20)",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'active'"
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "last_login_at": {
+                    "name": "last_login_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "deleted_at": {
+                    "name": "deleted_at",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {
+                "users_username_unique": {
+                    "name": "users_username_unique",
+                    "columns": [
+                        {
+                            "expression": "username",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "users_email_unique": {
+                    "name": "users_email_unique",
+                    "columns": [
+                        {
+                            "expression": "email",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                },
+                "users_status_idx": {
+                    "name": "users_status_idx",
+                    "columns": [
+                        {
+                            "expression": "status",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": false,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        }
+    },
+    "enums": {},
+    "schemas": {
+        "pgmonitoringtool": "pgmonitoringtool"
+    },
+    "sequences": {},
+    "roles": {},
+    "policies": {},
+    "views": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
+}

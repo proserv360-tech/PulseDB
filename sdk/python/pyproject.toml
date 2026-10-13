@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fathom-sdk"
+version = "0.1.0"
+description = "Lightweight Python SDK for FATHOM observability"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "FATHOM Team" }]
+requires-python = ">=3.9"
+dependencies = ["httpx>=0.25"]
+keywords = ["observability", "monitoring", "sdk", "fathom"]
+
+[project.urls]
+Homepage = "https://fathom.example.com"
+Documentation = "https://fathom.example.com/docs"
+Repository = "https://github.com/fathom/python-sdk"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.20", "respx>=0.20"]
+fastapi = ["fastapi>=0.100", "starlette>=0.20"]
+django = ["django>=3.2"]
+flask = ["flask>=2.0"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fathom_sdk*"]
+
+[tool.setuptools.package-data]
+fathom_sdk = ["py.typed"]

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FATHOM Cloud — managed database observability</title>
+<meta name="description" content="FATHOM Cloud is the managed tier of the open-source FATHOM platform. Connect Postgres, MySQL, or MongoDB in minutes — we run the metrics store, rollups, alerting, and SOC 2 controls." />
+<link rel="canonical" href="https://fathom.example.com/cloud.html" />
+<style>
+  :root{
+    --bg:#0b1020; --ink:#0f172a; --muted:#475569; --soft:#e2e8f0;
+    --brand:#4f46e5; --brand2:#06b6d4; --card:#ffffff; --border:#e5e7eb;
+    --good:#16a34a; --warn:#d97706;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#f8fafc;line-height:1.55}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  header.nav{background:#ffffff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .brand-mark{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  nav.links{display:flex;gap:20px;font-size:14px;color:var(--muted)}
+  nav.links a{color:var(--muted)}
+  .btn{display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:14px;cursor:pointer}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  .btn.primary:hover{background:#111827}
+  .hero{padding:80px 0 64px;background:radial-gradient(1000px 400px at 50% -200px,rgba(79,70,229,.15),transparent),#ffffff;border-bottom:1px solid var(--border)}
+  .hero h1{font-size:48px;line-height:1.1;margin:0 0 16px;letter-spacing:-.02em}
+  .hero p.lead{font-size:19px;color:var(--muted);max-width:680px;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .pill{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;background:#eef2ff;color:var(--brand);font-size:12px;font-weight:600;margin-bottom:20px}
+  section{padding:64px 0}
+  section h2{font-size:30px;margin:0 0 10px;letter-spacing:-.01em}
+  section p.sub{color:var(--muted);margin:0 0 32px;max-width:680px}
+  .grid{display:grid;gap:20px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:900px){.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+  .card h3{margin:0 0 8px;font-size:17px}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  .row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--border)}
+  .row:last-child{border-bottom:0}
+  .row .k{color:var(--muted);font-size:13px;font-weight:600}
+  .row .v{font-size:15px}
+  .arch{background:#0b1020;color:#cbd5e1;padding:56px 0}
+  .arch h2{color:#fff}
+  .arch .sub{color:#94a3b8}
+  .arch pre{background:#0f172a;border:1px solid #1e293b;color:#e2e8f0;padding:18px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.65}
+  .logos{display:flex;gap:28px;flex-wrap:wrap;color:var(--muted);font-weight:600;font-size:14px;letter-spacing:.02em;text-transform:uppercase;opacity:.7}
+  .quote{background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;font-size:18px;line-height:1.55}
+  .quote cite{display:block;margin-top:14px;color:var(--muted);font-size:14px;font-style:normal}
+  footer{padding:40px 0 60px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);background:#fff}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .badge{border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--muted);background:#fff}
+  .tick::before{content:"✓";color:var(--good);margin-right:8px;font-weight:700}
+  .price{display:flex;align-items:baseline;gap:6px;margin:10px 0}
+  .price strong{font-size:34px;letter-spacing:-.02em}
+  .price span{color:var(--muted);font-size:14px}
+  .faq details{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .faq summary{cursor:pointer;font-weight:600}
+  .faq p{color:var(--muted);margin:8px 0 0}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand"><span class="brand-mark"></span> FATHOM</div>
+    <nav class="links">
+      <a href="/">Product</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/trust-center.html">Trust</a>
+      <a href="https://github.com/fathom-io/fathom">GitHub</a>
+      <a class="btn primary" href="#signup">Start free</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="pill">● FATHOM Cloud — managed tier</span>
+    <h1>Database observability, without the babysitting.</h1>
+    <p class="lead">
+      Connect Postgres, MySQL, or MongoDB and get query-level insight,
+      EXPLAIN-plan diffing, anomaly detection, and runbook-aware alerts
+      in under ten minutes. We run the metrics store, rollups, alert
+      engine, and SOC 2 controls. You get your evenings back.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#signup">Start free — no credit card</a>
+      <a class="btn" href="#how">See architecture</a>
+      <a class="btn" href="/pricing.html">Compare plans</a>
+    </div>
+    <div class="badges" style="margin-top:22px">
+      <span class="badge">Postgres · MySQL · MongoDB</span>
+      <span class="badge">SOC 2 in progress</span>
+      <span class="badge">EU / US regions</span>
+      <span class="badge">99.9% uptime SLO</span>
+      <span class="badge">Open-source core — AGPL</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Why teams run FATHOM Cloud</h2>
+    <p class="sub">Same binary as the self-hosted edition — with the undifferentiated operational work taken care of.</p>
+    <div class="grid g3">
+      <div class="card"><h3>Connect in minutes</h3><p>Drop in a read-only DSN, pick a region, and metrics start flowing. No Helm chart, no VPN, no Prometheus long-term storage to plan.</p></div>
+      <div class="card"><h3>Always on the latest</h3><p>New detectors, schema-aware copilot upgrades, and plan parsers ship without a release hunt. You pin a version only if you want to.</p></div>
+      <div class="card"><h3>Deep, cheap history</h3><p>Rollups from 1s → 1m → 1h are stored automatically. Open a 90-day correlation in under a second without touching your production instance.</p></div>
+      <div class="card"><h3>Alerts that read like English</h3><p><code>avg(p95_latency[5m]) &gt; 200 and sustained(2m)</code> — expressive enough to say what you mean, simple enough to review in a PR.</p></div>
+      <div class="card"><h3>Schema-aware copilot</h3><p>Ask "top 10 tables by bloat last week" and get a safe SELECT, grounded in your live schema, with guardrails that block mutations.</p></div>
+      <div class="card"><h3>Compliance-ready by default</h3><p>SAML SSO, SCIM provisioning, IP allow-lists, immutable audit log with S3 export. Nothing you have to bolt on.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="arch">
+  <div class="wrap">
+    <h2>How it's wired</h2>
+    <p class="sub">The agent runs inside your network. Only aggregated metrics and query fingerprints leave the VPC — never rows, never literals.</p>
+    <div class="grid g2">
+      <div>
+        <pre>
+   ┌──────────────────────┐           ┌──────────────────────┐
+   │   Your VPC / net     │           │    FATHOM Cloud       │
+   │                      │           │   (regional)         │
+   │  ┌────────────────┐  │  mTLS     │                      │
+   │  │ fathom-agent    │──┼──────────▶│  ingest → rollups    │
+   │  │ (read-only DSN)│  │  outbound │  time-series + audit │
+   │  └────────────────┘  │  only     │         │            │
+   │          │           │           │         ▼            │
+   │          ▼           │           │  alert engine, DSL,  │
+   │   Postgres / MySQL / │           │  anomaly detectors   │
+   │   MongoDB clusters   │           │         │            │
+   │                      │           │         ▼            │
+   │                      │           │  UI · API · copilot  │
+   └──────────────────────┘           └──────────────────────┘
+
+  • Query text is fingerprinted (hash of normalized SQL); literals are dropped.
+  • Agent ↔ cloud: mTLS, workspace-scoped cert, rotatable via /governance API.
+  • Outbound only — no inbound ports opened on your side.
+  • EXPLAIN plans are captured on demand; agent refuses ANALYZE on DML.
+        </pre>
+      </div>
+      <div class="card" style="background:#0f172a;border-color:#1e293b;color:#cbd5e1">
+        <h3 style="color:#fff">What we store</h3>
+        <p class="tick" style="color:#cbd5e1">Fingerprinted query IDs + aggregates (p50/p95/p99, counts, lock waits)</p>
+        <p class="tick" style="color:#cbd5e1">Schema metadata (tables, columns, types — no row data)</p>
+        <p class="tick" style="color:#cbd5e1">EXPLAIN plans you explicitly capture (literals redacted)</p>
+        <p class="tick" style="color:#cbd5e1">Immutable audit log of every admin action</p>
+        <h3 style="color:#fff;margin-top:18px">What we don't</h3>
+        <p class="tick" style="color:#cbd5e1">Row contents, PII, query parameters, or connection credentials</p>
+        <p class="tick" style="color:#cbd5e1">Anything from a schema you exclude from the agent config</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Three ways to run FATHOM</h2>
+    <p class="sub">The engine is identical. Pick how much of the plumbing you want to own.</p>
+    <div class="grid g3">
+      <div class="card">
+        <h3>Self-hosted (OSS)</h3>
+        <div class="price"><strong>Free</strong><span>AGPL-3.0</span></div>
+        <p>Run the full stack on your own infrastructure. Docker Compose, Helm, or Terraform.</p>
+        <div class="badges"><span class="badge">All core features</span><span class="badge">Community support</span></div>
+      </div>
+      <div class="card" style="border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)">
+        <h3>FATHOM Cloud</h3>
+        <div class="price"><strong>$19</strong><span>/ user / month</span></div>
+        <p>Managed regional deployment. Zero ops, automatic upgrades, 99.9% SLO. Free tier up to 3 users &amp; 2 databases.</p>
+        <div class="badges"><span class="badge">Managed</span><span class="badge">Business-hours support</span><span class="badge">EU/US</span></div>
+      </div>
+      <div class="card">
+        <h3>Enterprise / BYOC</h3>
+        <div class="price"><strong>Custom</strong><span>annual</span></div>
+        <p>Bring-your-own-cloud — we run the control plane in your AWS/GCP/Azure account. HIPAA BAAs, dedicated region, 24×7.</p>
+        <div class="badges"><span class="badge">BYOC</span><span class="badge">24×7</span><span class="badge">DPA + BAA</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="wrap">
+    <h2>The numbers we commit to</h2>
+    <div class="row"><div class="k">Availability SLO</div><div class="v">99.9% monthly — service-credit remedy governed by the <a href="/trust-center.html">FATHOM Service Level Agreement</a> (the SLA is the controlling document; this page is a summary and subject to legal review).</div></div>
+    <div class="row"><div class="k">RPO / RTO</div><div class="v">≤ 15 minutes recovery point · ≤ 60 minutes recovery time.</div></div>
+    <div class="row"><div class="k">Data residency</div><div class="v">EU (Frankfurt) and US (N. Virginia) regions — pick at workspace creation, never moved.</div></div>
+    <div class="row"><div class="k">Encryption</div><div class="v">TLS 1.3 in transit · AES-256-GCM at rest · per-workspace KMS envelope keys.</div></div>
+    <div class="row"><div class="k">Compliance</div><div class="v">SOC 2 Type II (in progress), GDPR DPA on request, HIPAA BAA on Enterprise.</div></div>
+    <div class="row"><div class="k">Egress</div><div class="v">Outbound-only from your network — no inbound rules, no VPN peering required.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Trusted by teams who can't afford downtime</h2>
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="quote">“We replaced a $3k/mo Datadog DBM line item with FATHOM Cloud and got faster EXPLAIN-plan diffing as a bonus. The copilot catches at least one index miss per sprint.”
+        <cite>— VP Engineering, fintech (Series B, 80 engineers)</cite></div>
+      <div class="quote">“The alert DSL is what finally let us move alert rules into code review. Fewer pages at 3am, more fixes landed during work hours.”
+        <cite>— Principal SRE, SaaS platform</cite></div>
+    </div>
+    <div class="logos">ACME · NORTHWIND · INITECH · CONTOSO · UMBRELLA · STARK</div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <h2>FAQ</h2>
+    <details><summary>Does the agent need to see my data?</summary>
+      <p>No. The agent reads <code>pg_stat_statements</code> / <code>performance_schema</code> / <code>currentOp</code> — aggregate counters and normalized query shapes, never row contents. You can additionally exclude schemas or databases in the agent config.</p></details>
+    <details><summary>What happens if FATHOM Cloud is down?</summary>
+      <p>Your database keeps running. The agent buffers metrics for up to 60 minutes and replays once the service returns. Alert rules fail-safe to <em>not-fire</em>, and your PagerDuty / Slack integrations are independent of FATHOM's UI.</p></details>
+    <details><summary>Can I self-host and use Cloud at the same time?</summary>
+      <p>Yes. The OSS edition and FATHOM Cloud use the same config format. Many teams self-host in staging and run Cloud in production, or vice-versa. You can migrate workspaces with a single <code>fathom workspace export</code> → <code>import</code>.</p></details>
+    <details><summary>How does billing work?</summary>
+      <p>Monthly or annual, per active user. Data ingest and retention are included within the plan's stated limits. See <a href="/pricing.html">the pricing page</a> for details.</p></details>
+    <details><summary>Can I bring my own cloud account?</summary>
+      <p>On the Enterprise plan, yes. We ship a Terraform module that provisions the control plane in your AWS / GCP / Azure account; we retain operator access only via short-lived tokens with a full audit trail.</p></details>
+  </div>
+</section>
+
+<section id="signup" style="background:linear-gradient(135deg,#4f46e5,#06b6d4);color:#fff">
+  <div class="wrap" style="text-align:center">
+    <h2 style="color:#fff">Start in under ten minutes</h2>
+    <p class="sub" style="color:rgba(255,255,255,.85);margin-left:auto;margin-right:auto">Free tier is real — 3 users, 2 databases, 14-day retention. No card required.</p>
+    <div class="cta" style="justify-content:center">
+      <a class="btn primary" style="background:#111827" href="https://app.fathom.example.com/signup">Create a workspace →</a>
+      <a class="btn" href="https://cal.com/fathom/demo">Book a demo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px">
+    <div>© 2026 FATHOM, Inc. · <a href="/trust-center.html">Trust</a> · <a href="/pricing.html">Pricing</a> · <a href="https://github.com/fathom-io/fathom">GitHub</a></div>
+    <div>Built on the open-source <a href="https://github.com/fathom-io/fathom">fathom</a> engine (AGPL-3.0).</div>
+  </div>
+</footer>
+</body>
+</html>

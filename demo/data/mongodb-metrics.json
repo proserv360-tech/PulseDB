@@ -1,0 +1,199 @@
+{
+    "snapshot_time": "2026-03-26T14:30:00Z",
+    "server": {
+        "version": "MongoDB 7.0.8",
+        "uptime_days": 62,
+        "host": "mongo-prod-01.fathom.demo",
+        "port": 27017,
+        "storage_engine": "WiredTiger"
+    },
+    "health": {
+        "score": 92,
+        "connections": 184,
+        "ops_per_sec": 8420,
+        "avg_latency_ms": 1.8,
+        "replication_lag_s": 0.3
+    },
+    "system_resources": {
+        "cpu_usage_pct": 42,
+        "memory_usage_pct": 74,
+        "disk_iops": 4200,
+        "cache_fill_ratio_pct": 86,
+        "cpu_history": [32, 35, 38, 40, 42, 45, 44, 42, 40, 38, 36, 34, 32, 34, 36, 38, 40, 42, 45, 44, 42, 40, 38, 36],
+        "memory_history": [
+            68, 70, 71, 72, 74, 76, 75, 74, 73, 72, 71, 70, 68, 70, 71, 72, 74, 76, 75, 74, 73, 72, 71, 70
+        ]
+    },
+    "operations": {
+        "ops_per_sec": 8420,
+        "read_ops_per_sec": 5200,
+        "write_ops_per_sec": 2400,
+        "command_ops_per_sec": 820,
+        "ops_history": [
+            6500, 7000, 7500, 8000, 8420, 8800, 8600, 8200, 7800, 7400, 7000, 6500, 6200, 6500, 7000, 7500, 8000, 8420,
+            8800, 8600, 8200, 7800, 7400, 7000
+        ],
+        "read_history": [
+            4000, 4300, 4600, 4900, 5200, 5500, 5400, 5100, 4800, 4500, 4300, 4000, 3800, 4000, 4300, 4600, 4900, 5200,
+            5500, 5400, 5100, 4800, 4500, 4300
+        ],
+        "write_history": [
+            1800, 2000, 2100, 2300, 2400, 2500, 2450, 2350, 2250, 2150, 2000, 1800, 1700, 1800, 2000, 2100, 2300, 2400,
+            2500, 2450, 2350, 2250, 2150, 2000
+        ]
+    },
+    "latency": {
+        "p50_ms": 0.8,
+        "p95_ms": 5.2,
+        "p99_ms": 18.4,
+        "active_operations": 24,
+        "p50_history": [
+            0.6, 0.7, 0.8, 0.9, 1.0, 0.9, 0.8, 0.7, 0.6, 0.7, 0.8, 0.9, 1.0, 0.9, 0.8, 0.7, 0.6, 0.7, 0.8, 0.9, 1.0,
+            0.9, 0.8, 0.7
+        ],
+        "p95_history": [
+            4.0, 4.5, 5.0, 5.2, 5.5, 5.8, 5.5, 5.2, 4.8, 4.5, 5.0, 5.2, 5.5, 5.8, 5.5, 5.2, 4.8, 4.5, 5.0, 5.2, 5.5,
+            5.8, 5.5, 5.2
+        ],
+        "p99_history": [
+            14.0, 16.0, 18.0, 18.4, 20.0, 22.0, 20.0, 18.4, 16.0, 15.0, 16.0, 18.0, 18.4, 20.0, 22.0, 20.0, 18.4, 16.0,
+            15.0, 16.0, 18.0, 18.4, 20.0, 22.0
+        ]
+    },
+    "slow_queries": {
+        "count": 8,
+        "avg_time_s": 4.2,
+        "slowest_s": 12.8,
+        "top_slow": [
+            {
+                "namespace": "ecommerce.orders",
+                "op": "find",
+                "duration_ms": 12800,
+                "docs_scanned": 4500000,
+                "query": "{ status: 'pending', created_at: { $lt: ISODate('2026-03-19') } }"
+            },
+            {
+                "namespace": "analytics.events",
+                "op": "aggregate",
+                "duration_ms": 8400,
+                "docs_scanned": 12000000,
+                "query": "[{ $match: { type: 'pageview' } }, { $group: { _id: '$user_id', count: { $sum: 1 } } }, { $sort: { count: -1 } }]"
+            },
+            {
+                "namespace": "ecommerce.products",
+                "op": "find",
+                "duration_ms": 3200,
+                "docs_scanned": 800000,
+                "query": "{ $text: { $search: 'organic premium' }, price: { $gte: 10, $lte: 100 } }"
+            },
+            {
+                "namespace": "social.posts",
+                "op": "aggregate",
+                "duration_ms": 2800,
+                "docs_scanned": 2000000,
+                "query": "[{ $lookup: { from: 'users', ... } }, { $unwind: '$author' }, { $sort: { likes: -1 } }]"
+            }
+        ]
+    },
+    "locks": {
+        "global_queue_depth": 2,
+        "db_queue_depth": 1,
+        "global_tickets_used": 42,
+        "global_tickets_total": 128,
+        "global_lock_pct": 0.8
+    },
+    "wiredtiger": {
+        "cache_size_mb": 8192,
+        "cache_filled_mb": 7045,
+        "cache_hit_ratio_pct": 99.2,
+        "eviction_rate_per_sec": 45,
+        "dirty_pages_pct": 3.2,
+        "checkpoint_duration_s": 2.4,
+        "journal_commits_per_sec": 180,
+        "compression_ratio": 3.2,
+        "cache_history": [
+            80, 82, 84, 85, 86, 88, 87, 86, 85, 84, 83, 82, 80, 82, 84, 85, 86, 88, 87, 86, 85, 84, 83, 82
+        ]
+    },
+    "replication": {
+        "set_name": "rs-prod",
+        "members": [
+            { "name": "mongo-prod-01:27017", "state": "PRIMARY", "uptime_days": 62, "lag_ms": 0, "oplog_gb": 12 },
+            { "name": "mongo-prod-02:27017", "state": "SECONDARY", "uptime_days": 62, "lag_ms": 300, "oplog_gb": 12 },
+            { "name": "mongo-prod-03:27017", "state": "SECONDARY", "uptime_days": 60, "lag_ms": 450, "oplog_gb": 12 }
+        ],
+        "oplog_size_mb": 12288,
+        "oplog_window_hours": 72,
+        "sync_source": "mongo-prod-01:27017"
+    },
+    "sharding": {
+        "shard_count": 3,
+        "chunk_count": 2048,
+        "balanced": true,
+        "avg_chunk_size_mb": 64,
+        "shards": [
+            { "name": "shard-01", "databases": 3, "collections": 42, "documents": 85000000, "size_gb": 120 },
+            { "name": "shard-02", "databases": 3, "collections": 42, "documents": 82000000, "size_gb": 115 },
+            { "name": "shard-03", "databases": 3, "collections": 42, "documents": 83000000, "size_gb": 118 }
+        ],
+        "chunks_migrating": 0,
+        "migration_rate_hr": 2,
+        "failed_migrations": 0
+    },
+    "storage": {
+        "database_count": 6,
+        "total_size_gb": 353,
+        "avg_db_size_mb": 58833,
+        "largest_db_gb": 180,
+        "collection_count": 126,
+        "avg_doc_size_bytes": 1240,
+        "total_documents": 250000000,
+        "growth_rate_gb_week": 8.5,
+        "databases": [
+            { "name": "ecommerce", "size_gb": 180, "collections": 42, "documents": 120000000 },
+            { "name": "analytics", "size_gb": 95, "collections": 28, "documents": 80000000 },
+            { "name": "social", "size_gb": 45, "collections": 22, "documents": 30000000 },
+            { "name": "logs", "size_gb": 25, "collections": 18, "documents": 15000000 },
+            { "name": "config", "size_gb": 5, "collections": 12, "documents": 4500000 },
+            { "name": "admin", "size_gb": 3, "collections": 4, "documents": 500000 }
+        ],
+        "index_count": 380,
+        "unused_indexes": 15,
+        "bloated_indexes": 4,
+        "index_efficiency_pct": 97.8,
+        "data_file_size_gb": 280
+    },
+    "data_tools": {
+        "docs_edited": 45000,
+        "failed_updates": 12,
+        "validation_errors": 28,
+        "bulk_ops_hr": 120,
+        "pipeline_count": 85,
+        "avg_stages": 4.2,
+        "aggregation_cache_hit_pct": 78,
+        "aggregation_time_s": 1.8,
+        "imports_day": 5,
+        "exports_day": 12,
+        "transfer_gb": 8.4,
+        "transfer_rate_mb_s": 120,
+        "schema_versions": 14,
+        "differences_found": 3,
+        "compatibility_pct": 98.5,
+        "queries_generated_day": 340,
+        "conversion_rate_pct": 92,
+        "accuracy_pct": 95.8
+    },
+    "alerts": {
+        "active": 2,
+        "total_rules": 45,
+        "triggered_today": 5,
+        "alerts": [
+            {
+                "severity": "warning",
+                "message": "Replication lag exceeded 500ms on mongo-prod-03",
+                "time": "2026-03-26T13:45:00Z"
+            },
+            { "severity": "info", "message": "Cache utilization above 85% threshold", "time": "2026-03-26T14:10:00Z" }
+        ]
+    }
+}
