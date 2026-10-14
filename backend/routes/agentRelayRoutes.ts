@@ -34,7 +34,10 @@ export default function agentRelayRoutes(pool, authenticateSdkKey, log) {
             const app = await agentApp(req, res);
             if (!app) return;
             const targets = req.body?.targets;
-            if (!Array.isArray(targets) || targets.length === 0 || targets.length > 50) {
+            // A relaying agent may have no targets of its own (e.g. this Windows account
+            // is refused): it then only connects connections added in PulseDB.
+            const relays = Array.isArray(req.body?.agent?.capabilities) && req.body.agent.capabilities.includes('relay');
+            if (!Array.isArray(targets) || (targets.length === 0 && !relays) || targets.length > 50) {
                 return res.status(400).json({ error: 'targets must be a non-empty array (max 50)' });
             }
             // A downloaded agent package ("Connect another PC") is named after the

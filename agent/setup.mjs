@@ -16,6 +16,7 @@
  */
 import { execFileSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +37,32 @@ const fail = (msg) => {
 };
 
 // ── 1. discover local SQL Server instances and databases ───────────────────
+/**
+ * mssql's msnodesqlv8 wrapper turns ODBC errors into "[object Object]" (the
+ * driver hands back a plain object, not an Error). Ask the driver directly for
+ * the real message, e.g. "Login failed for user 'SERVER\Administrator'".
+ */
+async function odbcFailure(e, connectionString) {
+    const msg = e?.originalError?.message || e?.message;
+    if (typeof msg === 'string' && msg && msg !== '[object Object]') return msg;
+    try {
+        const native = createRequire(import.meta.url)('msnodesqlv8');
+        const err = await new Promise((resolve) =>
+            native.open(connectionString, (error, conn) => {
+                if (conn) conn.close(() => {});
+                resolve(error);
+            }),
+        );
+        if (!err) return 'the connection failed, then succeeded on retry';
+        const parts = (err.details?.length ? err.details : [err])
+            .map((d) => String(d?.message || '').replace(/^(\[[^\]]*\])+/, '').trim())
+            .filter((m) => m && !/Invalid connection string attribute/i.test(m));
+        return [...new Set(parts)].join(' | ') || JSON.stringify(err);
+    } catch {
+        return typeof msg === 'string' && msg ? msg : String(e);
+    }
+}
+
 function installedInstances() {
     try {
         const out = execFileSync('reg', ['query', 'HKLM\\SOFTWARE\\Microsoft\\Microsoft SQL Server\\Instance Names\\SQL'], {
@@ -56,9 +83,8 @@ async function listDatabases(v8, instance) {
     const server = instance === 'MSSQLSERVER' ? 'localhost' : `localhost\\${instance}`;
     let lastError;
     for (const driver of ['ODBC Driver 18 for SQL Server', 'ODBC Driver 17 for SQL Server']) {
-        const p = new v8.ConnectionPool({
-            connectionString: `Driver={${driver}};Server=${server};Database=master;Trusted_Connection=yes;Encrypt=no;TrustServerCertificate=yes;`,
-        });
+        const connectionString = `Driver={${driver}};Server=${server};Database=master;Trusted_Connection=yes;Encrypt=no;TrustServerCertificate=yes;`;
+        const p = new v8.ConnectionPool({ connectionString });
         try {
             await p.connect();
             const r = await p.request().query(
@@ -69,7 +95,7 @@ async function listDatabases(v8, instance) {
             await p.close();
             return { server, databases: r.recordset.map((x) => x.name) };
         } catch (e) {
-            lastError = e.originalError?.message || e.message;
+            lastError = await odbcFailure(e, connectionString);
             await p.close().catch(() => {});
             if (!/IM002|data source name not found|not found/i.test(lastError)) break;
         }
@@ -210,7 +236,15 @@ for (const instance of instances) {
 }
 // Keep hand-written targets; replace the ones setup found last time.
 config.targets = [...(config.targets || []).filter((t) => !t.auto), ...discovered];
-if (!config.targets.length) fail('No SQL Server databases found to monitor.');
+if (!config.targets.length) {
+    if (config.relayConnections === false) fail('No SQL Server databases found to monitor.');
+    // Fine: SQL Server may refuse this Windows account (Sage instances, for one,
+    // use a SQL login). Connections added in PulseDB with a SQL login are relayed.
+    console.log(
+        '    No databases reachable with Windows sign-in. That is fine: the agent still runs and\n' +
+            '    connects the connections you add in PulseDB with a SQL login (for example "sa").',
+    );
+}
 fs.writeFileSync(configPath, JSON.stringify(config, null, 4) + '\n');
 
 step(`Agent key for ${config.pulsedbUrl}`);
@@ -232,4 +266,9 @@ const reg = await waitForRegistration(since);
 if (reg.error) fail(`The agent started but did not register: ${reg.error}`);
 console.log(`\nDone. PulseDB Agent is running and registered with ${config.pulsedbUrl}:`);
 for (const c of reg.connections || []) console.log(`    ${c}`);
-console.log('\nOpen PulseDB -> Connections: these databases are listed with a VIA AGENT badge.');
+if (config.targets.length) console.log('\nOpen PulseDB -> Connections: these databases are listed with a VIA AGENT badge.');
+else
+    console.log(
+        '\nIn PulseDB add (or Test) a SQL Server connection to this server with its SQL login\n' +
+            '(for example host ' + os.hostname() + '\\<instance>, user sa): it is connected through this agent.',
+    );

@@ -16,13 +16,14 @@
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { assertReadOnly } from './readOnlyGuard.mjs';
 
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 // ── config ──────────────────────────────────────────────────────────────────
@@ -47,7 +48,10 @@ function loadConfig() {
     cfg.agentKey = process.env.PULSEDB_AGENT_KEY || cfg.agentKey;
     if (!/^https?:\/\//.test(cfg.pulsedbUrl)) throw new Error('pulsedbUrl must be the PulseDB address, e.g. https://pulsedb.example.com');
     if (!cfg.agentKey || /CHANGE-ME/.test(cfg.agentKey)) throw new Error('agentKey is required (create an SDK application in PulseDB and paste its key)');
-    if (!Array.isArray(cfg.targets) || !cfg.targets.length) throw new Error('targets must list at least one database');
+    if (!Array.isArray(cfg.targets)) cfg.targets = [];
+    // No targets is fine while relaying: the agent then only connects the
+    // connections added in PulseDB (with their own SQL login).
+    if (!cfg.targets.length && cfg.relayConnections === false) throw new Error('targets must list at least one database');
     for (const t of cfg.targets) {
         if (!t.name) throw new Error('every target needs a "name"');
         t.engine = String(t.engine || 'mssql').toLowerCase();
@@ -136,6 +140,32 @@ function sqlServerTarget(host, port) {
 }
 
 /**
+ * mssql's msnodesqlv8 wrapper turns ODBC errors into "[object Object]" (the
+ * driver hands back a plain object, not an Error). Ask the driver directly for
+ * the real message, e.g. "Login failed for user 'SERVER\Administrator'".
+ */
+async function odbcFailure(e, connectionString) {
+    const msg = e?.originalError?.message || e?.message;
+    if (typeof msg === 'string' && msg && msg !== '[object Object]') return msg;
+    try {
+        const native = createRequire(import.meta.url)('msnodesqlv8');
+        const err = await new Promise((resolve) =>
+            native.open(connectionString, (error, conn) => {
+                if (conn) conn.close(() => {});
+                resolve(error);
+            }),
+        );
+        if (!err) return 'the connection failed, then succeeded on retry';
+        const parts = (err.details?.length ? err.details : [err])
+            .map((d) => String(d?.message || '').replace(/^(\[[^\]]*\])+/, '').trim())
+            .filter((m) => m && !/Invalid connection string attribute/i.test(m));
+        return [...new Set(parts)].join(' | ') || JSON.stringify(err);
+    } catch {
+        return typeof msg === 'string' && msg ? msg : String(e);
+    }
+}
+
+/**
  * Windows authentication ("windowsAuth": true): connect as the Windows account
  * the agent runs under, through the ODBC driver (msnodesqlv8) — no SQL login or
  * password in the config. Tries ODBC Driver 18, then 17, unless "odbcDriver" is set.
@@ -159,10 +189,11 @@ async function windowsAuthPool(target) {
     const drivers = target.odbcDriver ? [target.odbcDriver] : ['ODBC Driver 18 for SQL Server', 'ODBC Driver 17 for SQL Server'];
     let lastError;
     for (const driver of drivers) {
+        const connectionString =
+            `Driver={${driver}};Server=${server};Database=${target.database || 'master'};Trusted_Connection=yes;` +
+            `Encrypt=${target.encrypt === true ? 'yes' : 'no'};TrustServerCertificate=${target.trustServerCertificate !== false ? 'yes' : 'no'};`;
         const p = new v8.ConnectionPool({
-            connectionString:
-                `Driver={${driver}};Server=${server};Database=${target.database || 'master'};Trusted_Connection=yes;` +
-                `Encrypt=${target.encrypt === true ? 'yes' : 'no'};TrustServerCertificate=${target.trustServerCertificate !== false ? 'yes' : 'no'};`,
+            connectionString,
             pool: { max: 4, min: 0, idleTimeoutMillis: 60_000 },
             requestTimeout: Number(target.requestTimeoutMs) || 25_000,
         });
@@ -170,8 +201,7 @@ async function windowsAuthPool(target) {
             await p.connect();
             return p;
         } catch (e) {
-            // msnodesqlv8 errors carry the ODBC message in originalError.
-            const msg = e.originalError?.message || e.message;
+            const msg = await odbcFailure(e, connectionString);
             lastError = new Error(`Windows authentication via ${driver} failed: ${msg}`);
             if (!/IM002|data source name not found|not found/i.test(msg)) break; // driver present, real failure
         }

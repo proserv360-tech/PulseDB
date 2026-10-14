@@ -29,7 +29,7 @@ winget install -e --id Microsoft.msodbcsql.18 --silent --accept-source-agreement
 rem -- agent dependencies ----------------------------------------------------
 if not exist "node_modules\msnodesqlv8" (
     echo ==^> Installing agent drivers
-    call "%NPM%" ci --omit=dev --no-audit --no-fund || (pause & exit /b 1)
+    call "%NPM%" ci --omit=dev --no-audit --no-fund --ignore-scripts || (pause & exit /b 1)
 )
 
 "%NODE%" setup.mjs %*
