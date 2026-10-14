@@ -110,3 +110,6 @@ supabase_backup_tool_monitoring/
 sdk/go/examples/*/gin
 sdk/go/examples/*/nethttp
 *-go-tmp-umask
+
+# Claude Code per-machine settings
+.claude/settings.local.json
