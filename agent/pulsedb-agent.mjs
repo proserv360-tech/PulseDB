@@ -22,7 +22,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { assertReadOnly } from './readOnlyGuard.mjs';
 
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 // ── config ──────────────────────────────────────────────────────────────────
@@ -100,9 +100,21 @@ async function register() {
         port: t.port || 1433,
         database: t.database || '',
     }));
-    const r = await api('/agent/register', { agent: { version: VERSION, hostname: os.hostname(), capabilities: cfg.relayConnections === false ? ['batch'] : ['batch', 'relay'] }, targets });
+    // setup.mjs leaves this flag when the user (re)runs setup: databases they had
+    // deleted in PulseDB come back once. Periodic re-registration keeps them deleted.
+    const restoreFlag = path.join(here, 'restore-targets.flag');
+    const restoreRemoved = fs.existsSync(restoreFlag);
+    const r = await api('/agent/register', {
+        agent: { version: VERSION, hostname: os.hostname(), capabilities: cfg.relayConnections === false ? ['batch'] : ['batch', 'relay'] },
+        targets,
+        restoreRemoved,
+    });
+    if (restoreRemoved) fs.rmSync(restoreFlag, { force: true });
     log('info', `registered with ${cfg.pulsedbUrl} as agent "${r.agent}"`, {
-        connections: (r.registered || []).map((x) => `${x.target} -> connection #${x.connectionId}`),
+        connections: (r.registered || [])
+            .filter((x) => x.connectionId)
+            .map((x) => `${x.target} -> connection #${x.connectionId}`),
+        removedInPulseDB: (r.registered || []).filter((x) => x.skipped).map((x) => x.target),
     });
 }
 

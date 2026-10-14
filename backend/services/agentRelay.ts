@@ -178,14 +178,40 @@ export async function purgeStaleJobs() {
  * connection row stores no password.
  * @returns {Promise<Array<{ target: string, connectionId: number, created: boolean }>>}
  */
+/**
+ * A user deleted a connection the agent registered: remember the target so the
+ * agent's periodic re-registration does not bring it back. Running the agent's
+ * setup again clears the list (registration with restoreRemoved).
+ */
+export async function rememberRemovedTarget(appId, target) {
+    if (!pool || !appId || !target) return;
+    await pool.query(
+        `UPDATE ${S}.sdk_applications
+            SET config = jsonb_set(config, '{removedTargets}',
+                    (SELECT to_jsonb(array(SELECT DISTINCT x FROM unnest(
+                         array(SELECT jsonb_array_elements_text(COALESCE(config->'removedTargets', '[]'::jsonb))) || $2::text
+                     ) AS x))))
+          WHERE id = $1`,
+        [appId, String(target).slice(0, 100)],
+    );
+}
+
+const configOf = (app) => (typeof app.config === 'string' ? JSON.parse(app.config || '{}') : app.config || {});
+
 export async function registerAgentTargets(app, targets) {
     if (!app.created_by)
         throw Object.assign(new Error('This agent key has no owner; create it from the PulseDB UI.'), { status: 400 });
+    const removed = new Set(configOf(app).removedTargets || []);
     const out = [];
     for (const t of targets) {
         const target = String(t.name || '')
             .trim()
             .slice(0, 100);
+        if (removed.has(target)) {
+            // Deleted by the user: keep it deleted (setup.cmd restores it).
+            out.push({ target, connectionId: null, skipped: 'removed in PulseDB' });
+            continue;
+        }
         const engine = String(t.engine || '').toLowerCase();
         if (!target) throw Object.assign(new Error('Every target needs a name.'), { status: 400 });
         if (!AGENT_ENGINES.has(engine)) {

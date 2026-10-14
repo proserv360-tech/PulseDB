@@ -223,6 +223,8 @@ if (stopped) console.log(`    Stopped ${stopped} running agent process(es).`);
 installAutostart();
 console.log(`    Autostart: ${path.join(startupFolder(), 'PulseDB Agent.vbs')}`);
 if (process.argv.includes('--no-start')) process.exit(0);
+// Running setup is the deliberate way to bring back databases deleted in PulseDB.
+fs.writeFileSync(path.join(here, 'restore-targets.flag'), new Date().toISOString());
 const since = fs.existsSync(logFile) ? fs.statSync(logFile).size : 0;
 spawn('wscript.exe', [path.join(here, 'start-agent-hidden.vbs')], { detached: true, stdio: 'ignore' }).unref();
 

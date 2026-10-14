@@ -65,6 +65,12 @@ export default function agentRelayRoutes(pool, authenticateSdkKey, log) {
                   WHERE id = $1`,
                 [app.id, JSON.stringify(caps), String(req.body?.agent?.version || '').slice(0, 20), hostname],
             );
+            // setup.cmd was run: bring back databases the user had deleted in PulseDB.
+            if (req.body?.restoreRemoved === true) {
+                await pool.query(`UPDATE pgmonitoringtool.sdk_applications SET config = config - 'removedTargets' WHERE id = $1`, [app.id]);
+                if (app.config && typeof app.config === 'object') delete app.config.removedTargets;
+                else app.config = {};
+            }
             const registered = await registerAgentTargets(app, targets);
             await syncConnectionsCache();
             log('INFO', 'PulseDB Agent registered', {

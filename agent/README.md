@@ -48,6 +48,10 @@ login to the agent, which dials it (read-only). Turn this off with
 Run `setup.cmd` again any time (new databases, new instance): it refreshes the
 list and keeps the same key and connections. `uninstall-agent.cmd` removes it.
 
+Deleting one of these connections in PulseDB is remembered: the agent's periodic
+re-registration (every 10 minutes and at sign-in) does not bring it back. Running
+`setup.cmd` again restores the deleted ones.
+
 ## Manual setup (Windows)
 
 1. **Create an agent key in PulseDB.** Sign in as an admin, open **Observability →

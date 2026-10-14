@@ -120,3 +120,4 @@ agent/node_modules/
 agent/run-agent.cmd
 agent/start-agent-hidden.vbs
 agent/logs/
+agent/restore-targets.flag

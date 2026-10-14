@@ -13,7 +13,7 @@ import {
     setUserActiveSchema,
 } from '../../core/activeSelection.js';
 import { buildSslOption, pool } from '../../core/adminPool.js';
-import { findAgentRoute } from '../../services/agentRelay.js';
+import { findAgentRoute, rememberRemovedTarget } from '../../services/agentRelay.js';
 import { createAgentRelayAdapter } from '../../services/dbAdapters/agentRelayAdapter.js';
 import { authenticate } from '../../core/auth.js';
 import { IS_PROD } from '../../core/config.js';
@@ -697,6 +697,12 @@ export default function registerConnectionRoutes(app) {
             }
 
             await dbDeleteConnection(id, req.user.id);
+            // Registered by a PulseDB Agent: keep it deleted when the agent re-registers.
+            if (c.agentAppId && c.agentTarget) {
+                await rememberRemovedTarget(c.agentAppId, c.agentTarget).catch((e) =>
+                    log('WARN', 'Could not remember removed agent target', { error: e.message }),
+                );
+            }
 
             // If it was the default, promote the next connection for this user
             if (c.isDefault) {
