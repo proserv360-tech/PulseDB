@@ -113,3 +113,7 @@ sdk/go/examples/*/nethttp
 
 # Claude Code per-machine settings
 .claude/settings.local.json
+
+# PulseDB Agent local config (holds database credentials)
+agent/agent.config.json
+agent/node_modules/

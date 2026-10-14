@@ -9,14 +9,13 @@ import { pool } from '../core/adminPool.js';
 import { alerts, emailService } from '../core/alerting.js';
 import { authenticate } from '../core/auth.js';
 import { CONFIG } from '../core/config.js';
-import { getMongoClient, getPool, reqPool, resolveConnection, resolvePoolConfig } from '../core/connectionPools.js';
+import { getMongoClient, getPool, openAdapter, reqPool, resolveConnection } from '../core/connectionPools.js';
 import { getConnections } from '../core/connectionStore.js';
 import { cache, cached } from '../core/responseCache.js';
 import { validateExplainQuery } from '../core/sqlGuard.js';
 import { requireRole, requireScreen } from '../middleware/authenticate.js';
 import { ipAllowListMiddleware } from '../middleware/ipAllowList.js';
 import { tenantIsolation } from '../middleware/tenantIsolation.js';
-import { getAdapter as getDbAdapter } from '../services/dbAdapters/index.js';
 import { log } from '../services/logger.js';
 import { renderMetrics as renderPromMetrics } from '../services/promScrapeService.js';
 import { authenticateSdkKey as sdkKeyAuth } from '../services/sdkService.js';
@@ -30,6 +29,7 @@ import alertDslRoutes from './alertDslRoutes.js';
 import alertsManagementRoutes from './alertsManagementRoutes.js';
 import anomalyRoutes from './anomalyRoutes.js';
 import auditRoutes from './auditRoutes.js';
+import agentRelayRoutes from './agentRelayRoutes.js';
 import autoExplainRoutes from './autoExplainRoutes.js';
 import backupRoutes from './backupRoutes.js';
 import bloatRoutes from './bloatRoutes.js';
@@ -184,6 +184,8 @@ export default function mountFeatureRoutes(app) {
         //    without a user JWT; falls back to authenticate() when unset.
         // auto_explain ingest + Log Insights (recent, summary, plan regressions)
         app.use(prefix, autoExplainRoutes(pool, authenticate, sdkKeyAuth));
+        // PulseDB Agent relay: lets this server reach databases only an agent can (x-sdk-key auth).
+        app.use(prefix, agentRelayRoutes(pool, sdkKeyAuth, log));
         //    Synthetic HTTP/TCP checks — CRUD + on-demand run.
         //    BYOK / KMS admin endpoints — provision, rotate, status.
         //    Schema ERD graph for the interactive viewer.
@@ -234,29 +236,7 @@ export default function mountFeatureRoutes(app) {
                 authenticate,
                 requireRole,
                 async (req, connectionId) => resolveConnection(connectionId, req.user?.id),
-                async (connection) => {
-                    // Returns a CONNECTED adapter instance for the given connection.
-                    // For the 9 Phase-5 engines the factory handles driver resolution;
-                    // for mysql/mongo/postgres we just reuse the existing pools via
-                    // getPool / getMongoClient — callers branch on dbType.
-                    const cfg = await resolvePoolConfig(connection);
-                    const adapter = getDbAdapter(connection.dbType, {
-                        host: cfg.host,
-                        port: cfg.port,
-                        database: cfg.database,
-                        user: cfg.user,
-                        username: cfg.user,
-                        password: cfg.password,
-                        ssl: cfg.ssl,
-                        account: cfg.host, // Snowflake alias
-                        projectId: cfg.host, // BigQuery alias
-                        region: cfg.host, // DynamoDB alias
-                        keyspace: cfg.database,
-                        contactPoints: cfg.host ? [cfg.host] : undefined,
-                    });
-                    await adapter.connect();
-                    return adapter;
-                },
+                openAdapter,
                 // Active-schema getter: lets the console apply the user's schema
                 // selection (Snowflake USE SCHEMA) before running their query.
                 (req, connectionId) => getUserActiveSchema(req.user?.id, parseInt(connectionId, 10)),
@@ -270,50 +250,18 @@ export default function mountFeatureRoutes(app) {
             waitEventsRoutes(
                 authenticate,
                 async (req, connectionId) => resolveConnection(connectionId, req.user?.id),
-                async (connection) => {
-                    const cfg = await resolvePoolConfig(connection);
-                    const adapter = getDbAdapter(connection.dbType, {
-                        host: cfg.host,
-                        port: cfg.port,
-                        database: cfg.database,
-                        user: cfg.user,
-                        username: cfg.user,
-                        password: cfg.password,
-                        ssl: cfg.ssl,
-                        account: cfg.host,
-                        projectId: cfg.host,
-                        region: cfg.host,
-                        keyspace: cfg.database,
-                        contactPoints: cfg.host ? [cfg.host] : undefined,
-                    });
-                    await adapter.connect();
-                    return adapter;
-                },
+                openAdapter,
             ),
         );
 
-        // SQL Server monitoring screens (overview / performance / sessions / storage).
+        // SQL Server monitoring screens. Index fragmentation and buffer-pool
+        // scans can take a while on big servers, hence the longer timeout.
         app.use(
             '/api',
             sqlServerRoutes(
                 authenticate,
                 async (req, connectionId) => resolveConnection(connectionId, req.user?.id),
-                async (connection) => {
-                    const cfg = await resolvePoolConfig(connection);
-                    const adapter = getDbAdapter(connection.dbType, {
-                        host: cfg.host,
-                        port: cfg.port,
-                        database: cfg.database,
-                        user: cfg.user,
-                        username: cfg.user,
-                        password: cfg.password,
-                        ssl: cfg.ssl,
-                        // Index fragmentation and buffer-pool scans can take a while on big servers.
-                        requestTimeout: 30_000,
-                    });
-                    await adapter.connect();
-                    return adapter;
-                },
+                (connection) => openAdapter(connection, { requestTimeout: 30_000 }),
             ),
         );
 
@@ -324,25 +272,7 @@ export default function mountFeatureRoutes(app) {
             storageAdvisorRoutes(
                 authenticate,
                 async (req, connectionId) => resolveConnection(connectionId, req.user?.id),
-                async (connection) => {
-                    const cfg = await resolvePoolConfig(connection);
-                    const adapter = getDbAdapter(connection.dbType, {
-                        host: cfg.host,
-                        port: cfg.port,
-                        database: cfg.database,
-                        user: cfg.user,
-                        username: cfg.user,
-                        password: cfg.password,
-                        ssl: cfg.ssl,
-                        account: cfg.host,
-                        projectId: cfg.host,
-                        region: cfg.host,
-                        keyspace: cfg.database,
-                        contactPoints: cfg.host ? [cfg.host] : undefined,
-                    });
-                    await adapter.connect();
-                    return adapter;
-                },
+                openAdapter,
             ),
         );
     }

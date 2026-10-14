@@ -74,7 +74,15 @@ export default function sqlServerRoutes(authenticate, resolveConnection, getAdap
             } catch (err) {
                 return res.status(502).json({ error: err.message });
             }
-            const result = await collectSqlServerView(adapter, view, id);
+            let result;
+            try {
+                result = await collectSqlServerView(adapter, view, id);
+            } catch (err) {
+                // A whole-screen failure is a connectivity problem (login failed,
+                // agent offline…): report the database's own message, not a 500.
+                drop(id);
+                return res.status(err.status || 502).json({ error: err.message });
+            }
             // Every panel failing usually means the pool itself is broken — start fresh next time.
             if (Object.keys(QUERIES[view]).every((panel) => result.errors[panel])) drop(id);
             res.json(result);

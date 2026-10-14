@@ -24,6 +24,7 @@ import {
     isPgLikeEngine,
     mongodb,
     mysql2,
+    openAdapter,
     reqPool,
     resolvePoolConfig,
 } from '../../core/connectionPools.js';
@@ -292,22 +293,7 @@ export default function registerConnectionRoutes(app) {
     // shared pool). Connects, lists, and disconnects — cheap enough for a dropdown
     // that's cached for DB_LIST_TTL_MS.
     async function listAdapterSchemas(conn) {
-        const cfg = await resolvePoolConfig(conn);
-        const adapter = getDbAdapter(conn.dbType, {
-            host: cfg.host,
-            port: cfg.port,
-            database: cfg.database,
-            user: cfg.user,
-            username: cfg.user,
-            password: cfg.password,
-            ssl: cfg.ssl,
-            account: cfg.host,
-            projectId: cfg.host,
-            region: cfg.host,
-            keyspace: cfg.database,
-            contactPoints: cfg.host ? [cfg.host] : undefined,
-        });
-        await adapter.connect();
+        const adapter = await openAdapter(conn);
         try {
             return (await adapter.getSchemas()) || [];
         } finally {
@@ -635,7 +621,7 @@ export default function registerConnectionRoutes(app) {
             const { name, host, port, database, username, password, ssl } = body;
             const ssh = pickSSH({ ...existing, ...body });
             const target = dialTarget({ host: host || existing.host, ...ssh });
-            if (target !== dialTarget(existing)) {
+            if (!existing.agentAppId && target !== dialTarget(existing)) {
                 const hostCheck = await assertHostNotPrivate(target);
                 if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
             }
@@ -1014,6 +1000,22 @@ export default function registerConnectionRoutes(app) {
             const conns = await dbLoadConnections(req.user.id, req.user.role);
             const c = conns.find((c) => c.id === id);
             if (!c) return res.status(404).json({ error: 'Connection not found' });
+
+            // Served by a PulseDB Agent: the agent dials the database, so there is no
+            // host to vet or tunnel to open here, just a round trip to the agent.
+            if (c.agentAppId) {
+                try {
+                    const adapter = await openAdapter(c);
+                    await adapter.connect();
+                    await dbUpdateConnection(id, { status: 'success', lastTested: new Date().toISOString() });
+                    await syncConnectionsCache();
+                    return res.json({ success: true, message: 'Connection successful via PulseDB Agent' });
+                } catch (e) {
+                    await dbUpdateConnection(id, { status: 'failed', lastTested: new Date().toISOString() });
+                    await syncConnectionsCache();
+                    return res.json({ success: false, error: e.message });
+                }
+            }
 
             const hostCheck = await assertHostNotPrivate(dialTarget(c));
             if (!hostCheck.ok) return res.json({ success: false, error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });

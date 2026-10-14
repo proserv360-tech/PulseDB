@@ -140,6 +140,9 @@ function rowToConn(row) {
         lastTested: row.last_tested,
         createdAt: row.created_at,
         dbType: row.db_type || 'postgresql',
+        // Set when a PulseDB Agent serves this connection (services/agentRelay.ts).
+        agentAppId: row.agent_app_id ?? null,
+        agentTarget: row.agent_target ?? null,
     };
 }
 

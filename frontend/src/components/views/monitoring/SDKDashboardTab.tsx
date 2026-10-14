@@ -45,7 +45,7 @@ async function copyToClipboard(text: string) {
 
 /* ── Formatting helpers ────────────────────────────────────────────────── */
 function platformLabel(t: string) {
-    return ({ salesforce: 'Salesforce', mulesoft: 'MuleSoft', nodejs: 'Node.js', java: 'Java', python: 'Python', dotnet: '.NET', custom: 'Custom' } as any)[t] || t;
+    return ({ salesforce: 'Salesforce', mulesoft: 'MuleSoft', nodejs: 'Node.js', java: 'Java', python: 'Python', dotnet: '.NET', custom: 'Custom / PulseDB Agent' } as any)[t] || t;
 }
 function envColor(e: string) {
     return e === 'production' ? THEME.danger : e === 'staging' ? THEME.warning : THEME.primary;
@@ -344,7 +344,7 @@ function RegisterModal({ open, onClose, onSuccess }: { open: boolean; onClose: (
                                 <label style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', color: THEME.textMuted, textTransform: 'uppercase', marginBottom: 7, display: 'block' }}>Platform</label>
                                 <select value={form.platform} onChange={e => setForm(f => ({ ...f, platform: e.target.value }))}
                                     style={{ width: '100%', padding: '9px 12px', background: THEME.bg, border: '1px solid rgba(99,102,241,0.10)', borderRadius: 7, color: THEME.textMain, fontSize: 13, fontFamily: THEME.fontMono, outline: 'none' }}>
-                                    {['salesforce', 'nodejs', 'mulesoft', 'python', 'java', 'dotnet'].map(v => <option key={v} value={v}>{platformLabel(v)}</option>)}
+                                    {['salesforce', 'nodejs', 'mulesoft', 'python', 'java', 'dotnet', 'custom'].map(v => <option key={v} value={v}>{platformLabel(v)}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -721,7 +721,7 @@ function AppDetail({ app: initialApp, onBack, onDelete, onUpdate }: { app: any; 
                                     <label style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', color: THEME.textMuted, textTransform: 'uppercase', marginBottom: 7, display: 'block' }}>Platform</label>
                                     <select value={editForm.platform} onChange={e => setEditForm(f => ({ ...f, platform: e.target.value }))}
                                         style={{ width: '100%', padding: '9px 12px', background: THEME.bg, border: '1px solid rgba(99,102,241,0.10)', borderRadius: 7, color: THEME.textMain, fontSize: 13, fontFamily: THEME.fontMono, outline: 'none' }}>
-                                        {['salesforce', 'nodejs', 'mulesoft', 'python', 'java', 'dotnet'].map(v => <option key={v} value={v}>{platformLabel(v)}</option>)}
+                                        {['salesforce', 'nodejs', 'mulesoft', 'python', 'java', 'dotnet', 'custom'].map(v => <option key={v} value={v}>{platformLabel(v)}</option>)}
                                     </select>
                                 </div>
                                 <div>

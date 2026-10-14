@@ -110,10 +110,14 @@ export const Sidebar = ({
         'Developer Tools',
         'Admin',
     ];
-    // Only the screens that work through the SQL Server adapter: its own section
-    // and, under Developer Tools, the engine console (the rest there is Postgres-only).
-    const MSSQL_SECTIONS = ['Connections', 'SQL Server', 'Developer Tools', 'Admin'];
-    const MSSQL_DEV_TOOLS = ['engine-console'];
+    // Only the screens that work through the SQL Server adapter: its own section,
+    // the engine console (the rest of Developer Tools is Postgres-only) and SDK
+    // Integration, where PulseDB Agent keys are created.
+    const MSSQL_SECTIONS = ['Connections', 'SQL Server', 'Developer Tools', 'Observability', 'Admin'];
+    const MSSQL_ONLY_TABS: Record<string, string[]> = {
+        'Developer Tools': ['engine-console'],
+        Observability: ['sdk-dashboard'],
+    };
     const isMssql = connDbType === 'mssql' || connDbType === 'sqlserver';
     const MONGO_SECTIONS = [
         'Connections',
@@ -135,7 +139,7 @@ export const Sidebar = ({
                 tabs: g.tabs.filter(
                     (t) =>
                         allowedTabIds.includes(t.id) &&
-                        !(isMssql && g.section === 'Developer Tools' && !MSSQL_DEV_TOOLS.includes(t.id)),
+                        !(isMssql && MSSQL_ONLY_TABS[g.section] && !MSSQL_ONLY_TABS[g.section].includes(t.id)),
                 ),
             }))
                 .filter((g) => g.tabs.length > 0)

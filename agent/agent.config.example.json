@@ -1,0 +1,27 @@
+{
+    "pulsedbUrl": "https://pulsedb-o8ax.vercel.app",
+    "agentKey": "CHANGE-ME (SDK application key from PulseDB)",
+    "allowWrites": false,
+    "targets": [
+        {
+            "name": "Local SQL Server",
+            "engine": "mssql",
+            "host": "localhost",
+            "port": 1433,
+            "database": "master",
+            "windowsAuth": true,
+            "encrypt": false,
+            "trustServerCertificate": true
+        },
+        {
+            "name": "Office SQL Server (SQL login)",
+            "engine": "mssql",
+            "host": "SERVER01\\SQLEXPRESS",
+            "database": "master",
+            "user": "CHANGE-ME",
+            "password": "CHANGE-ME",
+            "encrypt": false,
+            "trustServerCertificate": true
+        }
+    ]
+}

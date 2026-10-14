@@ -366,6 +366,28 @@ async function runPanels(adapter, queries) {
 }
 
 /**
+ * Adapters that can run many queries in one round trip (the PulseDB Agent
+ * relay) get the screen's panels and the pulse as a single batch.
+ */
+async function runBatched(adapter, queries) {
+    const all = { ...queries, ...Object.fromEntries(Object.entries(PULSE).map(([k, v]) => [`pulse:${k}`, v])) };
+    const results = await adapter.queryMany(all);
+    const split = (prefix) => {
+        const data = {};
+        const errors = {};
+        for (const name of Object.keys(all)) {
+            if (prefix ? !name.startsWith(prefix) : name.startsWith('pulse:')) continue;
+            const panel = prefix ? name.slice(prefix.length) : name;
+            const r = results[name] || { error: 'no result from the agent' };
+            data[panel] = r.error ? null : r.rows || [];
+            if (r.error) errors[panel] = r.error;
+        }
+        return { data, errors };
+    };
+    return [split(null), split('pulse:')];
+}
+
+/**
  * Run one view's queries through a connected engine adapter.
  * @returns {Promise<{ view, data, errors, live, history?, collectedAt }>}
  */
@@ -373,7 +395,9 @@ export async function collectSqlServerView(adapter, view, connectionId) {
     const queries = QUERIES[view];
     if (!queries) throw Object.assign(new Error(`Unknown SQL Server view "${view}"`), { status: 404 });
 
-    const [{ data, errors }, pulseRaw] = await Promise.all([runPanels(adapter, queries), runPanels(adapter, PULSE)]);
+    const [{ data, errors }, pulseRaw] = adapter.queryMany
+        ? await runBatched(adapter, queries)
+        : await Promise.all([runPanels(adapter, queries), runPanels(adapter, PULSE)]);
     const pulse = recordPulse(connectionId, pulseRaw.data);
 
     if (view === 'overview') data.alerts = buildAlerts(data, pulse.live);

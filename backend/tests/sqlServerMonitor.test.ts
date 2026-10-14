@@ -145,3 +145,29 @@ test('security config is annotated with the recommended value', async () => {
     assert.equal(byName.xp_cmdshell.at_risk, 1);
     assert.equal(byName['clr strict security'].at_risk, 0);
 });
+
+test('agent adapters get the whole screen, pulse included, as one batch', async () => {
+    const calls = [];
+    const adapter = {
+        query: async () => {
+            throw new Error('per-query path must not be used when queryMany exists');
+        },
+        queryMany: async (queries) => {
+            calls.push(Object.keys(queries));
+            return Object.fromEntries(
+                Object.entries(queries).map(([name, sql]) =>
+                    sql.includes('dm_db_index_physical_stats')
+                        ? [name, { error: 'permission denied' }]
+                        : [name, { rows: name === 'tables' ? [{ table_name: 't1' }] : [] }],
+                ),
+            );
+        },
+    };
+    const r = await collectSqlServerView(adapter, 'storage', 'unit-batch');
+    assert.equal(calls.length, 1);
+    assert.ok(calls[0].includes('pulse:counters') && calls[0].includes('tables'));
+    assert.equal(r.data.tables.length, 1);
+    assert.equal(r.data.fragmentation, null);
+    assert.match(r.errors.fragmentation, /permission denied/);
+    assert.ok(!('pulse:counters' in r.data));
+});

@@ -121,6 +121,9 @@ app.use(hipaaMiddleware({ log }));
 //    it twice is harmless.
 app.use(['/api/slack/commands', '/api/slack/events'], express.raw({ type: '*/*', limit: '256kb' }));
 
+// PulseDB Agent job results carry query rows; the agent caps them below this
+// (Vercel's request body limit is 4.5 MB). Parsed here, the global parser skips them.
+app.use(['/api/agent/jobs', '/api/v1/agent/jobs'], express.json({ limit: '4mb' }));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.text({ limit: '100kb' }));
 app.use(rateLimiter);

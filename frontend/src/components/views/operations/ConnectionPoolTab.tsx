@@ -1372,10 +1372,12 @@ const ConnectionsTab = () => {
                                                     {conn.isDefault && <span style={S.badge(THEME.success)}>DEFAULT</span>}
                                                     {isActive && <span style={S.badge(dbMeta.accent)}>ACTIVE</span>}
                                                     {conn.sshEnabled && <span style={{ ...S.badge(THEME.primary), display: 'inline-flex', alignItems: 'center', gap: 4 }}><Terminal size={10} /> SSH</span>}
+                                                    {conn.agentAppId && <span style={S.badge(THEME.primary)} title="Served by a PulseDB Agent running next to this database">VIA AGENT</span>}
                                                 </div>
                                                 <div style={{ fontSize: 12, color: THEME.textMuted, marginTop: 4 }}>
                                                     <span style={{ color: dbMeta.accent, fontWeight: 600 }}>{dbMeta.label}</span>
                                                     {conn.host && ` · ${conn.host}${conn.port ? `:${conn.port}` : ''}`}
+                                                    {conn.agentAppId && ' (as seen by the agent)'}
                                                 </div>
                                             </div>
                                         </div>

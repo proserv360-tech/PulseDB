@@ -4,6 +4,8 @@
 // Extracted from server.ts.
 
 import { Pool } from 'pg';
+import { createAgentRelayAdapter } from '../services/dbAdapters/agentRelayAdapter.js';
+import { getAdapter as getDbAdapter } from '../services/dbAdapters/index.js';
 import { log } from '../services/logger.js';
 import { getTunnelPort, openTunnel } from '../services/sshTunnel.js';
 import { getUserActiveConnectionId, getUserActiveDatabaseId } from './activeSelection.js';
@@ -573,4 +575,31 @@ export async function resolvePoolConfig(c) {
         password: c.password,
         ssl: buildSslOption(c.ssl),
     };
+}
+
+/**
+ * A ready-to-use engine adapter for a saved connection: a direct, connected
+ * driver adapter, or — for a connection served by a PulseDB Agent — one whose
+ * queries are relayed to that agent (it holds the credentials locally).
+ */
+export async function openAdapter(connection, options = {}) {
+    if (connection.agentAppId) return createAgentRelayAdapter(connection);
+    const cfg = await resolvePoolConfig(connection);
+    const adapter = getDbAdapter(connection.dbType, {
+        host: cfg.host,
+        port: cfg.port,
+        database: cfg.database,
+        user: cfg.user,
+        username: cfg.user,
+        password: cfg.password,
+        ssl: cfg.ssl,
+        account: cfg.host, // Snowflake alias
+        projectId: cfg.host, // BigQuery alias
+        region: cfg.host, // DynamoDB alias
+        keyspace: cfg.database,
+        contactPoints: cfg.host ? [cfg.host] : undefined,
+        ...options,
+    });
+    await adapter.connect();
+    return adapter;
 }
