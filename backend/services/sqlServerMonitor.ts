@@ -2,243 +2,391 @@
 /**
  * SQL Server monitoring views for the "SQL Server" UI section.
  *
- * Every query here is read-only and uses the DMVs/catalog views SQL Server
- * documents for monitoring (needs VIEW SERVER STATE, or sysadmin). Each panel
- * query runs independently: one failing (permissions, timeout) does not blank
- * the rest of the screen — its message is returned under `errors[panel]`.
+ * Each view runs its panel queries (services/sqlServerQueries.ts) in parallel;
+ * one failing panel (permissions, timeout, older version) does not blank the
+ * rest of the screen — its message is returned under `errors[panel]`.
  *
- * The generic MSSQLAdapter's getTableStats/getIndexStats/getPerformanceStats
- * are not used: they reference an undefined alias, misuse
- * sys.dm_db_page_info, and read the buffer cache hit ratio without its base
- * counter.
+ * Every request also takes a cheap "pulse" (performance counters, wait totals,
+ * file I/O totals). SQL Server exposes most of these as ever-growing counters,
+ * so the difference between two pulses gives real per-second rates; the
+ * points are kept in memory per connection (`history`) so the screens can chart
+ * trends while any SQL Server screen is open.
  */
-
-// Waits that are idle/background noise, after the widely used Paul Randal list.
-const BENIGN_WAITS = [
-    'BROKER_EVENTHANDLER', 'BROKER_RECEIVE_WAITFOR', 'BROKER_TASK_STOP', 'BROKER_TO_FLUSH', 'BROKER_TRANSMITTER',
-    'CHECKPOINT_QUEUE', 'CHKPT', 'CLR_AUTO_EVENT', 'CLR_MANUAL_EVENT', 'CLR_SEMAPHORE', 'DBMIRROR_DBM_EVENT',
-    'DBMIRROR_EVENTS_QUEUE', 'DBMIRROR_WORKER_QUEUE', 'DBMIRRORING_CMD', 'DIRTY_PAGE_POLL', 'DISPATCHER_QUEUE_SEMAPHORE',
-    'EXECSYNC', 'FSAGENT', 'FT_IFTS_SCHEDULER_IDLE_WAIT', 'FT_IFTSHC_MUTEX', 'KSOURCE_WAKEUP', 'LAZYWRITER_SLEEP',
-    'LOGMGR_QUEUE', 'MEMORY_ALLOCATION_EXT', 'ONDEMAND_TASK_QUEUE', 'PARALLEL_REDO_DRAIN_WORKER',
-    'PARALLEL_REDO_LOG_CACHE', 'PARALLEL_REDO_TRAN_LIST', 'PARALLEL_REDO_WORKER_SYNC', 'PARALLEL_REDO_WORKER_WAIT_WORK',
-    'PREEMPTIVE_OS_FLUSHFILEBUFFERS', 'PREEMPTIVE_XE_GETTARGETSTATE', 'PVS_PREALLOCATE', 'PWAIT_ALL_COMPONENTS_INITIALIZED',
-    'PWAIT_DIRECTLOGCONSUMER_GETNEXT', 'PWAIT_EXTENSIBILITY_CLEANUP_TASK', 'QDS_PERSIST_TASK_MAIN_LOOP_SLEEP',
-    'QDS_ASYNC_QUEUE', 'QDS_CLEANUP_STALE_QUERIES_TASK_MAIN_LOOP_SLEEP', 'QDS_SHUTDOWN_QUEUE', 'REDO_THREAD_PENDING_WORK',
-    'REQUEST_FOR_DEADLOCK_SEARCH', 'RESOURCE_QUEUE', 'SERVER_IDLE_CHECK', 'SNI_HTTP_ACCEPT', 'SOS_WORK_DISPATCHER',
-    'SP_SERVER_DIAGNOSTICS_SLEEP', 'SQLTRACE_BUFFER_FLUSH', 'SQLTRACE_INCREMENTAL_FLUSH_SLEEP',
-    'SQLTRACE_WAIT_ENTRIES', 'VDI_CLIENT_OTHER', 'WAIT_FOR_RESULTS', 'WAITFOR', 'WAITFOR_TASKSHUTDOWN',
-    'WAIT_XTP_RECOVERY', 'WAIT_XTP_HOST_WAIT', 'WAIT_XTP_OFFLINE_CKPT_NEW_LOG', 'WAIT_XTP_CKPT_CLOSE',
-    'XE_DISPATCHER_JOIN', 'XE_DISPATCHER_WAIT', 'XE_TIMER_EVENT',
-];
-
-const STATEMENT_TEXT = (alias, req) => `SUBSTRING(${alias}.text, (${req}.statement_start_offset / 2) + 1,
-    ((CASE ${req}.statement_end_offset WHEN -1 THEN DATALENGTH(${alias}.text)
-      ELSE ${req}.statement_end_offset END - ${req}.statement_start_offset) / 2) + 1)`;
-
-const QUERIES = {
-    overview: {
-        server: `
-            SELECT CAST(SERVERPROPERTY('ProductVersion') AS nvarchar(128)) AS product_version,
-                   CAST(SERVERPROPERTY('ProductLevel')   AS nvarchar(128)) AS product_level,
-                   CAST(SERVERPROPERTY('Edition')        AS nvarchar(128)) AS edition,
-                   @@SERVERNAME AS server_name,
-                   DB_NAME() AS current_database,
-                   i.sqlserver_start_time AS start_time,
-                   DATEDIFF(SECOND, i.sqlserver_start_time, SYSDATETIME()) AS uptime_seconds,
-                   i.cpu_count,
-                   i.physical_memory_kb,
-                   i.committed_kb,
-                   i.committed_target_kb,
-                   (SELECT COUNT(*) FROM sys.dm_exec_sessions WHERE is_user_process = 1) AS user_sessions,
-                   (SELECT COUNT(*) FROM sys.dm_exec_requests r
-                      JOIN sys.dm_exec_sessions s ON s.session_id = r.session_id
-                     WHERE s.is_user_process = 1 AND r.session_id <> @@SPID) AS active_requests,
-                   (SELECT COUNT(*) FROM sys.dm_exec_requests WHERE blocking_session_id <> 0) AS blocked_requests
-              FROM sys.dm_os_sys_info i`,
-        counters: `
-            SELECT RTRIM(counter_name) AS counter_name, cntr_value
-              FROM sys.dm_os_performance_counters
-             WHERE (object_name LIKE '%Buffer Manager%'
-                    AND counter_name IN ('Buffer cache hit ratio', 'Buffer cache hit ratio base', 'Page life expectancy'))
-                OR (object_name LIKE '%SQL Statistics%' AND counter_name IN ('Batch Requests/sec', 'SQL Compilations/sec'))
-                OR (object_name LIKE '%Memory Manager%'
-                    AND counter_name IN ('Memory Grants Pending', 'Total Server Memory (KB)', 'Target Server Memory (KB)'))`,
-        cpu: `
-            SELECT TOP 1
-                   x.record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') AS sql_cpu_pct,
-                   x.record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') AS system_idle_pct
-              FROM (SELECT CONVERT(xml, record) AS record, [timestamp]
-                      FROM sys.dm_os_ring_buffers
-                     WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'
-                       AND record LIKE N'%<SystemHealth>%') AS x
-             ORDER BY x.[timestamp] DESC`,
-        databases: `
-            SELECT d.name, d.state_desc, d.recovery_model_desc, d.compatibility_level, d.create_date,
-                   CAST(SUM(CASE WHEN mf.type = 0 THEN mf.size ELSE 0 END) * 8.0 / 1024 AS decimal(18, 2)) AS data_mb,
-                   CAST(SUM(CASE WHEN mf.type = 1 THEN mf.size ELSE 0 END) * 8.0 / 1024 AS decimal(18, 2)) AS log_mb
-              FROM sys.databases d
-              LEFT JOIN sys.master_files mf ON mf.database_id = d.database_id
-             GROUP BY d.name, d.state_desc, d.recovery_model_desc, d.compatibility_level, d.create_date
-             ORDER BY d.name`,
-    },
-    performance: {
-        topQueries: `
-            SELECT TOP 25
-                   qs.execution_count,
-                   qs.total_worker_time / 1000 AS total_cpu_ms,
-                   qs.total_elapsed_time / 1000 AS total_elapsed_ms,
-                   CAST(qs.total_worker_time / 1000.0 / NULLIF(qs.execution_count, 0) AS decimal(18, 2)) AS avg_cpu_ms,
-                   CAST(qs.total_elapsed_time / 1000.0 / NULLIF(qs.execution_count, 0) AS decimal(18, 2)) AS avg_elapsed_ms,
-                   qs.total_logical_reads,
-                   qs.last_execution_time,
-                   DB_NAME(st.dbid) AS database_name,
-                   LEFT(${STATEMENT_TEXT('st', 'qs')}, 2000) AS query_text
-              FROM sys.dm_exec_query_stats qs
-             CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) st
-             ORDER BY qs.total_worker_time DESC`,
-        waits: `
-            SELECT TOP 15 wait_type, waiting_tasks_count, wait_time_ms, signal_wait_time_ms,
-                   CAST(100.0 * wait_time_ms / NULLIF(SUM(wait_time_ms) OVER (), 0) AS decimal(5, 2)) AS pct
-              FROM sys.dm_os_wait_stats
-             WHERE waiting_tasks_count > 0
-               AND wait_type NOT LIKE 'SLEEP%'
-               AND wait_type NOT IN (${BENIGN_WAITS.map((w) => `N'${w}'`).join(', ')})
-             ORDER BY wait_time_ms DESC`,
-    },
-    sessions: {
-        sessions: `
-            SELECT s.session_id, s.login_name, s.host_name, s.program_name,
-                   DB_NAME(s.database_id) AS database_name,
-                   s.status AS session_status, r.status AS request_status, r.command,
-                   r.wait_type, r.wait_time AS wait_ms, r.blocking_session_id,
-                   r.cpu_time AS cpu_ms, r.total_elapsed_time AS elapsed_ms,
-                   s.login_time, s.last_request_end_time,
-                   LEFT(${STATEMENT_TEXT('t', 'r')}, 2000) AS current_statement
-              FROM sys.dm_exec_sessions s
-              LEFT JOIN sys.dm_exec_requests r ON r.session_id = s.session_id
-             OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t
-             WHERE s.is_user_process = 1 AND s.session_id <> @@SPID
-             ORDER BY CASE WHEN r.session_id IS NULL THEN 1 ELSE 0 END, r.total_elapsed_time DESC, s.session_id`,
-        blocking: `
-            SELECT r.session_id AS blocked_session, r.blocking_session_id AS blocking_session,
-                   r.wait_type, r.wait_time AS wait_ms, r.wait_resource, DB_NAME(r.database_id) AS database_name,
-                   LEFT(t.text, 2000) AS blocked_statement,
-                   (SELECT TOP 1 LEFT(bt.text, 2000)
-                      FROM sys.dm_exec_connections bc
-                     CROSS APPLY sys.dm_exec_sql_text(bc.most_recent_sql_handle) bt
-                     WHERE bc.session_id = r.blocking_session_id) AS blocking_statement
-              FROM sys.dm_exec_requests r
-             OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t
-             WHERE r.blocking_session_id <> 0
-             ORDER BY r.wait_time DESC`,
-    },
-    storage: {
-        tables: `
-            SELECT TOP 100 s.name AS schema_name, t.name AS table_name,
-                   SUM(CASE WHEN p.index_id < 2 THEN p.row_count ELSE 0 END) AS row_count,
-                   SUM(p.reserved_page_count) * 8 AS reserved_kb,
-                   SUM(CASE WHEN p.index_id < 2
-                            THEN p.in_row_data_page_count + p.lob_used_page_count + p.row_overflow_used_page_count
-                            ELSE 0 END) * 8 AS data_kb,
-                   SUM(CASE WHEN p.index_id >= 2 THEN p.used_page_count ELSE 0 END) * 8 AS index_kb
-              FROM sys.dm_db_partition_stats p
-              JOIN sys.tables t  ON t.object_id = p.object_id
-              JOIN sys.schemas s ON s.schema_id = t.schema_id
-             WHERE t.is_ms_shipped = 0
-             GROUP BY s.name, t.name
-             ORDER BY reserved_kb DESC`,
-        indexUsage: `
-            SELECT TOP 100 OBJECT_SCHEMA_NAME(i.object_id) AS schema_name, OBJECT_NAME(i.object_id) AS table_name,
-                   i.name AS index_name, i.type_desc,
-                   ISNULL(us.user_seeks, 0) AS seeks, ISNULL(us.user_scans, 0) AS scans,
-                   ISNULL(us.user_lookups, 0) AS lookups, ISNULL(us.user_updates, 0) AS updates,
-                   (SELECT SUM(ps.used_page_count) * 8 FROM sys.dm_db_partition_stats ps
-                     WHERE ps.object_id = i.object_id AND ps.index_id = i.index_id) AS size_kb
-              FROM sys.indexes i
-              JOIN sys.objects o ON o.object_id = i.object_id
-              LEFT JOIN sys.dm_db_index_usage_stats us
-                     ON us.object_id = i.object_id AND us.index_id = i.index_id AND us.database_id = DB_ID()
-             WHERE o.is_ms_shipped = 0 AND o.type = 'U' AND i.index_id > 0
-             ORDER BY size_kb DESC`,
-        missingIndexes: `
-            SELECT TOP 20 mid.statement AS table_name, mid.equality_columns, mid.inequality_columns, mid.included_columns,
-                   migs.user_seeks, migs.avg_user_impact,
-                   CAST(migs.user_seeks * migs.avg_total_user_cost * (migs.avg_user_impact / 100.0) AS decimal(18, 2)) AS improvement_score
-              FROM sys.dm_db_missing_index_groups mig
-              JOIN sys.dm_db_missing_index_group_stats migs ON migs.group_handle = mig.index_group_handle
-              JOIN sys.dm_db_missing_index_details mid ON mid.index_handle = mig.index_handle
-             WHERE mid.database_id = DB_ID()
-             ORDER BY improvement_score DESC`,
-        fragmentation: `
-            SELECT TOP 50 OBJECT_SCHEMA_NAME(ips.object_id) AS schema_name, OBJECT_NAME(ips.object_id) AS table_name,
-                   i.name AS index_name, ips.index_type_desc,
-                   CAST(ips.avg_fragmentation_in_percent AS decimal(5, 2)) AS fragmentation_pct, ips.page_count
-              FROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED') ips
-              JOIN sys.indexes i ON i.object_id = ips.object_id AND i.index_id = ips.index_id
-             WHERE ips.index_id > 0 AND ips.page_count >= 100
-             ORDER BY ips.avg_fragmentation_in_percent DESC`,
-    },
-};
+import { PULSE, QUERIES } from './sqlServerQueries.js';
 
 export const SQL_SERVER_VIEWS = Object.keys(QUERIES);
 
-// Cumulative "/sec" counters need two samples; keep the previous one per connection.
-const lastCounterSample = new Map(); // connectionId -> { at, batch, compilations }
+const PULSE_MIN_INTERVAL_MS = 5_000;
+const HISTORY_POINTS = 240;
+
+// cntr_type values from sys.dm_os_performance_counters
+const PERF_COUNTER_BULK_COUNT = 272696576; // cumulative, per-second rate
+const PERF_AVERAGE_BULK = 1073874176; // average with a matching "base"
+
+const RATES = {
+    batchPerSec: 'SQL Statistics|Batch Requests/sec',
+    compilationsPerSec: 'SQL Statistics|SQL Compilations/sec',
+    recompilationsPerSec: 'SQL Statistics|SQL Re-Compilations/sec',
+    transactionsPerSec: 'Databases|Transactions/sec',
+    logFlushesPerSec: 'Databases|Log Flushes/sec',
+    logBytesFlushedPerSec: 'Databases|Log Bytes Flushed/sec',
+    loginsPerSec: 'General Statistics|Logins/sec',
+    errorsPerSec: 'SQL Errors|Errors/sec',
+    lockRequestsPerSec: 'Locks|Lock Requests/sec',
+    lockWaitsPerSec: 'Locks|Lock Waits/sec',
+    lockTimeoutsPerSec: 'Locks|Lock Timeouts/sec',
+    deadlocksPerSec: 'Locks|Number of Deadlocks/sec',
+    pageSplitsPerSec: 'Access Methods|Page Splits/sec',
+    fullScansPerSec: 'Access Methods|Full Scans/sec',
+    indexSearchesPerSec: 'Access Methods|Index Searches/sec',
+    rangeScansPerSec: 'Access Methods|Range Scans/sec',
+    worktablesPerSec: 'Access Methods|Worktables Created/sec',
+    workfilesPerSec: 'Access Methods|Workfiles Created/sec',
+    forwardedRecordsPerSec: 'Access Methods|Forwarded Records/sec',
+    lazyWritesPerSec: 'Buffer Manager|Lazy writes/sec',
+    checkpointPagesPerSec: 'Buffer Manager|Checkpoint pages/sec',
+    pageReadsPerSec: 'Buffer Manager|Page reads/sec',
+    pageWritesPerSec: 'Buffer Manager|Page writes/sec',
+    readaheadPagesPerSec: 'Buffer Manager|Readahead pages/sec',
+};
+const RAW = {
+    pageLifeExpectancy: 'Buffer Manager|Page life expectancy',
+    databasePages: 'Buffer Manager|Database pages',
+    userConnections: 'General Statistics|User Connections',
+    processesBlocked: 'General Statistics|Processes blocked',
+    memoryGrantsPending: 'Memory Manager|Memory Grants Pending',
+    memoryGrantsOutstanding: 'Memory Manager|Memory Grants Outstanding',
+    totalServerMemoryKb: 'Memory Manager|Total Server Memory (KB)',
+    targetServerMemoryKb: 'Memory Manager|Target Server Memory (KB)',
+    stolenServerMemoryKb: 'Memory Manager|Stolen Server Memory (KB)',
+    freeMemoryKb: 'Memory Manager|Free Memory (KB)',
+    databaseCacheMemoryKb: 'Memory Manager|Database Cache Memory (KB)',
+    versionStoreKb: 'Transactions|Version Store Size (KB)',
+    tempdbFreeKb: 'Transactions|Free Space in tempdb (KB)',
+    longestTransactionSec: 'Transactions|Longest Transaction Running Time',
+    activeTransactions: 'Databases|Active Transactions',
+    planCachePages: 'Plan Cache|Cache Pages',
+};
+const RATIOS = {
+    bufferCacheHitPct: 'Buffer Manager|Buffer cache hit ratio',
+    planCacheHitPct: 'Plan Cache|Cache Hit Ratio',
+};
+// [value counter, base counter] — the base is not always named "<value> base".
+const AVERAGES = {
+    avgLockWaitMs: ['Locks|Average Wait Time (ms)', 'Locks|Average Wait Time Base'],
+};
+
+// History fields each screen charts — keeps the payload small.
+const HISTORY_FIELDS = {
+    overview: ['batchPerSec', 'compilationsPerSec', 'recompilationsPerSec', 'transactionsPerSec', 'userConnections',
+        'pageLifeExpectancy', 'bufferCacheHitPct', 'processesBlocked', 'deadlocksPerSec', 'errorsPerSec'],
+    performance: ['waits', 'signalWaitPct', 'pageSplitsPerSec', 'fullScansPerSec', 'indexSearchesPerSec',
+        'lockWaitsPerSec', 'deadlocksPerSec', 'worktablesPerSec', 'compilationsPerSec', 'batchPerSec'],
+    sessions: ['userConnections', 'processesBlocked', 'lockWaitsPerSec', 'deadlocksPerSec', 'avgLockWaitMs'],
+    memory: ['totalServerMemoryKb', 'targetServerMemoryKb', 'stolenServerMemoryKb', 'databaseCacheMemoryKb',
+        'pageLifeExpectancy', 'lazyWritesPerSec', 'memoryGrantsPending', 'bufferCacheHitPct'],
+    io: ['readsPerSec', 'writesPerSec', 'readMBps', 'writeMBps', 'readLatencyMs', 'writeLatencyMs',
+        'logFlushesPerSec', 'checkpointPagesPerSec', 'pageReadsPerSec', 'pageWritesPerSec'],
+};
+
+const pulses = new Map(); // connectionId -> { prev, history, live }
 
 const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v));
+const round = (v, d = 2) => (v === null || v === undefined || !Number.isFinite(v) ? null : Number(v.toFixed(d)));
 
-function shapeOverview(r, connectionId) {
-    const counters = Object.fromEntries((r.counters || []).map((c) => [c.counter_name, num(c.cntr_value)]));
-    const hit = counters['Buffer cache hit ratio'];
-    const base = counters['Buffer cache hit ratio base'];
-    const now = Date.now();
-    const batch = counters['Batch Requests/sec'];
-    const comp = counters['SQL Compilations/sec'];
-    const prev = lastCounterSample.get(connectionId);
-    let batchPerSec = null;
-    let compilationsPerSec = null;
-    if (prev && batch !== null && now > prev.at) {
-        const secs = (now - prev.at) / 1000;
-        batchPerSec = Math.max(0, (batch - prev.batch) / secs);
-        compilationsPerSec = Math.max(0, (comp - prev.compilations) / secs);
+function counterIndex(rows) {
+    const idx = new Map();
+    for (const r of rows || []) {
+        idx.set(`${r.obj}|${r.counter_name}`.toLowerCase(), { value: num(r.cntr_value), type: Number(r.cntr_type) });
     }
-    if (batch !== null) lastCounterSample.set(connectionId, { at: now, batch, compilations: comp });
+    return idx;
+}
+const get = (idx, key) => idx.get(key.toLowerCase());
+const baseOf = (idx, key) => get(idx, `${key} base`);
 
+function snapshot(raw) {
     return {
-        server: r.server?.[0] || null,
-        cpu: r.cpu?.[0] || null,
-        metrics: {
-            bufferCacheHitPct: hit !== null && base ? Math.min(100, (100 * hit) / base) : null,
-            pageLifeExpectancySec: counters['Page life expectancy'] ?? null,
-            memoryGrantsPending: counters['Memory Grants Pending'] ?? null,
-            totalServerMemoryKb: counters['Total Server Memory (KB)'] ?? null,
-            targetServerMemoryKb: counters['Target Server Memory (KB)'] ?? null,
-            batchRequestsPerSec: batchPerSec,
-            compilationsPerSec,
-        },
-        databases: r.databases || [],
+        at: Date.now(),
+        counters: counterIndex(raw.counters),
+        waits: Object.fromEntries(
+            (raw.waits || []).map((w) => [w.category, { wait: num(w.wait_ms), signal: num(w.signal_ms) }]),
+        ),
+        io: raw.io?.[0] || null,
     };
 }
 
-/**
- * Run one view's queries through a connected engine adapter.
- * @returns {Promise<{ view: string, data: object, errors: object, collectedAt: string }>}
- */
-export async function collectSqlServerView(adapter, view, connectionId) {
-    const queries = QUERIES[view];
-    if (!queries) throw Object.assign(new Error(`Unknown SQL Server view "${view}"`), { status: 404 });
-    const raw = {};
+function instantMetrics(cur) {
+    const out = {};
+    for (const [name, key] of Object.entries(RAW)) out[name] = get(cur.counters, key)?.value ?? null;
+    for (const [name, key] of Object.entries(RATIOS)) {
+        const v = get(cur.counters, key)?.value;
+        const b = baseOf(cur.counters, key)?.value;
+        out[name] = v !== undefined && v !== null && b ? round(Math.min(100, (100 * v) / b)) : null;
+    }
+    return out;
+}
+
+function rateMetrics(prev, cur) {
+    const secs = (cur.at - prev.at) / 1000;
+    const out = {};
+    for (const [name, key] of Object.entries(RATES)) {
+        const a = get(prev.counters, key);
+        const b = get(cur.counters, key);
+        out[name] =
+            a && b && b.type === PERF_COUNTER_BULK_COUNT && b.value >= a.value ? round((b.value - a.value) / secs) : null;
+    }
+    for (const [name, [key, baseKey]] of Object.entries(AVERAGES)) {
+        const a = get(prev.counters, key);
+        const b = get(cur.counters, key);
+        const ab = get(prev.counters, baseKey);
+        const bb = get(cur.counters, baseKey);
+        if (!a || !b || !ab || !bb || b.type !== PERF_AVERAGE_BULK) out[name] = null;
+        else {
+            const dBase = bb.value - ab.value;
+            out[name] = dBase > 0 ? round((b.value - a.value) / dBase) : dBase === 0 ? 0 : null;
+        }
+    }
+    // Wait time accrued per second, by category, plus the signal (CPU queue) share.
+    const waits = {};
+    let dWait = 0;
+    let dSignal = 0;
+    for (const [cat, w] of Object.entries(cur.waits)) {
+        const p = prev.waits[cat];
+        if (!p || w.wait < p.wait) continue;
+        waits[cat] = round((w.wait - p.wait) / secs, 1);
+        dWait += w.wait - p.wait;
+        dSignal += w.signal - p.signal;
+    }
+    out.waits = waits;
+    out.signalWaitPct = dWait > 0 ? round((100 * dSignal) / dWait, 1) : null;
+    // File I/O
+    const a = prev.io;
+    const b = cur.io;
+    if (a && b) {
+        const dr = num(b.reads) - num(a.reads);
+        const dw = num(b.writes) - num(a.writes);
+        out.readsPerSec = dr >= 0 ? round(dr / secs) : null;
+        out.writesPerSec = dw >= 0 ? round(dw / secs) : null;
+        out.readMBps = dr >= 0 ? round((num(b.bytes_read) - num(a.bytes_read)) / 1048576 / secs, 3) : null;
+        out.writeMBps = dw >= 0 ? round((num(b.bytes_written) - num(a.bytes_written)) / 1048576 / secs, 3) : null;
+        out.readLatencyMs = dr > 0 ? round((num(b.stall_read_ms) - num(a.stall_read_ms)) / dr) : dr === 0 ? 0 : null;
+        out.writeLatencyMs = dw > 0 ? round((num(b.stall_write_ms) - num(a.stall_write_ms)) / dw) : dw === 0 ? 0 : null;
+    }
+    return out;
+}
+
+/** Fold a pulse into the per-connection state; returns { live, history }. */
+export function recordPulse(connectionId, raw, now = Date.now()) {
+    const cur = { ...snapshot(raw), at: now };
+    const state = pulses.get(connectionId) || { prev: null, history: [], live: null };
+    const instant = instantMetrics(cur);
+    if (state.prev && cur.at - state.prev.at >= PULSE_MIN_INTERVAL_MS) {
+        // A restart resets the counters; rateMetrics turns negative deltas into nulls.
+        const point = { t: new Date(cur.at).toISOString(), ...instant, ...rateMetrics(state.prev, cur) };
+        state.history.push(point);
+        if (state.history.length > HISTORY_POINTS) state.history.splice(0, state.history.length - HISTORY_POINTS);
+        state.live = point;
+        state.prev = cur;
+    } else if (!state.prev) {
+        state.prev = cur;
+        state.live = { t: new Date(cur.at).toISOString(), ...instant };
+    } else {
+        // Too soon for a fair rate: keep the last rates, refresh the instantaneous values.
+        state.live = { ...(state.live || {}), ...instant };
+    }
+    pulses.set(connectionId, state);
+    return state;
+}
+
+/* ── deadlock graphs (system_health xml_deadlock_report) ─────────────────── */
+const decode = (s) =>
+    String(s ?? '')
+        .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+        .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, '&');
+const attrs = (s) => Object.fromEntries([...String(s).matchAll(/([\w:-]+)="([^"]*)"/g)].map((m) => [m[1], decode(m[2])]));
+
+export function parseDeadlock(xml) {
+    if (!xml) return null;
+    const victims = [...xml.matchAll(/<victimProcess\s([^>]*?)\/>/g)].map((m) => attrs(m[1]).id);
+    const processes = [...xml.matchAll(/<process\s([^>]*)>([\s\S]*?)<\/process>/g)].map((m) => {
+        const a = attrs(m[1]);
+        const input = m[2].match(/<inputbuf>([\s\S]*?)<\/inputbuf>/);
+        return {
+            id: a.id,
+            spid: num(a.spid),
+            login: a.loginname || null,
+            host: a.hostname || null,
+            app: a.clientapp || null,
+            database: a.currentdbname || a.currentdb || null,
+            lockMode: a.lockMode || null,
+            waitResource: a.waitresource || null,
+            waitTimeMs: num(a.waittime),
+            isolation: a.isolationlevel || null,
+            statement: decode(input?.[1] || '').trim().slice(0, 2000),
+            isVictim: victims.includes(a.id),
+        };
+    });
+    const resources = [];
+    const edges = [];
+    const list = xml.match(/<resource-list>([\s\S]*?)<\/resource-list>/)?.[1] || '';
+    const resourceRe = /<(\w+)\s([^>]*)>\s*<owner-list>([\s\S]*?)<\/owner-list>\s*<waiter-list>([\s\S]*?)<\/waiter-list>\s*<\/\1>/g;
+    for (const m of list.matchAll(resourceRe)) {
+        const a = attrs(m[2]);
+        const label = [a.objectname, a.indexname].filter(Boolean).join(' / ') || m[1];
+        resources.push({ type: m[1], object: a.objectname || null, index: a.indexname || null, mode: a.mode || null });
+        const owners = [...m[3].matchAll(/<owner\s([^>]*?)\/>/g)].map((o) => attrs(o[1]));
+        const waiters = [...m[4].matchAll(/<waiter\s([^>]*?)\/>/g)].map((w) => attrs(w[1]));
+        for (const w of waiters) {
+            for (const o of owners) {
+                edges.push({ from: w.id, to: o.id, resource: label, waitMode: w.mode || null, holdMode: o.mode || null });
+            }
+        }
+    }
+    return { victims, processes, resources, edges };
+}
+
+/* ── shaping ─────────────────────────────────────────────────────────────── */
+const SECURITY_CONFIG = {
+    xp_cmdshell: { recommended: 0, why: 'Lets T-SQL run operating-system commands.' },
+    'clr enabled': { recommended: 0, why: 'Allows .NET assemblies inside SQL Server; enable only if used.' },
+    'clr strict security': { recommended: 1, why: 'Treats all CLR assemblies as UNSAFE unless signed.' },
+    'Ole Automation Procedures': { recommended: 0, why: 'Lets T-SQL instantiate COM objects.' },
+    'remote admin connections': { recommended: null, why: 'Remote dedicated admin connection — useful for emergencies.' },
+    'Ad Hoc Distributed Queries': { recommended: 0, why: 'Allows OPENROWSET/OPENDATASOURCE to arbitrary sources.' },
+    'cross db ownership chaining': { recommended: 0, why: 'Ownership chains across databases bypass permission checks.' },
+    'Database Mail XPs': { recommended: null, why: 'Needed only if the server sends mail.' },
+    'scan for startup procs': { recommended: 0, why: 'Runs procedures automatically at startup.' },
+    'contained database authentication': { recommended: 0, why: 'Users can authenticate without a server login.' },
+    'remote access': { recommended: 0, why: 'Deprecated remote stored-procedure calls.' },
+    'default trace enabled': { recommended: 1, why: 'Lightweight trace used for troubleshooting and auditing.' },
+};
+
+function shapeSecurity(data) {
+    if (data.config) {
+        data.config = data.config.map((c) => {
+            const rule = SECURITY_CONFIG[c.name] || {};
+            const atRisk =
+                rule.recommended !== null && rule.recommended !== undefined && Number(c.value_in_use) !== rule.recommended;
+            return { ...c, recommended: rule.recommended ?? null, why: rule.why || null, at_risk: atRisk ? 1 : 0 };
+        });
+    }
+    return data;
+}
+
+export function buildAlerts(data, live, now = Date.now()) {
+    const alerts = [];
+    const add = (severity, title, detail = null) => alerts.push({ severity, title, detail });
+    const a = data.activity?.[0] || {};
+    const s = data.server?.[0] || {};
+    const mem = data.memory?.[0] || {};
+    const cpu = data.cpuHistory?.[0];
+
+    for (const d of data.databases || []) {
+        if (d.state_desc && d.state_desc !== 'ONLINE') add('critical', `Database ${d.name} is ${d.state_desc}`);
+    }
+    if (Number(a.blocked_requests) > 0) {
+        add(
+            'warning',
+            `${a.blocked_requests} blocked request(s)`,
+            `Longest wait ${Math.round(Number(a.longest_block_ms) / 1000)} s — see Sessions & Locks.`,
+        );
+    }
+    if (cpu && cpu.sql_cpu_pct !== null && cpu.sql_cpu_pct !== undefined) {
+        if (cpu.sql_cpu_pct >= 90) add('critical', `SQL Server CPU at ${cpu.sql_cpu_pct}%`);
+        else if (cpu.sql_cpu_pct >= 75) add('warning', `SQL Server CPU at ${cpu.sql_cpu_pct}%`);
+    }
+    if (s.scheduler_count && Number(a.runnable_tasks) >= Number(s.scheduler_count)) {
+        add('warning', `${a.runnable_tasks} tasks waiting for CPU`, 'At least one runnable task per scheduler — CPU pressure.');
+    }
+    if (live?.pageLifeExpectancy !== null && live?.pageLifeExpectancy !== undefined && live.pageLifeExpectancy < 300) {
+        add('warning', `Page life expectancy is ${live.pageLifeExpectancy} s`, 'Pages leave the buffer pool quickly — memory pressure.');
+    }
+    if (live?.bufferCacheHitPct !== null && live?.bufferCacheHitPct !== undefined && live.bufferCacheHitPct < 95) {
+        add('warning', `Buffer cache hit ratio ${live.bufferCacheHitPct}%`);
+    }
+    if (Number(live?.memoryGrantsPending) > 0) add('warning', `${live.memoryGrantsPending} queries waiting for a memory grant`);
+    if (Number(live?.deadlocksPerSec) > 0) add('warning', 'Deadlocks occurring right now', 'See Sessions & Locks for the deadlock graph.');
+    if (mem.process_physical_memory_low) add('warning', 'SQL Server reports low physical memory');
+    if (mem.system_memory_state_desc && /low/i.test(mem.system_memory_state_desc)) add('warning', mem.system_memory_state_desc);
+    if (mem.max_server_memory_mb && Number(mem.max_server_memory_mb) >= 2147483647) {
+        add('info', 'Max server memory is not set', 'SQL Server can take memory the OS needs; set "max server memory".');
+    }
+
+    // Backup checks only when msdb was readable — never guess.
+    if (data.backupAges) {
+        const backups = Object.fromEntries(data.backupAges.map((b) => [b.database_name, b]));
+        for (const d of data.databases || []) {
+            // model is only a template; master/msdb matter for a rebuild but are not user data.
+            if (d.name === 'tempdb' || d.name === 'model' || d.state_desc !== 'ONLINE') continue;
+            const level = d.name === 'master' || d.name === 'msdb' ? 'info' : 'warning';
+            const b = backups[d.name];
+            const full = b?.last_full ? new Date(b.last_full).getTime() : null;
+            if (!full) add(level, `${d.name} has never had a full backup`);
+            else if (now - full > 7 * 86400_000) {
+                add(level, `${d.name}: last full backup ${Math.floor((now - full) / 86400_000)} days ago`);
+            }
+            if (d.recovery_model_desc === 'FULL' && d.name !== 'model') {
+                const log = b?.last_log ? new Date(b.last_log).getTime() : null;
+                if (!log || now - log > 86400_000) {
+                    add('warning', `${d.name} is in FULL recovery without a log backup in 24 h`, 'The transaction log keeps growing until it is backed up.');
+                }
+            }
+        }
+    }
+    for (const d of data.databases || []) {
+        if (d.is_auto_shrink_on) add('info', `Auto-shrink is on for ${d.name}`);
+        if (d.is_auto_close_on) add('info', `Auto-close is on for ${d.name}`);
+        if (d.page_verify_option_desc && d.page_verify_option_desc !== 'CHECKSUM' && d.name !== 'tempdb') {
+            add('info', `${d.name} page verify is ${d.page_verify_option_desc}`, 'CHECKSUM detects corruption earliest.');
+        }
+    }
+    const rank = { critical: 0, warning: 1, info: 2 };
+    return alerts.sort((x, y) => rank[x.severity] - rank[y.severity]);
+}
+
+async function runPanels(adapter, queries) {
+    const data = {};
     const errors = {};
     await Promise.all(
         Object.entries(queries).map(async ([panel, sql]) => {
             try {
-                raw[panel] = (await adapter.query(sql)).rows || [];
+                data[panel] = (await adapter.query(sql)).rows || [];
             } catch (e) {
                 errors[panel] = e.message;
-                raw[panel] = null;
+                data[panel] = null;
             }
         }),
     );
-    const data = view === 'overview' ? shapeOverview(raw, connectionId) : raw;
-    return { view, data, errors, collectedAt: new Date().toISOString() };
+    return { data, errors };
+}
+
+/**
+ * Run one view's queries through a connected engine adapter.
+ * @returns {Promise<{ view, data, errors, live, history?, collectedAt }>}
+ */
+export async function collectSqlServerView(adapter, view, connectionId) {
+    const queries = QUERIES[view];
+    if (!queries) throw Object.assign(new Error(`Unknown SQL Server view "${view}"`), { status: 404 });
+
+    const [{ data, errors }, pulseRaw] = await Promise.all([runPanels(adapter, queries), runPanels(adapter, PULSE)]);
+    const pulse = recordPulse(connectionId, pulseRaw.data);
+
+    if (view === 'overview') data.alerts = buildAlerts(data, pulse.live);
+    if (view === 'sessions' && data.deadlocks) {
+        data.deadlocks = data.deadlocks.map((d) => ({ event_time: d.event_time, ...parseDeadlock(d.deadlock_xml) }));
+    }
+    if (view === 'security') shapeSecurity(data);
+    if (pulseRaw.errors.counters) errors.pulse = pulseRaw.errors.counters;
+
+    const result = { view, data, errors, live: pulse.live, collectedAt: new Date().toISOString() };
+    const fields = HISTORY_FIELDS[view];
+    if (fields) {
+        result.history = pulse.history.map((p) => Object.fromEntries([['t', p.t], ...fields.map((f) => [f, p[f] ?? null])]));
+    }
+    return result;
 }

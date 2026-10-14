@@ -308,6 +308,8 @@ export default function mountFeatureRoutes(app) {
                         username: cfg.user,
                         password: cfg.password,
                         ssl: cfg.ssl,
+                        // Index fragmentation and buffer-pool scans can take a while on big servers.
+                        requestTimeout: 30_000,
                     });
                     await adapter.connect();
                     return adapter;

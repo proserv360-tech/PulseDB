@@ -82,7 +82,7 @@ export class MSSQLAdapter extends BaseAdapter {
                     encrypt: this.config.ssl !== false,
                     trustServerCertificate: true,
                     connectionTimeout: 5000,
-                    requestTimeout: 5000,
+                    requestTimeout: this.config.requestTimeout ?? 5000,
                     ...(target.instanceName ? { instanceName: target.instanceName } : {}),
                 },
             });

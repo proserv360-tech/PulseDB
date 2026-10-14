@@ -72,13 +72,17 @@ const MySQLOverviewTab = lazyRetry(() => import('../components/views/mysql/MySQL
 const MySQLPerformanceTab = lazyRetry(() => import('../components/views/mysql/MySQLPerformanceTab'));
 const MySQLReplicationTab = lazyRetry(() => import('../components/views/mysql/MySQLReplicationTab'));
 
-// SQL Server features (one module, four screens)
-const sqlServerTab = (name) =>
-    lazyRetry(() => import('../components/views/sqlserver/SqlServerTabs').then((m) => ({ default: m[name] })));
-const SqlServerOverviewTab = sqlServerTab('SqlServerOverviewTab');
-const SqlServerPerformanceTab = sqlServerTab('SqlServerPerformanceTab');
-const SqlServerSessionsTab = sqlServerTab('SqlServerSessionsTab');
-const SqlServerStorageTab = sqlServerTab('SqlServerStorageTab');
+// SQL Server features
+const SqlServerOverviewTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerOverviewTab'));
+const SqlServerPerformanceTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerPerformanceTab'));
+const SqlServerQueryStoreTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerQueryStoreTab'));
+const SqlServerSessionsTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerSessionsTab'));
+const SqlServerStorageTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerStorageTab'));
+const SqlServerMemoryTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerMemoryTab'));
+const SqlServerIoTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerIoTab'));
+const SqlServerBackupsTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerBackupsTab'));
+const SqlServerSecurityTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerSecurityTab'));
+const SqlServerAlwaysOnTab = lazyRetry(() => import('../components/views/sqlserver/SqlServerAlwaysOnTab'));
 
 // MongoDB features
 const MongoOverviewTab = lazyRetry(() => import('../components/views/mongodb/MongoOverviewTab'));
@@ -245,8 +249,14 @@ registerComponents({
     MySQLReplicationTab,
     SqlServerOverviewTab,
     SqlServerPerformanceTab,
+    SqlServerQueryStoreTab,
     SqlServerSessionsTab,
     SqlServerStorageTab,
+    SqlServerMemoryTab,
+    SqlServerIoTab,
+    SqlServerBackupsTab,
+    SqlServerSecurityTab,
+    SqlServerAlwaysOnTab,
     MongoOverviewTab,
     MongoPerformanceTab,
     MongoStorageTab,
