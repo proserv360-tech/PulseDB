@@ -1226,6 +1226,8 @@ const ConnectionsTab = () => {
                             <div style={{ flex: 1, height: 1, background: THEME.glassBorder }} />
                         </div>
 
+                        {/* Primary actions side by side (wrap on narrow screens) */}
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                         <button
                             onClick={() => openNew()}
                             style={{
@@ -1249,21 +1251,20 @@ const ConnectionsTab = () => {
                         </button>
 
                         {/* SQL Server on a PC/LAN the server cannot reach: PulseDB Agent package */}
-                        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                            <ConnectAnotherPcButton
-                                style={{
-                                    // Same box as "Add Connection Manually" above: outline drawn
-                                    // inset (no border) so both buttons are the same height.
-                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                    minWidth: 230, padding: '9px 22px', borderRadius: 16, cursor: 'pointer',
-                                    background: THEME.success + '1F', border: 'none',
-                                    boxShadow: `inset 0 0 0 1px ${THEME.success}55`,
-                                    color: THEME.success, fontSize: 12, fontWeight: 600, fontFamily: FONT_UI,
-                                }}
-                            />
-                            <span style={{ fontSize: 11, color: THEME.textMuted }}>
-                                SQL Server on your PC or office network? Download the agent and run setup.cmd there.
-                            </span>
+                        <ConnectAnotherPcButton
+                            style={{
+                                // Same box as "Add Connection Manually": outline drawn inset
+                                // (no border) so both buttons are the same height.
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                minWidth: 230, padding: '9px 22px', borderRadius: 16, cursor: 'pointer',
+                                background: THEME.success + '1F', border: 'none',
+                                boxShadow: `inset 0 0 0 1px ${THEME.success}55`,
+                                color: THEME.success, fontSize: 12, fontWeight: 600, fontFamily: FONT_UI,
+                            }}
+                        />
+                        </div>
+                        <div style={{ marginTop: 10, fontSize: 11, color: THEME.textMuted }}>
+                            SQL Server on your PC or office network? Use “Connect another PC” and run setup.cmd there.
                         </div>
 
                         {/* Feature tags */}
