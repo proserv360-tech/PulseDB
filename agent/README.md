@@ -31,9 +31,9 @@ Double-click **`setup.cmd`** (no admin rights needed). It:
 
 1. finds every SQL Server instance on this PC and its databases, signing in with
    **Windows authentication** (no SQL password anywhere),
-2. gets an agent key — on a PC that also has the PulseDB backend (`..\backend\.env`)
-   it creates one automatically; otherwise it asks you to paste one into
-   `agent.config.json` (see step 1 below),
+2. gets an agent key — the key that came in the **Connect another PC** download,
+   or, on a PC that also has the PulseDB backend (`..\backend\.env`), a new one it
+   creates automatically,
 3. starts the agent in the background and makes it start at every sign-in
    (Startup folder; a small supervisor restarts it if it ever exits),
 4. waits until PulseDB has registered the databases and lists them.
@@ -41,16 +41,67 @@ Double-click **`setup.cmd`** (no admin rights needed). It:
 Each database then appears in PulseDB → **Connections** with a **VIA AGENT** badge.
 
 Connections you add in PulseDB the ordinary way (**New Connection**, host such as
-`MYPCSQLEXPRESS`, `localhost` or `192.168.x.x`, with a SQL login) also work from the
+`MYPC\SQLEXPRESS`, `localhost` or `192.168.x.x`, with a SQL login) also work from the
 cloud while an agent of yours is online: PulseDB sends that connection's host and
 login to the agent, which dials it (read-only). Turn this off with
 `"relayConnections": false` in `agent.config.json`.
+
 Run `setup.cmd` again any time (new databases, new instance): it refreshes the
 list and keeps the same key and connections. `uninstall-agent.cmd` removes it.
 
 Deleting one of these connections in PulseDB is remembered: the agent's periodic
 re-registration (every 10 minutes and at sign-in) does not bring it back. Running
 `setup.cmd` again restores the deleted ones.
+
+## Connect another PC
+
+Monitor the SQL Server on any other Windows PC — nothing to type: no server
+details, passwords or keys. Illustrated guide:
+**[Connect a PC to PulseDB](https://claude.ai/artifact/JxN2XyTJyyVE29gWfppWuN)**.
+
+**Before you start** (on the other PC)
+
+- Windows 10 or 11 with SQL Server installed.
+- The Windows user you sign in as can open that SQL Server (if it connects in
+  SQL Server Management Studio without a password, it's fine).
+- Internet access. No admin rights needed; Windows may ask permission once to
+  install the SQL Server ODBC driver.
+
+**Steps**
+
+1. **Download the agent — on your PC.** Open PulseDB (e.g.
+   `https://pulsedb-o8ax.vercel.app`), sign in as an administrator, go to
+   **Connections → Manage Connections** and click **Connect another PC**.
+   `PulseDB-Agent.zip` downloads with PulseDB's address and a new agent key inside.
+   Keep it private and download a fresh one for each PC.
+2. **Copy the zip to the other PC** — USB drive, email, Teams or a shared folder.
+3. **Extract it — on the other PC.** Right-click → **Extract All… → Extract**, then
+   move the `PulseDB-Agent` folder somewhere permanent, e.g. `C:\PulseDB-Agent`
+   (the agent runs from it).
+4. **Run `setup.cmd` — on the other PC.** Double-click it (if Windows shows *Windows
+   protected your PC*, click **More info → Run anyway**). In 1–3 minutes it installs
+   Node.js and the ODBC driver if missing, finds the databases, starts the agent and
+   makes it start at every sign-in. It ends with:
+
+   ```
+   Done. PulseDB Agent is running and registered with https://pulsedb-o8ax.vercel.app:
+       OFFICE-PC · SalesDB   -> connection #81
+       OFFICE-PC · Inventory -> connection #82
+   ```
+
+5. **Check in PulseDB.** Refresh (**Ctrl + Shift + R**) and open **Connections**:
+   each database appears as `<PC name> · <database>` with a **VIA AGENT** badge.
+   Click **Test** (expect *Connection successful via PulseDB Agent*), then select it
+   and open the **SQL Server** screens.
+
+SQL Servers that the other PC can reach on its network (e.g. `SERVER01\SQLEXPRESS`,
+`192.168.1.20`) can then be added in PulseDB with **New Connection** and a SQL
+login — they go through that PC's agent automatically. With agents on several PCs,
+use the PC's name as the host rather than `localhost`.
+
+**Removing a PC:** run `uninstall-agent.cmd` on it, delete `<PC name> agent` in
+PulseDB under **Observability → SDK Integration** (the key stops working at once),
+then delete its connections.
 
 ## Manual setup (Windows)
 
@@ -113,5 +164,9 @@ node pulsedb-agent.mjs
 | *did not answer within 20s* | The agent just stopped, or the query is taking too long |
 | *Login failed for user …* | Wrong `user`/`password` in `agent.config.json`, or SQL authentication is off |
 | *Windows authentication via ODBC Driver … failed* | The Windows account running the agent has no SQL Server login, or the ODBC driver is missing |
+| setup: *skipped — Login failed* | This Windows user has no SQL Server login — ask the DBA to add one, or add the server in PulseDB with **New Connection** and a SQL login |
+| setup: *No SQL Server databases found* | SQL Server isn't installed on this PC or its service is stopped (**Services → SQL Server**) |
+| setup: *This agent has no valid key* | Its key was deleted in PulseDB — download a fresh package (**Connections → Connect another PC**) and run its `setup.cmd` |
+| `setup.cmd` closes at once / Node.js error | Install Node.js LTS from https://nodejs.org and run `setup.cmd` again |
 | *Blocked by the PulseDB Agent* | A write statement in read-only mode (`"allowWrites": true` to permit) |
 | Agent log: *rejected the agent key (401)* | Wrong `agentKey`, or the SDK application was deleted/regenerated |

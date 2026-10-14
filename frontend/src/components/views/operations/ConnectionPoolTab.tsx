@@ -1264,7 +1264,8 @@ const ConnectionsTab = () => {
                         />
                         </div>
                         <div style={{ marginTop: 10, fontSize: 11, color: THEME.textMuted }}>
-                            SQL Server on your PC or office network? Use “Connect another PC” and run setup.cmd there.
+                            SQL Server on your PC or office network? Use “Connect another PC” and run setup.cmd there.{' '}
+                            <AgentGuideLink />
                         </div>
 
                         {/* Feature tags */}
@@ -1320,7 +1321,13 @@ const ConnectionsTab = () => {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 22, alignItems: 'center' }}>
-                                <ConnectAnotherPcButton style={S.btn(THEME.success + '1F', THEME.success + '55', THEME.success)} />
+                                {/* Guide link hangs below the button without changing the row's alignment */}
+                                <div style={{ position: 'relative' }}>
+                                    <ConnectAnotherPcButton style={S.btn(THEME.success + '1F', THEME.success + '55', THEME.success)} />
+                                    <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, textAlign: 'center' }}>
+                                        <AgentGuideLink />
+                                    </div>
+                                </div>
                                 <button onClick={() => openNew()}
                                     style={S.btn(THEME.primary + '2E', THEME.primary + '66', THEME.primary)}
                                     onMouseEnter={e => e.currentTarget.style.background = THEME.primary + '4D'}
@@ -1695,6 +1702,22 @@ const ConnectionsTab = () => {
  * "Connect another PC": downloads a PulseDB Agent zip with a fresh key and this
  * PulseDB's address already in it. On the other PC: unzip, run setup.cmd.
  */
+/** Step-by-step guide for "Connect another PC" (also linked from agent/README.md). */
+const AGENT_GUIDE_URL = 'https://claude.ai/artifact/JxN2XyTJyyVE29gWfppWuN';
+
+function AgentGuideLink() {
+    return (
+        <a
+            href={AGENT_GUIDE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 11, fontWeight: 600, color: THEME.success, textDecoration: 'underline', whiteSpace: 'nowrap' }}
+        >
+            Setup guide ↗
+        </a>
+    );
+}
+
 function ConnectAnotherPcButton({ style }: { style: React.CSSProperties }) {
     const [busy, setBusy] = useState(false);
     const download = async () => {
@@ -1714,7 +1737,8 @@ function ConnectAnotherPcButton({ style }: { style: React.CSSProperties }) {
                 'PulseDB-Agent.zip downloaded.\n\nOn the PC with the SQL Server:\n' +
                     '1. Copy the zip there and extract it.\n' +
                     '2. Double-click PulseDB-Agent\\setup.cmd.\n\n' +
-                    'Its databases then appear here with a VIA AGENT badge. The zip contains a key for this PulseDB — keep it private.',
+                    'Its databases then appear here with a VIA AGENT badge. The zip contains a key for this PulseDB — keep it private.\n\n' +
+                    `Step-by-step guide: ${AGENT_GUIDE_URL}`,
             );
         } catch (e: any) {
             window.alert(`Could not create the agent package: ${e.message}`);
