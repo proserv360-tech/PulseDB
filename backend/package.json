@@ -57,7 +57,7 @@
         "@aws-sdk/client-s3": "^3.998.0",
         "@aws-sdk/client-kms": "^3.998.0",
         "@elastic/elasticsearch": "^8.15.0",
-        "@google-cloud/bigquery": "^8.1.1",
+        "@google-cloud/bigquery": "^9.2.0",
         "bullmq": "^5.16.0",
         "cassandra-driver": "^4.7.2",
         "ioredis": "^5.4.2",
