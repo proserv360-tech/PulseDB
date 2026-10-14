@@ -117,3 +117,6 @@ sdk/go/examples/*/nethttp
 # PulseDB Agent local config (holds database credentials)
 agent/agent.config.json
 agent/node_modules/
+agent/run-agent.cmd
+agent/start-agent-hidden.vbs
+agent/logs/

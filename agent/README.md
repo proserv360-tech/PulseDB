@@ -25,7 +25,24 @@ storage & I/O, backups & jobs, security, Always On), and can **test the
 connection**, run **SQL console** queries and list **schemas**. Each screen
 refresh is a single round trip to the agent.
 
-## Set up (Windows)
+## Automatic setup (Windows) — recommended
+
+Double-click **`setup.cmd`** (no admin rights needed). It:
+
+1. finds every SQL Server instance on this PC and its databases, signing in with
+   **Windows authentication** (no SQL password anywhere),
+2. gets an agent key — on a PC that also has the PulseDB backend (`..\backend\.env`)
+   it creates one automatically; otherwise it asks you to paste one into
+   `agent.config.json` (see step 1 below),
+3. starts the agent in the background and makes it start at every sign-in
+   (Startup folder; a small supervisor restarts it if it ever exits),
+4. waits until PulseDB has registered the databases and lists them.
+
+Each database then appears in PulseDB → **Connections** with a **VIA AGENT** badge.
+Run `setup.cmd` again any time (new databases, new instance): it refreshes the
+list and keeps the same key and connections. `uninstall-agent.cmd` removes it.
+
+## Manual setup (Windows)
 
 1. **Create an agent key in PulseDB.** Sign in as an admin, open **Observability →
    SDK Integration** and register an application (e.g. name `My PC agent`, platform

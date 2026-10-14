@@ -163,6 +163,22 @@ export async function registerAgentTargets(app, targets) {
             continue;
         }
 
+        // The agent's SDK application was deleted and re-created (ON DELETE SET
+        // NULL detached its connections): adopt them rather than duplicating.
+        const adopted = await pool.query(
+            `UPDATE ${S}.pulsedb_connections
+                SET agent_app_id = $1, db_type = $4, db_name = $5, host = $6, port = $7
+              WHERE id = (SELECT id FROM ${S}.pulsedb_connections
+                           WHERE agent_app_id IS NULL AND agent_target = $2 AND user_id = $3
+                           ORDER BY id LIMIT 1)
+              RETURNING id`,
+            [app.id, target, app.created_by, engine, database, host, port],
+        );
+        if (adopted.rows[0]) {
+            out.push({ target, connectionId: adopted.rows[0].id, created: false });
+            continue;
+        }
+
         // New target: the display name must be unique per user.
         let name = target;
         for (let attempt = 1; ; attempt++) {

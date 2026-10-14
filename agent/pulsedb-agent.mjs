@@ -136,8 +136,13 @@ async function windowsAuthPool(target) {
         throw new Error(`Windows authentication needs the msnodesqlv8 driver (npm.cmd ci in the agent folder): ${e.message}`);
     }
     const [host, instance] = String(target.host || 'localhost').split('\\');
+    // No port configured: let ODBC pick shared memory locally (works without SQL Browser).
     const server =
-        instance && instance.toUpperCase() !== 'MSSQLSERVER' ? `${host}\\${instance}` : `${host},${Number(target.port) || 1433}`;
+        instance && instance.toUpperCase() !== 'MSSQLSERVER'
+            ? `${host}\\${instance}`
+            : target.port
+              ? `${host},${Number(target.port)}`
+              : host;
     const drivers = target.odbcDriver ? [target.odbcDriver] : ['ODBC Driver 18 for SQL Server', 'ODBC Driver 17 for SQL Server'];
     let lastError;
     for (const driver of drivers) {
@@ -276,15 +281,27 @@ async function runJob(job) {
 let stopping = false;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** Post a job result, retrying brief server-side failures (5xx / network). */
+async function postResult(jobId, body) {
+    for (let attempt = 1; ; attempt++) {
+        try {
+            return await api(`/agent/jobs/${jobId}/result`, body);
+        } catch (e) {
+            if (attempt >= 3 || (e.status && e.status < 500)) throw e;
+            await sleep(700 * attempt);
+        }
+    }
+}
+
 async function handle(job) {
     const started = Date.now();
     try {
         const result = await runJob(job);
-        await api(`/agent/jobs/${job.id}/result`, { ok: true, result });
+        await postResult(job.id, { ok: true, result });
         log('info', `${job.op} on ${job.target} ok`, { ms: Date.now() - started });
     } catch (e) {
         log('error', `${job.op} on ${job.target} failed`, { error: errMsg(e) });
-        await api(`/agent/jobs/${job.id}/result`, { ok: false, error: errMsg(e) }).catch((err) =>
+        await postResult(job.id, { ok: false, error: errMsg(e) }).catch((err) =>
             log('error', 'could not report failure', { error: err.message }),
         );
     }
