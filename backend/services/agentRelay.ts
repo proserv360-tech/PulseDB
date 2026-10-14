@@ -34,6 +34,55 @@ const CLAIM_POLL_MS = 500;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * A host only something on the user's own network can reach: a computer name
+ * (MYPC, MYPC\SQLEXPRESS), localhost, a private IP, or a *.local-style name.
+ */
+export function isLocalOnlyHost(host) {
+    const h = String(host || '')
+        .trim()
+        .split('\\')[0]
+        .toLowerCase();
+    if (!h) return false;
+    if (['localhost', '.', '(local)', '::1'].includes(h)) return true;
+    if (/^(127|10)\.\d+\.\d+\.\d+$/.test(h) || /^192\.168\.\d+\.\d+$/.test(h)) return true;
+    if (/^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(h)) return true;
+    if (/\.(local|lan|internal|home|corp|localdomain)$/.test(h)) return true;
+    return !h.includes('.') && !h.includes(':'); // single-label computer name
+}
+
+const normEngine = (t) => {
+    const s = String(t || '').toLowerCase();
+    return s === 'sqlserver' || s === 'sql-server' ? 'mssql' : s;
+};
+
+/**
+ * On a cloud deployment, which online PulseDB Agent of this user can reach a
+ * connection's private/local host? Lets an ordinary connection (host
+ * "MYPC\SQLEXPRESS", a SQL login) work from the cloud: the agent dials it with
+ * the connection's own credentials. Prefers the agent running on the named
+ * machine; otherwise the user's only online agent. Self-hosted installs reach
+ * such hosts directly and are not routed (PULSEDB_ROUTE_VIA_AGENT=1 forces it).
+ * @returns {Promise<{ id: number, name: string, machine: string|null } | null>}
+ */
+export async function findAgentRoute({ dbType, host, userId }) {
+    if (process.env.VERCEL !== '1' && process.env.PULSEDB_ROUTE_VIA_AGENT !== '1') return null;
+    if (!pool || !userId || !AGENT_ENGINES.has(normEngine(dbType)) || !isLocalOnlyHost(host)) return null;
+    const { rows } = await pool.query(
+        `SELECT id, name, config->>'machine' AS machine
+           FROM ${S}.sdk_applications
+          WHERE status = 'active' AND created_by = $1
+            AND config->>'pulsedbAgent' = 'true'
+            AND config->'capabilities' ? 'relay'
+            AND last_heartbeat_at > now() - interval '${OFFLINE_AFTER_MS / 1000} seconds'
+          ORDER BY last_heartbeat_at DESC`,
+        [userId],
+    );
+    if (!rows.length) return null;
+    const machine = String(host).trim().split('\\')[0].toLowerCase();
+    return rows.find((r) => (r.machine || '').toLowerCase() === machine) || (rows.length === 1 ? rows[0] : null);
+}
+
+/**
  * Run one operation on an agent and wait for its result.
  * @returns {Promise<object>} the agent's result payload
  */

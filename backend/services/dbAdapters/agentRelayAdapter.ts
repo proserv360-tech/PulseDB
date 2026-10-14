@@ -11,10 +11,28 @@
 import { getAdapter } from './index.js';
 import { runAgentJob } from '../agentRelay.js';
 
-export function createAgentRelayAdapter(connection) {
+/**
+ * @param connection a saved (or wizard) connection
+ * @param route      for an ordinary connection to a private host: the agent
+ *                   (from findAgentRoute) that dials it with the connection's
+ *                   own host and login, sent along with each job.
+ */
+export function createAgentRelayAdapter(connection, route = null) {
     const adapter = getAdapter(connection.dbType, {});
+    const appId = route ? route.id : connection.agentAppId;
+    const inline = route
+        ? {
+              host: connection.host,
+              port: connection.port || null,
+              database: connection.database || 'master',
+              user: connection.username || null,
+              password: connection.password || null,
+              encrypt: connection.ssl === true,
+          }
+        : null;
+    const target = route ? `relay:${connection.host}/${inline.database}` : connection.agentTarget;
     const job = (op, payload, timeoutMs) =>
-        runAgentJob({ appId: connection.agentAppId, target: connection.agentTarget, op, payload, timeoutMs });
+        runAgentJob({ appId, target, op, payload: inline ? { ...payload, connection: inline } : payload, timeoutMs });
 
     adapter.viaAgent = true;
 

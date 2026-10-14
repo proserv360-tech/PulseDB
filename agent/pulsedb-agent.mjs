@@ -14,6 +14,7 @@
  *
  *   node pulsedb-agent.mjs [--config path\to\agent.config.json]
  */
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -21,7 +22,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { assertReadOnly } from './readOnlyGuard.mjs';
 
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 // ── config ──────────────────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ async function register() {
         port: t.port || 1433,
         database: t.database || '',
     }));
-    const r = await api('/agent/register', { agent: { version: VERSION, hostname: os.hostname() }, targets });
+    const r = await api('/agent/register', { agent: { version: VERSION, hostname: os.hostname(), capabilities: cfg.relayConnections === false ? ['batch'] : ['batch', 'relay'] }, targets });
     log('info', `registered with ${cfg.pulsedbUrl} as agent "${r.agent}"`, {
         connections: (r.registered || []).map((x) => `${x.target} -> connection #${x.connectionId}`),
     });
@@ -224,8 +225,36 @@ function shapeResult(recordset, duration) {
     return { rows, fields, rowCount: recordset?.length ?? rows.length, duration, truncated };
 }
 
+/**
+ * A connection added in PulseDB the ordinary way (host + SQL login) whose host
+ * only this network can reach: PulseDB sends its details with the job and the
+ * agent dials it — still read-only unless allowWrites. Without a login the
+ * agent signs in with Windows authentication. Disable with
+ * "relayConnections": false.
+ */
+function relayTarget(c) {
+    if (cfg.relayConnections === false) {
+        throw new Error('This PulseDB Agent does not relay connections ("relayConnections": false in agent.config.json).');
+    }
+    if (!c?.host) throw new Error('relay job without a host');
+    // Pool key changes with the login, so an edited password gets a fresh pool.
+    const key = crypto.createHash('sha256').update(JSON.stringify([c.host, c.port, c.database, c.user, c.password])).digest('hex');
+    return {
+        name: `relay:${key.slice(0, 16)}`,
+        engine: 'mssql',
+        host: c.host,
+        port: c.port || undefined,
+        database: c.database || 'master',
+        user: c.user || undefined,
+        password: c.password || undefined,
+        windowsAuth: !c.user,
+        encrypt: c.encrypt === true,
+        trustServerCertificate: true,
+    };
+}
+
 async function runJob(job) {
-    const target = targetsByName.get(job.target);
+    const target = job.payload?.connection ? relayTarget(job.payload.connection) : targetsByName.get(job.target);
     if (!target) throw new Error(`This agent has no target named "${job.target}". Check agent.config.json.`);
     if (job.op === 'ping') {
         const p = await pool(target);

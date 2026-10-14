@@ -39,6 +39,12 @@ Double-click **`setup.cmd`** (no admin rights needed). It:
 4. waits until PulseDB has registered the databases and lists them.
 
 Each database then appears in PulseDB → **Connections** with a **VIA AGENT** badge.
+
+Connections you add in PulseDB the ordinary way (**New Connection**, host such as
+`MYPCSQLEXPRESS`, `localhost` or `192.168.x.x`, with a SQL login) also work from the
+cloud while an agent of yours is online: PulseDB sends that connection's host and
+login to the agent, which dials it (read-only). Turn this off with
+`"relayConnections": false` in `agent.config.json`.
 Run `setup.cmd` again any time (new databases, new instance): it refreshes the
 list and keeps the same key and connections. `uninstall-agent.cmd` removes it.
 

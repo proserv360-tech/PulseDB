@@ -13,6 +13,8 @@ import {
     setUserActiveSchema,
 } from '../../core/activeSelection.js';
 import { buildSslOption, pool } from '../../core/adminPool.js';
+import { findAgentRoute } from '../../services/agentRelay.js';
+import { createAgentRelayAdapter } from '../../services/dbAdapters/agentRelayAdapter.js';
 import { authenticate } from '../../core/auth.js';
 import { IS_PROD } from '../../core/config.js';
 import {
@@ -440,8 +442,11 @@ export default function registerConnectionRoutes(app) {
                     .status(400)
                     .json({ error: 'host, port, database, username, password are required for this database type' });
             }
-            const hostCheck = await assertHostNotPrivate(dialTarget({ host, ...pickSSH(body) }));
-            if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
+            const agentRoute = await agentRouteFor({ host, dbType, ...pickSSH(body) }, req.user.id);
+            if (!agentRoute) {
+                const hostCheck = await assertHostNotPrivate(dialTarget({ host, ...pickSSH(body) }));
+                if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
+            }
             if (isDefault) await dbSetDefault(req.user.id, req.user.role, -1);
 
             // Auto-deduplicate connection names: if "MyDB" exists, try "MyDB (2)", "MyDB (3)", …
@@ -498,7 +503,10 @@ export default function registerConnectionRoutes(app) {
             ]);
             try {
                 const cfg = await resolvePoolConfig(newConn);
-                if (PHASE5_VIA_ADAPTER.has(connDbType)) {
+                if (agentRoute) {
+                    // Private host reached through the user's PulseDB Agent.
+                    await createAgentRelayAdapter(newConn, agentRoute).connect();
+                } else if (PHASE5_VIA_ADAPTER.has(connDbType)) {
                     const { getAdapter } = await import('../../services/dbAdapters/index.js');
                     const adapter = getAdapter(connDbType, {
                         // Common fields
@@ -621,7 +629,10 @@ export default function registerConnectionRoutes(app) {
             const { name, host, port, database, username, password, ssl } = body;
             const ssh = pickSSH({ ...existing, ...body });
             const target = dialTarget({ host: host || existing.host, ...ssh });
-            if (!existing.agentAppId && target !== dialTarget(existing)) {
+            const viaAgent =
+                existing.agentAppId ||
+                (await agentRouteFor({ ...existing, host: host || existing.host, ...ssh }, existing.userId));
+            if (!viaAgent && target !== dialTarget(existing)) {
                 const hostCheck = await assertHostNotPrivate(target);
                 if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
             }
@@ -778,6 +789,16 @@ export default function registerConnectionRoutes(app) {
         return conn?.sshEnabled && conn?.sshHost ? conn.sshHost : conn?.host;
     }
 
+    /**
+     * On the cloud deployment, a SQL Server on a private/local host is reached
+     * through the user's online PulseDB Agent (services/agentRelay.findAgentRoute)
+     * instead of being refused as a private address.
+     */
+    function agentRouteFor(fields, userId) {
+        if (fields?.sshEnabled) return Promise.resolve(null);
+        return findAgentRoute({ dbType: fields?.dbType || fields?.type, host: fields?.host, userId }).catch(() => null);
+    }
+
     function isMetadataTarget(hostOrIp) {
         const s = String(hostOrIp || '').toLowerCase();
         return (
@@ -864,11 +885,28 @@ export default function registerConnectionRoutes(app) {
             // SEC-021 + audit M-1: reject private/internal targets by literal host AND
             // by resolved IP (defeats DNS-based SSRF bypass). This test dials `host`
             // directly (no SSH tunnel), so the database host is what gets vetted.
+            const dbType = (type || 'postgresql').toLowerCase();
+            // Private host on the cloud deployment: test through the user's PulseDB Agent.
+            const agentRoute = await agentRouteFor({ host, dbType }, req.user.id);
+            if (agentRoute) {
+                try {
+                    const relay = createAgentRelayAdapter(
+                        { dbType, host, port, database, username, password, ssl },
+                        agentRoute,
+                    );
+                    await relay.connect();
+                    return res.json({
+                        success: true,
+                        message: `Connection successful via PulseDB Agent on ${agentRoute.machine || agentRoute.name}`,
+                    });
+                } catch (e) {
+                    return res.json({ success: false, error: e.message });
+                }
+            }
             const ssrf = await assertHostNotPrivate(host);
             if (!ssrf.ok) {
                 return res.status(400).json({ success: false, error: ssrf.reason, code: 'HOST_NOT_ALLOWED' });
             }
-            const dbType = (type || 'postgresql').toLowerCase();
 
             // Phase-5 engines (MSSQL, Oracle, Redis, Elasticsearch, Snowflake,
             // BigQuery, Redshift, Cassandra, DynamoDB) are routed through the
@@ -1001,9 +1039,10 @@ export default function registerConnectionRoutes(app) {
             const c = conns.find((c) => c.id === id);
             if (!c) return res.status(404).json({ error: 'Connection not found' });
 
-            // Served by a PulseDB Agent: the agent dials the database, so there is no
-            // host to vet or tunnel to open here, just a round trip to the agent.
-            if (c.agentAppId) {
+            // Served by a PulseDB Agent (registered by it, or an ordinary connection to a
+            // private host routed through it): the agent dials the database, so there is
+            // no host to vet or tunnel to open here, just a round trip to the agent.
+            if (c.agentAppId || (await agentRouteFor(c, c.userId))) {
                 try {
                     const adapter = await openAdapter(c);
                     await adapter.connect();

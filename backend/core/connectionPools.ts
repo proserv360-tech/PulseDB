@@ -4,6 +4,7 @@
 // Extracted from server.ts.
 
 import { Pool } from 'pg';
+import { findAgentRoute } from '../services/agentRelay.js';
 import { createAgentRelayAdapter } from '../services/dbAdapters/agentRelayAdapter.js';
 import { getAdapter as getDbAdapter } from '../services/dbAdapters/index.js';
 import { log } from '../services/logger.js';
@@ -584,6 +585,11 @@ export async function resolvePoolConfig(c) {
  */
 export async function openAdapter(connection, options = {}) {
     if (connection.agentAppId) return createAgentRelayAdapter(connection);
+    // Ordinary connection to a private host on a cloud deployment: through the user's agent.
+    if (!connection.sshEnabled) {
+        const route = await findAgentRoute({ dbType: connection.dbType, host: connection.host, userId: connection.userId });
+        if (route) return createAgentRelayAdapter(connection, route);
+    }
     const cfg = await resolvePoolConfig(connection);
     const adapter = getDbAdapter(connection.dbType, {
         host: cfg.host,

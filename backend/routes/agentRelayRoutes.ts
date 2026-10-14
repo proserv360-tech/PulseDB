@@ -50,6 +50,21 @@ export default function agentRelayRoutes(pool, authenticateSdkKey, log) {
                 );
                 app.name = `${hostname} agent`;
             }
+            // Remember what this agent can do and where it runs: findAgentRoute only
+            // routes ordinary private-host connections to agents that can relay them.
+            const caps = (Array.isArray(req.body?.agent?.capabilities) ? req.body.agent.capabilities : [])
+                .map((c) => String(c).slice(0, 20))
+                .filter((c) => /^[a-z]+$/.test(c))
+                .slice(0, 10);
+            await pool.query(
+                `UPDATE pgmonitoringtool.sdk_applications
+                    SET config = config
+                        || jsonb_build_object('pulsedbAgent', true, 'capabilities', $2::jsonb, 'agentVersion', $3::text)
+                        || CASE WHEN config ? 'machine' OR $4 = '' THEN '{}'::jsonb
+                                ELSE jsonb_build_object('machine', $4::text) END
+                  WHERE id = $1`,
+                [app.id, JSON.stringify(caps), String(req.body?.agent?.version || '').slice(0, 20), hostname],
+            );
             const registered = await registerAgentTargets(app, targets);
             await syncConnectionsCache();
             log('INFO', 'PulseDB Agent registered', {
