@@ -454,6 +454,8 @@ export default function registerConnectionRoutes(app) {
                     .status(400)
                     .json({ error: 'host, port, database, username, password are required for this database type' });
             }
+            const hostCheck = await assertHostNotPrivate(dialTarget({ host, ...pickSSH(body) }));
+            if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
             if (isDefault) await dbSetDefault(req.user.id, req.user.role, -1);
 
             // Auto-deduplicate connection names: if "MyDB" exists, try "MyDB (2)", "MyDB (3)", …
@@ -632,6 +634,11 @@ export default function registerConnectionRoutes(app) {
             const body = unwrapSensitiveFields(req.body);
             const { name, host, port, database, username, password, ssl } = body;
             const ssh = pickSSH({ ...existing, ...body });
+            const target = dialTarget({ host: host || existing.host, ...ssh });
+            if (target !== dialTarget(existing)) {
+                const hostCheck = await assertHostNotPrivate(target);
+                if (!hostCheck.ok) return res.status(400).json({ error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
+            }
 
             const sshChanged = SSH_FIELDS.some((f) => req.body[f] !== undefined && req.body[f] !== existing[f]);
             if (sshChanged) await closeTunnel(id);
@@ -760,6 +767,42 @@ export default function registerConnectionRoutes(app) {
     // Block private/internal targets by literal host string AND by resolved IP, so
     // a public hostname that resolves to an internal address (DNS rebinding, a CNAME
     // to cloud metadata) can't slip through a name-only blocklist.
+    //
+    // Private networks are allowed on self-hosted installs (a server, a
+    // laptop): monitoring databases on the same machine or LAN is what those are
+    // for. The cloud deployment cannot reach them anyway, so there they stay
+    // blocked as SSRF. PULSEDB_ALLOW_PRIVATE_NETWORKS=true|false overrides.
+    // Cloud metadata endpoints (link-local 169.254/16, fd00:ec2::254,
+    // metadata.google.internal) are refused in every mode.
+    const ALLOW_PRIVATE_NETWORKS = process.env.PULSEDB_ALLOW_PRIVATE_NETWORKS
+        ? process.env.PULSEDB_ALLOW_PRIVATE_NETWORKS === 'true'
+        : process.env.VERCEL !== '1';
+    const PRIVATE_BLOCKED_REASON =
+        'This PulseDB server runs in the cloud and cannot reach private or local addresses ' +
+        '(localhost, 192.168.x.x, computer names). To monitor databases on your own machine ' +
+        'or network, run PulseDB on that machine or network.';
+    const METADATA_BLOCKED_REASON = 'Connections to cloud metadata endpoints are not allowed';
+
+    /**
+     * The address PulseDB itself will dial. Behind an SSH tunnel the database
+     * host is private by design and is reached from the SSH server, so the SSH
+     * host is the one to vet.
+     */
+    function dialTarget(conn) {
+        return conn?.sshEnabled && conn?.sshHost ? conn.sshHost : conn?.host;
+    }
+
+    function isMetadataTarget(hostOrIp) {
+        const s = String(hostOrIp || '').toLowerCase();
+        return (
+            /^169\.254\./.test(s) ||
+            /(^|:)169\.254\.\d+\.\d+$/.test(s) ||
+            s === 'fd00:ec2::254' ||
+            s === 'metadata.google.internal' ||
+            s === 'metadata'
+        );
+    }
+
     function isPrivateIp(ip) {
         const s = String(ip || '').toLowerCase();
         if (!s) return false;
@@ -778,8 +821,25 @@ export default function registerConnectionRoutes(app) {
     }
 
     async function assertHostNotPrivate(host) {
-        const h = String(host || '').trim();
+        // SQL Server hosts may be written HOST\INSTANCE; only HOST is an address.
+        const h = String(host || '')
+            .trim()
+            .split('\\')[0];
         if (!h) return { ok: false, reason: 'Host is required' };
+        if (isMetadataTarget(h)) return { ok: false, reason: METADATA_BLOCKED_REASON };
+        if (ALLOW_PRIVATE_NETWORKS) {
+            // Still refuse names that resolve to a metadata address.
+            try {
+                const dns = await import('dns/promises');
+                const records = await dns.lookup(h, { all: true });
+                if (records.some((r) => isMetadataTarget(r.address))) {
+                    return { ok: false, reason: METADATA_BLOCKED_REASON };
+                }
+            } catch {
+                // resolution failure: let the actual connection attempt surface the error
+            }
+            return { ok: true };
+        }
         const literal = [
             /^127\./,
             /^10\./,
@@ -795,13 +855,13 @@ export default function registerConnectionRoutes(app) {
             /^metadata\.google\.internal$/i,
         ];
         if (literal.some((p) => p.test(h)) || isPrivateIp(h)) {
-            return { ok: false, reason: 'Connections to private/internal networks are not allowed' };
+            return { ok: false, reason: PRIVATE_BLOCKED_REASON };
         }
         try {
             const dns = await import('dns/promises');
             const records = await dns.lookup(h, { all: true });
-            if (records.some((r) => isPrivateIp(r.address))) {
-                return { ok: false, reason: 'Host resolves to a private/internal address; not allowed' };
+            if (records.some((r) => isPrivateIp(r.address) || isMetadataTarget(r.address))) {
+                return { ok: false, reason: PRIVATE_BLOCKED_REASON };
             }
         } catch {
             // resolution failure: let the actual connection attempt surface the error
@@ -816,10 +876,11 @@ export default function registerConnectionRoutes(app) {
             if (!host) return res.status(400).json({ success: false, error: 'Host is required' });
 
             // SEC-021 + audit M-1: reject private/internal targets by literal host AND
-            // by resolved IP (defeats DNS-based SSRF bypass).
+            // by resolved IP (defeats DNS-based SSRF bypass). This test dials `host`
+            // directly (no SSH tunnel), so the database host is what gets vetted.
             const ssrf = await assertHostNotPrivate(host);
             if (!ssrf.ok) {
-                return res.status(400).json({ success: false, error: ssrf.reason });
+                return res.status(400).json({ success: false, error: ssrf.reason, code: 'HOST_NOT_ALLOWED' });
             }
             const dbType = (type || 'postgresql').toLowerCase();
 
@@ -953,6 +1014,9 @@ export default function registerConnectionRoutes(app) {
             const conns = await dbLoadConnections(req.user.id, req.user.role);
             const c = conns.find((c) => c.id === id);
             if (!c) return res.status(404).json({ error: 'Connection not found' });
+
+            const hostCheck = await assertHostNotPrivate(dialTarget(c));
+            if (!hostCheck.ok) return res.json({ success: false, error: hostCheck.reason, code: 'HOST_NOT_ALLOWED' });
 
             let poolCfg;
             try {
