@@ -135,7 +135,7 @@ export async function adviseSqlServer(view, snapshot, focus) {
             {
                 server: pick(server, ['edition', 'cpu_count', 'maxdop', 'cost_threshold']),
                 statistics: focus.stats || {},
-                missing_index_suggestions_for_this_database: (snapshot?.data?.missingIndexes || []).slice(0, 10),
+                missing_index_suggestions: (snapshot?.data?.missingIndexes || []).slice(0, 10),
                 query: maskSql(focus.text),
             },
             null,

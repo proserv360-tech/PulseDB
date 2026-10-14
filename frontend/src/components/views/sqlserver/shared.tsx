@@ -16,7 +16,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-import { AlertCircle, AlertTriangle, Check, ChevronDown, ChevronUp, Copy, Info, Lightbulb, Pause, Play, RefreshCw, Sparkles, XCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Check, ChevronDown, ChevronUp, Copy, Database, Info, Lightbulb, Pause, Play, RefreshCw, Sparkles, XCircle } from 'lucide-react';
 import { THEME, useAdaptiveTheme } from '../../../utils/theme';
 import { fetchDataFresh, postData } from '../../../utils/api';
 import { useConnection } from '../../../context/ConnectionContext';
@@ -35,6 +35,8 @@ export type ViewResult = {
     history?: Row[];
     collectedAt: string;
     ai?: { available: boolean; provider: string };
+    /** Per-database screens: the database the data is from. */
+    database?: string | null;
 };
 
 // SQL Server brand-adjacent palette (readable on light and dark surfaces).
@@ -122,9 +124,56 @@ const clockSec = (t: any) => `${clock(t)}:${String(new Date(t).getSeconds()).pad
 /* ── data hook ──────────────────────────────────────────────────────────── */
 const lastResults = new Map<string, ViewResult>(); // `${connectionId}:${view}` — instant paint when switching tabs
 
-export function useSqlServerView(view: string, refreshMs: number | null) {
+/**
+ * The database picked on the per-database screens (Tables & Indexes, Query
+ * Store), per connection and shared by both. '' = the connection's own
+ * database. Remembered in this browser only.
+ */
+const DB_PICK_KEY = 'pulsedb.mssql.database';
+const pickedDatabases = new Map<string, string>();
+const dbPickListeners = new Set<() => void>();
+function readPicked(): Record<string, string> {
+    try {
+        return JSON.parse(localStorage.getItem(DB_PICK_KEY) || '{}') || {};
+    } catch {
+        return {};
+    }
+}
+export function useSelectedDatabase(): [string, (db: string) => void] {
     const { activeConnectionId } = useConnection();
-    const cacheKey = `${activeConnectionId}:${view}`;
+    const key = String(activeConnectionId || '');
+    const [, rerender] = useState(0);
+    useEffect(() => {
+        const on = () => rerender((x) => x + 1);
+        dbPickListeners.add(on);
+        return () => {
+            dbPickListeners.delete(on);
+        };
+    }, []);
+    if (key && !pickedDatabases.has(key)) pickedDatabases.set(key, readPicked()[key] || '');
+    const set = useCallback(
+        (db: string) => {
+            pickedDatabases.set(key, db);
+            try {
+                const all = readPicked();
+                if (db) all[key] = db;
+                else delete all[key];
+                localStorage.setItem(DB_PICK_KEY, JSON.stringify(all));
+            } catch {
+                /* storage unavailable: the choice lasts until reload */
+            }
+            dbPickListeners.forEach((fn) => fn());
+        },
+        [key],
+    );
+    return [pickedDatabases.get(key) || '', set];
+}
+
+const dbQuery = (database?: string) => (database ? `?database=${encodeURIComponent(database)}` : '');
+
+export function useSqlServerView(view: string, refreshMs: number | null, database = '') {
+    const { activeConnectionId } = useConnection();
+    const cacheKey = `${activeConnectionId}:${view}:${database}`;
     // Results are stored per connection+view so switching tabs or connections
     // paints the last known data immediately instead of an empty screen.
     const [stored, setStored] = useState<{ key: string; value: ViewResult } | null>(null);
@@ -139,7 +188,7 @@ export function useSqlServerView(view: string, refreshMs: number | null) {
         const mine = ++seq.current;
         setLoading(true);
         try {
-            const r = await fetchDataFresh(`/api/connections/${activeConnectionId}/sqlserver/${view}`);
+            const r = await fetchDataFresh(`/api/connections/${activeConnectionId}/sqlserver/${view}${dbQuery(database)}`);
             if (mine === seq.current) {
                 lastResults.set(cacheKey, r);
                 setStored({ key: cacheKey, value: r });
@@ -150,7 +199,7 @@ export function useSqlServerView(view: string, refreshMs: number | null) {
         } finally {
             if (mine === seq.current) setLoading(false);
         }
-    }, [activeConnectionId, view, cacheKey]);
+    }, [activeConnectionId, view, cacheKey, database]);
 
     useEffect(() => {
         const t = setTimeout(load, 0); // first fetch for this connection+view
@@ -235,16 +284,22 @@ export function Shell({
     view,
     refreshMs,
     children,
+    database,
+    onDatabaseChange,
 }: {
     title: string;
     icon: any;
     view: string;
     refreshMs: number | null;
     children: (r: ViewResult) => React.ReactNode;
+    /** Per-database screens: the picked database ('' = the connection's) and how to change it. */
+    database?: string;
+    onDatabaseChange?: (db: string) => void;
 }) {
     useAdaptiveTheme();
     const { activeConnection } = useConnection();
-    const { result, error, loading, reload, paused, setPaused } = useSqlServerView(view, refreshMs);
+    const { result, error, loading, reload, paused, setPaused } = useSqlServerView(view, refreshMs, database);
+    const shownDb = result?.database || database || activeConnection?.database;
     const dbType = activeConnection?.dbType;
     const isMssql = dbType === 'mssql' || dbType === 'sqlserver';
 
@@ -261,12 +316,21 @@ export function Shell({
                         <div className="mss-sub" style={{ fontWeight: 400 }}>
                             {activeConnection?.name}
                             {activeConnection?.host ? ` · ${activeConnection.host}` : ''}
-                            {activeConnection?.database ? ` · ${activeConnection.database}` : ''}
+                            {shownDb && !onDatabaseChange ? ` · ${shownDb}` : ''}
                             {result?.collectedAt && ` · updated ${new Date(result.collectedAt).toLocaleTimeString()}`}
                         </div>
                     </div>
                 </div>
                 <div className="mss-actions">
+                    {onDatabaseChange && isMssql && (
+                        <DatabasePicker
+                            list={result?.data?.databaseList || []}
+                            value={shownDb || ''}
+                            ownDb={activeConnection?.database || ''}
+                            onChange={onDatabaseChange}
+                            disabled={loading}
+                        />
+                    )}
                     {refreshMs && (
                         <button className="mss-btn" onClick={() => setPaused(!paused)} disabled={!isMssql} title="Auto-refresh">
                             {paused ? <Play size={13} /> : <Pause size={13} />}
@@ -286,7 +350,14 @@ export function Shell({
             ) : error && !result ? (
                 <div className="mss-error">
                     <AlertCircle size={14} color={THEME.danger} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <span>Could not load data from SQL Server: {error}</span>
+                    <span>
+                        Could not load data from SQL Server{database ? ` (database ${database})` : ''}: {error}
+                        {database && onDatabaseChange && (
+                            <button className="mss-btn" style={{ marginLeft: 10, padding: '3px 10px' }} onClick={() => onDatabaseChange('')} type="button">
+                                Back to {activeConnection?.database || "the connection's database"}
+                            </button>
+                        )}
+                    </span>
                 </div>
             ) : !result ? (
                 <div className="mss-empty">Loading…</div>
@@ -298,10 +369,58 @@ export function Shell({
                             <span>Last refresh failed ({error}) — showing the previous data.</span>
                         </div>
                     )}
+                    {result.errors?.database && (
+                        <div className="mss-error">
+                            <AlertTriangle size={14} color={THEME.warning} style={{ flexShrink: 0, marginTop: 1 }} />
+                            <span>{result.errors.database}</span>
+                        </div>
+                    )}
                     {children(result)}
                 </>
             )}
         </div>
+    );
+}
+
+/** Database dropdown for the per-database screens (list comes with the screen's data). */
+function DatabasePicker({
+    list,
+    value,
+    ownDb,
+    onChange,
+    disabled,
+}: {
+    list: Row[];
+    value: string;
+    ownDb: string;
+    onChange: (db: string) => void;
+    disabled?: boolean;
+}) {
+    const names = list.map((d) => d.database_name);
+    // Until the list arrives, still show the current choice.
+    const rows = value && !names.includes(value) ? [{ database_name: value, has_access: 1, state_desc: 'ONLINE' }, ...list] : list;
+    return (
+        <label className="mss-btn" style={{ gap: 6, paddingTop: 3, paddingBottom: 3 }} title="Database shown on this screen">
+            <Database size={13} />
+            <select
+                value={value}
+                disabled={disabled && !rows.length}
+                onChange={(e) => onChange(e.target.value === ownDb ? '' : e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: 'inherit', font: 'inherit', outline: 'none', maxWidth: 220, cursor: 'pointer' }}
+            >
+                {rows.map((d) => {
+                    const usable = Number(d.has_access) === 1 && d.state_desc === 'ONLINE';
+                    const size = d.size_mb != null ? ` · ${Number(d.size_mb) >= 1024 ? `${(Number(d.size_mb) / 1024).toFixed(1)} GB` : `${Math.round(Number(d.size_mb))} MB`}` : '';
+                    return (
+                        <option key={d.database_name} value={d.database_name} disabled={!usable}>
+                            {d.database_name}
+                            {size}
+                            {!usable ? (d.state_desc !== 'ONLINE' ? ` (${String(d.state_desc).toLowerCase()})` : ' (no access)') : ''}
+                        </option>
+                    );
+                })}
+            </select>
+        </label>
     );
 }
 
@@ -836,20 +955,20 @@ function AdviceText({ text }: { text: string }) {
     );
 }
 
-export function useAiAdvice(view: string) {
+export function useAiAdvice(view: string, database = '') {
     const { activeConnectionId } = useConnection();
     const [state, setState] = useState<{ loading: boolean; text?: string; provider?: string; error?: string; title?: string }>({ loading: false });
     const run = useCallback(
         async (title: string, focus?: Row) => {
             setState({ loading: true, title });
             try {
-                const r: any = await postData(`/api/connections/${activeConnectionId}/sqlserver/${view}/ai`, focus ? { focus } : {});
+                const r: any = await postData(`/api/connections/${activeConnectionId}/sqlserver/${view}/ai${dbQuery(database)}`, focus ? { focus } : {});
                 setState({ loading: false, title, text: r.text, provider: r.provider });
             } catch (e: any) {
                 setState({ loading: false, title, error: e.message || 'AI request failed' });
             }
         },
-        [activeConnectionId, view],
+        [activeConnectionId, view, database],
     );
     const clear = useCallback(() => setState({ loading: false }), []);
     return { ...state, run, clear };

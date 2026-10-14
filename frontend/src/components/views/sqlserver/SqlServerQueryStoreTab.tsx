@@ -2,13 +2,14 @@ import React from 'react';
 import { Archive, Info, ListOrdered, TrendingUp } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
 import Advisor from './Advisor';
-import { Badge, C, compact, DataTable, Facts, HBars, ms, n, Panel, Progress, Row, Shell, when, useAiAdvice, AiAdviceBox, TuneButton } from './shared';
+import { Badge, C, compact, DataTable, Facts, HBars, ms, n, Panel, Progress, Row, Shell, when, useAiAdvice, AiAdviceBox, TuneButton, useSelectedDatabase } from './shared';
 
 export default function SqlServerQueryStoreTab() {
-    const advice = useAiAdvice('querystore');
-    const tune = useAiAdvice('querystore'); // per-query tuning, shown above the tables
+    const [database, setDatabase] = useSelectedDatabase();
+    const advice = useAiAdvice('querystore', database);
+    const tune = useAiAdvice('querystore', database); // per-query tuning, shown above the tables
     return (
-        <Shell title="Query Store" icon={Archive} view="querystore" refreshMs={null}>
+        <Shell title="Query Store" icon={Archive} view="querystore" refreshMs={null} database={database} onDatabaseChange={setDatabase}>
             {(result) => {
                 const { data, errors } = result;
                 const o: Row = data.options?.[0] || {};

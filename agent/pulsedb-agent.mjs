@@ -23,7 +23,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { assertReadOnly } from './readOnlyGuard.mjs';
 
-const VERSION = '1.2.2';
+const VERSION = '1.2.3';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 // ── config ──────────────────────────────────────────────────────────────────
@@ -171,6 +171,7 @@ async function odbcFailure(e, connectionString) {
  * password in the config. Tries ODBC Driver 18, then 17, unless "odbcDriver" is set.
  */
 async function windowsAuthPool(target) {
+    if (target.database && !safeDatabase(target.database)) throw new Error('invalid database name');
     let v8;
     try {
         const m = await import('mssql/msnodesqlv8.js');
@@ -295,9 +296,22 @@ function relayTarget(c) {
     };
 }
 
-async function runJob(job) {
-    const target = job.payload?.connection ? relayTarget(job.payload.connection) : targetsByName.get(job.target);
+/** A database name safe to put in a connection (ODBC connection strings treat ; { } specially). */
+const safeDatabase = (name) => typeof name === 'string' && name.length > 0 && name.length <= 128 && !/[;{}\u0000-\u001f]/.test(name);
+
+function jobTarget(job) {
+    if (job.payload?.connection) return relayTarget(job.payload.connection);
+    const target = targetsByName.get(job.target);
     if (!target) throw new Error(`This agent has no target named "${job.target}". Check agent.config.json.`);
+    // PulseDB's per-database screens can pick another database on the same server.
+    const db = job.payload?.database;
+    if (!db || db === (target.database || 'master')) return target;
+    if (!safeDatabase(db)) throw new Error('invalid database name');
+    return { ...target, name: `${target.name}@${db}`, database: db };
+}
+
+async function runJob(job) {
+    const target = jobTarget(job);
     if (job.op === 'ping') {
         const p = await pool(target);
         const r = await p.request().query('SELECT @@VERSION AS version, DB_NAME() AS db');

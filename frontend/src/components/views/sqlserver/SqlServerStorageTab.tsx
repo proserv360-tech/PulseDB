@@ -2,12 +2,13 @@ import React from 'react';
 import { Copy, Database, Layers, Link2, ChartPie as PieIcon, Puzzle, Table2, Zap } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
 import Advisor from './Advisor';
-import { Badge, C, compact, DataTable, Donut, HBars, Kpi, kb, n, Panel, pct, Row, Shell, when, useAiAdvice } from './shared';
+import { Badge, C, compact, DataTable, Donut, HBars, Kpi, kb, n, Panel, pct, Row, Shell, when, useAiAdvice, useSelectedDatabase } from './shared';
 
 export default function SqlServerStorageTab() {
-    const advice = useAiAdvice('storage');
+    const [database, setDatabase] = useSelectedDatabase();
+    const advice = useAiAdvice('storage', database);
     return (
-        <Shell title="Tables & Indexes" icon={Table2} view="storage" refreshMs={null}>
+        <Shell title="Tables & Indexes" icon={Table2} view="storage" refreshMs={null} database={database} onDatabaseChange={setDatabase}>
             {(result) => {
                 const { data, errors } = result;
                 const s: Row = data.indexSummary?.[0] || {};
@@ -19,7 +20,7 @@ export default function SqlServerStorageTab() {
                 return (
                     <>
                         <div style={{ fontSize: 12, color: THEME.textMuted, marginTop: -6 }}>
-                            Database: <strong style={{ color: THEME.textMain }}>{s.database_name || '—'}</strong> (the connection's database). Usage counters reset when SQL Server restarts.
+                            Database: <strong style={{ color: THEME.textMain }}>{result.database || s.database_name || '—'}</strong> — pick another one at the top right. Missing-index suggestions cover every database on the server. Usage counters reset when SQL Server restarts.
                         </div>
                         <div className="mss-kpis">
                             <Kpi label="Indexes" icon={Layers} color={C.blue} value={n(s.total_indexes)} hint={`${n(s.clustered_indexes)} clustered · ${n(s.nonclustered_indexes)} nonclustered`} />
@@ -28,7 +29,7 @@ export default function SqlServerStorageTab() {
                             <Kpi label="Unused indexes" icon={Zap} color={C.amber} value={n(s.unused_since_restart)} hint="never read since restart" tone={Number(s.unused_since_restart) > 0 ? 'warning' : null} />
                             <Kpi label="Duplicate indexes" icon={Copy} color={C.purple} value={errors.duplicates ? '—' : n((data.duplicates || []).length)} tone={(data.duplicates || []).length ? 'warning' : null} />
                             <Kpi label="Need rebuild" icon={Puzzle} color={C.red} value={n(rebuild)} hint={`${n(reorganize)} need reorganize`} tone={rebuild ? 'warning' : null} />
-                            <Kpi label="Missing indexes" icon={Link2} color={C.orange} value={errors.missingIndexes ? '—' : n((data.missingIndexes || []).length)} hint="suggested by the optimizer" />
+                            <Kpi label="Missing indexes" icon={Link2} color={C.orange} value={errors.missingIndexes ? '—' : n((data.missingIndexes || []).length)} hint="all databases, from the optimizer" />
                             <Kpi label="Avg fill factor" icon={PieIcon} color={C.green} value={pct(s.avg_fill_factor, 0)} />
                         </div>
 
@@ -67,11 +68,12 @@ export default function SqlServerStorageTab() {
                             </Panel>
                         </div>
 
-                        <Panel title="Missing index suggestions" icon={Link2} color={C.orange} pad={false} error={errors.missingIndexes}>
+                        <Panel title="Missing index suggestions — all databases" icon={Link2} color={C.orange} pad={false} error={errors.missingIndexes}>
                             <DataTable
                                 rows={data.missingIndexes}
-                                empty="The optimizer has no missing-index suggestions for this database."
+                                empty="The optimizer has no missing-index suggestions on this server."
                                 columns={[
+                                    { key: 'database_name', label: 'Database', fmt: (v) => <Badge color={v === result.database ? C.blue : C.slate}>{v}</Badge> },
                                     { key: 'table_name', label: 'Table', fmt: (v) => <code style={{ fontSize: 11 }}>{v}</code> },
                                     { key: 'equality_columns', label: 'Equality columns' },
                                     { key: 'inequality_columns', label: 'Inequality columns' },

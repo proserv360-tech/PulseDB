@@ -31,8 +31,10 @@ export function createAgentRelayAdapter(connection, route = null) {
           }
         : null;
     const target = route ? `relay:${connection.host}/${inline.database}` : connection.agentTarget;
-    const job = (op, payload, timeoutMs) =>
-        runAgentJob({ appId, target, op, payload: inline ? { ...payload, connection: inline } : payload, timeoutMs });
+    // A registered target opens its own database; agent 1.2.3+ honours another
+    // one chosen in the UI (the per-database screens' picker).
+    const extra = inline ? { connection: inline } : connection.database ? { database: connection.database } : {};
+    const job = (op, payload, timeoutMs) => runAgentJob({ appId, target, op, payload: { ...payload, ...extra }, timeoutMs });
 
     adapter.viaAgent = true;
 

@@ -97,6 +97,20 @@ const SERVER_CONFIG = `
            DB_NAME() AS current_database`;
 
 /* ── screens ─────────────────────────────────────────────────────────────── */
+/**
+ * User databases for the database picker on the per-database screens (Tables &
+ * Indexes, Query Store); is_current marks the one this connection is using.
+ */
+const DATABASE_LIST = `
+            SELECT d.name AS database_name, d.state_desc, HAS_DBACCESS(d.name) AS has_access,
+                   CAST(SUM(CAST(mf.size AS bigint)) * 8 / 1024.0 AS decimal(18, 1)) AS size_mb,
+                   CASE WHEN d.name = DB_NAME() THEN 1 ELSE 0 END AS is_current
+              FROM sys.databases d
+              LEFT JOIN sys.master_files mf ON mf.database_id = d.database_id
+             WHERE d.database_id > 4 OR d.name = DB_NAME()
+             GROUP BY d.name, d.state_desc
+             ORDER BY d.name`;
+
 export const QUERIES = {
     overview: {
         server: `
@@ -212,6 +226,7 @@ export const QUERIES = {
     },
 
     querystore: {
+        databaseList: DATABASE_LIST,
         options: `
             SELECT DB_NAME() AS database_name, actual_state_desc, desired_state_desc, readonly_reason,
                    current_storage_size_mb, max_storage_size_mb, query_capture_mode_desc,
@@ -336,6 +351,7 @@ export const QUERIES = {
     },
 
     storage: {
+        databaseList: DATABASE_LIST,
         tables: `
             SELECT TOP 100 s.name AS schema_name, t.name AS table_name,
                    SUM(CASE WHEN p.index_id < 2 THEN p.row_count ELSE 0 END) AS row_count,
@@ -386,13 +402,14 @@ export const QUERIES = {
              WHERE o.is_ms_shipped = 0 AND o.type = 'U' AND i.index_id > 0 AND i.is_hypothetical = 0
              ORDER BY size_kb DESC`,
         missingIndexes: `
-            SELECT TOP 20 mid.statement AS table_name, mid.equality_columns, mid.inequality_columns, mid.included_columns,
+            SELECT TOP 50 DB_NAME(mid.database_id) AS database_name,
+                   mid.statement AS table_name, mid.equality_columns, mid.inequality_columns, mid.included_columns,
                    migs.user_seeks, migs.user_scans, migs.avg_user_impact, migs.last_user_seek,
                    CAST(migs.user_seeks * migs.avg_total_user_cost * (migs.avg_user_impact / 100.0) AS decimal(18, 2)) AS improvement_score
               FROM sys.dm_db_missing_index_groups mig
               JOIN sys.dm_db_missing_index_group_stats migs ON migs.group_handle = mig.index_group_handle
               JOIN sys.dm_db_missing_index_details mid ON mid.index_handle = mig.index_handle
-             WHERE mid.database_id = DB_ID()
+             WHERE mid.database_id > 4 -- every user database on the instance, not only the selected one
              ORDER BY improvement_score DESC`,
         fragmentation: `
             SELECT TOP 50 OBJECT_SCHEMA_NAME(ips.object_id) AS schema_name, OBJECT_NAME(ips.object_id) AS table_name,

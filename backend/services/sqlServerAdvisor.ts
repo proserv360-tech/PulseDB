@@ -23,10 +23,16 @@ function rec(list, r) {
 
 /* ── Tables & Indexes ─────────────────────────────────────────────────── */
 function storage(d, out) {
-    // Missing indexes the optimizer asked for
-    for (const m of (d.missingIndexes || []).filter((x) => num(x.avg_user_impact) >= 25).slice(0, 10)) {
+    // Scripts for the selected database's indexes run in that database.
+    const current = d.databaseList?.find((x) => num(x.is_current))?.database_name || d.indexSummary?.[0]?.database_name;
+    const use = current ? `USE ${q(current)};\n` : '';
+
+    // Missing indexes the optimizer asked for, across every database (the
+    // table name is [database].[schema].[table], so the script runs anywhere).
+    for (const m of (d.missingIndexes || []).filter((x) => num(x.avg_user_impact) >= 25).slice(0, 15)) {
         const parts = String(m.table_name || '').split('.').map((p) => p.replace(/^\[|\]$/g, ''));
         const table = parts[parts.length - 1] || 'table';
+        const db = m.database_name || (parts.length === 3 ? parts[0] : '');
         const keyCols = [m.equality_columns, m.inequality_columns].filter(Boolean).join(', ');
         if (!keyCols) continue;
         const colNames = keyCols.replace(/[[\]\s]/g, '').split(',').slice(0, 3).join('_');
@@ -37,7 +43,7 @@ function storage(d, out) {
             id: `missing-index:${m.table_name}:${keyCols}`,
             severity: high ? 'high' : 'medium',
             category: 'Indexes',
-            title: `Create an index on ${table} (${keyCols.replace(/[[\]]/g, '')})`,
+            title: `Create an index on ${table} (${keyCols.replace(/[[\]]/g, '')})${db ? ` in ${db}` : ''}`,
             detail: `The optimizer estimates queries would be ${Math.round(num(m.avg_user_impact))}% cheaper; they wanted it ${num(m.user_seeks).toLocaleString('en-US')} times since the last restart.`,
             sql: `CREATE NONCLUSTERED INDEX ${q(name)}\n    ON ${m.table_name} (${keyCols})${include};`,
             caution: 'Check it does not duplicate an existing index, and create it outside busy hours on large tables.',
@@ -54,7 +60,9 @@ function storage(d, out) {
             category: 'Indexes',
             title: `${frag.length} fragmented index${frag.length > 1 ? 'es' : ''} (${rebuild.length} need a rebuild)`,
             detail: 'Rebuild indexes above 30% fragmentation and reorganize those between 10% and 30%. Fragmentation mostly matters for large range scans.',
-            sql: frag
+            sql:
+                use +
+                frag
                 .slice(0, 25)
                 .map(
                     (f) =>
@@ -83,7 +91,9 @@ function storage(d, out) {
             category: 'Indexes',
             title: `${unused.length} index${unused.length > 1 ? 'es are' : ' is'} maintained but never read`,
             detail: 'Every insert and update pays for these indexes, but no query has used them since SQL Server last started.',
-            sql: unused
+            sql:
+                use +
+                unused
                 .slice(0, 20)
                 .map(
                     (i) =>
@@ -103,7 +113,9 @@ function storage(d, out) {
             category: 'Indexes',
             title: `${dups.length} duplicate index${dups.length > 1 ? 'es' : ''}`,
             detail: 'These have exactly the same key columns as another index on the same table, so they cost writes and space for no benefit.',
-            sql: dups
+            sql:
+                use +
+                dups
                 .slice(0, 20)
                 .map((x) => `DROP INDEX ${q(x.index_name)} ON ${q(x.schema_name)}.${q(x.table_name)};  -- same keys as ${x.duplicate_of}`)
                 .join('\n'),

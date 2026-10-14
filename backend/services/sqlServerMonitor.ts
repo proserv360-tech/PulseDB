@@ -392,6 +392,17 @@ async function runBatched(adapter, queries) {
  * Run one view's queries through a connected engine adapter.
  * @returns {Promise<{ view, data, errors, live, history?, collectedAt }>}
  */
+/** Screens whose data lives inside one database; they take a ?database= choice. */
+export const DATABASE_SCOPED_VIEWS = new Set(['storage', 'querystore']);
+
+/**
+ * A database name that is safe to use as a connection setting (it ends up in an
+ * ODBC connection string on agents using Windows sign-in, where ; { } matter).
+ */
+export function isSafeDatabaseName(name) {
+    return typeof name === 'string' && name.length > 0 && name.length <= 128 && !/[;{}\u0000-\u001f]/.test(name);
+}
+
 export async function collectSqlServerView(adapter, view, connectionId) {
     const queries = QUERIES[view];
     if (!queries) throw Object.assign(new Error(`Unknown SQL Server view "${view}"`), { status: 404 });

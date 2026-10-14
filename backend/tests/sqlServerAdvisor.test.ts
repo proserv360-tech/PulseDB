@@ -103,3 +103,21 @@ test('Groq: picks an available chat model and recovers when the chosen one is re
         process.env = saved;
     }
 });
+
+test('database picker: instance-wide missing indexes name their database; per-database scripts start with USE', () => {
+    const recs = buildRecommendations('storage', {
+        databaseList: [{ database_name: 'SageA', is_current: 0 }, { database_name: 'Sage]B', is_current: 1 }],
+        missingIndexes: [{ database_name: 'SageA', table_name: '[SageA].[dbo].[Jobs]', equality_columns: '[JobNo]', user_seeks: 50, avg_user_impact: 60 }],
+        duplicates: [{ schema_name: 'dbo', table_name: 'T', index_name: 'IX2', duplicate_of: 'IX1' }],
+    });
+    const mi = recs.find((r) => r.id.startsWith('missing-index'));
+    assert.match(mi.title, / in SageA$/);
+    assert.match(mi.sql, /ON \[SageA\]\.\[dbo\]\.\[Jobs\]/);
+    assert.ok(recs.find((r) => r.id === 'duplicate-indexes').sql.startsWith('USE [Sage]]B];\nDROP INDEX [IX2] ON [dbo].[T];'));
+});
+
+test('database picker: only safe database names are accepted', async () => {
+    const { isSafeDatabaseName } = await import('../services/sqlServerMonitor.js');
+    for (const ok of ['StowellSandbox', 'Sage 100 [Live]', "O'Brien Co"]) assert.equal(isSafeDatabaseName(ok), true, ok);
+    for (const bad of ['', 'x;Trusted_Connection=no', 'a}b', 'a{b', 'line\nbreak', 'x'.repeat(129), null]) assert.equal(isSafeDatabaseName(bad), false, String(bad));
+});
