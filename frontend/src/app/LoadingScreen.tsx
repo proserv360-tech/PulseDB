@@ -1,6 +1,7 @@
 // Full-screen loading state.
 // Extracted from App.tsx.
 import { Database } from 'lucide-react';
+import ByProserv360 from '../components/ui/ByProserv360';
 import { DS } from '../config/designTokens';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -58,6 +59,9 @@ export const LoadingScreen = () => (
                 }}
             >
                 PulseDB
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
+                <ByProserv360 height={12} color={DS.textMuted} />
             </div>
             <div
                 style={{

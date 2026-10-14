@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Database, LogOut, MessageSquarePlus, User, U
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getGroupForTab, getSectionForTab, SECTION_GROUPS } from '../../app/tabRegistry';
 import { DS } from '../../config/designTokens';
+import ByProserv360 from '../ui/ByProserv360';
 import { useConnection } from '../../context/ConnectionContext';
 import { THEME } from '../../utils/theme';
 
@@ -213,17 +214,7 @@ export const Sidebar = ({
                         >
                             Pulse<span style={{ color: DS.cyan }}>DB</span>
                         </span>
-                        <span
-                            style={{
-                                fontSize: 9,
-                                letterSpacing: '0.14em',
-                                color: DS.logoSub,
-                                fontFamily: DS.fontMono,
-                                marginTop: 2,
-                            }}
-                        >
-                            Database Intelligence
-                        </span>
+                        <ByProserv360 height={11} color={DS.logoSub} style={{ marginTop: 4 }} />
                     </div>
                 )}
             </div>

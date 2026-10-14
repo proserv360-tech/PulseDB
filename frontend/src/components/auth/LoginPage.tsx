@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { THEME } from '../../utils/theme';
 import { Eye, EyeOff, Loader, Mail, User, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ByProserv360 from '../ui/ByProserv360';
 import { useAdaptiveTheme } from '../../utils/theme';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -443,6 +444,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ embedded = false, onClose }) => {
                     <p style={styles.artSub}>{isSignup ? 'Create your account to get started.' : 'Please enter your credentials.'}</p>
                 </div>
                 <div style={{ marginTop: 18 }}><FleetArt /></div>
+                <div style={{ marginTop: 22, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: BODY, fontSize: 13, fontWeight: 700, color: THEME.textMain }}>PulseDB</span>
+                    <ByProserv360 height={12} color={THEME.textMuted} />
+                </div>
             </div>
 
             {/* right form panel */}

@@ -16,6 +16,7 @@ import {
     ChevronRight,
     GitBranch,
 } from 'lucide-react';
+import ByProserv360 from '../components/ui/ByProserv360';
 import { THEME } from '../utils/theme';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -479,6 +480,7 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
                         <Database size={14} color="#fff" />
                     </div>
                     <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 2, color: THEME.textMain }}>PulseDB</span>
+                    <ByProserv360 height={12} color={THEME.textMuted} style={{ marginLeft: 4 }} />
                 </div>
 
                 {/* Nav links */}
@@ -850,7 +852,10 @@ export default function LandingPage({ onEnterDemo, onLogin }: LandingPageProps) 
                         </span>
                     ))}
                 </div>
-                <span style={{ fontSize: 11, color: THEME.textDim }}>© 2024 PulseDB. Built for engineers.</span>
+                <span style={{ fontSize: 11, color: THEME.textDim, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    © {new Date().getFullYear()} PulseDB
+                    <ByProserv360 height={10} color={THEME.textDim} />
+                </span>
             </footer>
         </div>
     );
