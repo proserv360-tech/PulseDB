@@ -1,12 +1,16 @@
 import React from 'react';
 import { Archive, Info, ListOrdered, TrendingUp } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { Badge, C, compact, DataTable, Facts, HBars, ms, n, Panel, Progress, Row, Shell, when } from './shared';
+import Advisor from './Advisor';
+import { Badge, C, compact, DataTable, Facts, HBars, ms, n, Panel, Progress, Row, Shell, when, useAiAdvice, AiAdviceBox, TuneButton } from './shared';
 
 export default function SqlServerQueryStoreTab() {
+    const advice = useAiAdvice('querystore');
+    const tune = useAiAdvice('querystore'); // per-query tuning, shown above the tables
     return (
         <Shell title="Query Store" icon={Archive} view="querystore" refreshMs={null}>
-            {({ data, errors }) => {
+            {(result) => {
+                const { data, errors } = result;
                 const o: Row = data.options?.[0] || {};
                 const off = o.actual_state_desc && o.actual_state_desc !== 'READ_WRITE';
                 const top: Row[] = data.top || [];
@@ -45,6 +49,9 @@ export default function SqlServerQueryStoreTab() {
                             )}
                         </Panel>
 
+                        <Advisor result={result} advice={advice} />
+                        <AiAdviceBox advice={tune} />
+
                         <Panel
                             title="Regressed queries — last 7 days"
                             icon={TrendingUp}
@@ -57,6 +64,8 @@ export default function SqlServerQueryStoreTab() {
                                 rows={data.regressed}
                                 empty={off ? 'Query Store is not collecting data.' : 'No plan regressions found.'}
                                 columns={[
+                                    { key: 'tune', label: '', fmt: (_: any, r: Row) => (result.ai?.available ? <TuneButton advice={tune} text={r.query_text} label={`query ${r.query_id}`} stats={{ query_id: r.query_id, current_plan_avg_ms: r.current_avg_ms, best_plan_avg_ms: r.best_avg_ms, regression_pct: r.regression_pct, plans: r.plan_count }} /> : null) },
+                                    { key: 'tune', label: '', fmt: (_: any, r: Row) => (result.ai?.available ? <TuneButton advice={tune} text={r.query_text} label={`query ${r.query_id}`} stats={{ query_id: r.query_id, executions: r.executions, avg_duration_ms: r.avg_duration_ms, avg_cpu_ms: r.avg_cpu_ms, avg_logical_reads: r.avg_logical_reads, plans: r.plan_count }} /> : null) },
                                     { key: 'query_id', label: 'Query', num: true },
                                     { key: 'query_text', label: 'Statement', code: true },
                                     {

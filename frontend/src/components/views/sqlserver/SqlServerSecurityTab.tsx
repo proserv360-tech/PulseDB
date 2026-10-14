@@ -1,7 +1,8 @@
 import React from 'react';
 import { KeyRound, Lock, ShieldAlert, ShieldCheck, UserCheck, UserX, Users } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { AlertList, Badge, C, DataTable, Kpi, n, Panel, Row, Shell, when } from './shared';
+import Advisor from './Advisor';
+import { AlertList, Badge, C, DataTable, Kpi, n, Panel, Row, Shell, when, useAiAdvice } from './shared';
 
 const yes = (v: any, good = false) => (Number(v) ? <Badge color={good ? C.green : C.red}>yes</Badge> : <span style={{ color: THEME.textDim }}>no</span>);
 
@@ -33,9 +34,11 @@ function findings(data: Row) {
 }
 
 export default function SqlServerSecurityTab() {
+    const advice = useAiAdvice('security');
     return (
         <Shell title="Security" icon={ShieldCheck} view="security" refreshMs={null}>
-            {({ data, errors }) => {
+            {(result) => {
+                const { data, errors } = result;
                 const s: Row = data.summary?.[0] || {};
                 const logins: Row[] = data.sqlLogins || [];
                 const weak = logins.filter((l) => !Number(l.is_disabled) && (Number(l.blank_password) || Number(l.password_is_login_name) || !Number(l.is_policy_checked))).length;
@@ -57,6 +60,8 @@ export default function SqlServerSecurityTab() {
                             <Kpi label="Encrypted databases" icon={ShieldCheck} color={C.green} value={n(s.encrypted_dbs)} hint="Transparent Data Encryption" />
                             <Kpi label="TRUSTWORTHY databases" icon={UserCheck} color={C.amber} value={n(s.trustworthy_dbs)} hint="excluding msdb" tone={Number(s.trustworthy_dbs) ? 'warning' : null} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         <Panel title="Security findings" icon={ShieldAlert} color={C.red} pad={false} right={`${f.length} finding(s)`}>
                             <AlertList alerts={f} />

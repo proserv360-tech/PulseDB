@@ -36,10 +36,59 @@ const PROVIDER_TIMEOUT_MS = Number(process.env.COPILOT_TIMEOUT_MS) || 30_000;
 // Provider adapter
 // ─────────────────────────────────────────────────────────────────────────────
 export function getProvider() {
-    const p = (process.env.COPILOT_PROVIDER || 'local').toLowerCase();
+    // COPILOT_PROVIDER wins; otherwise use whichever key is configured
+    // (GROQ_API_KEY is the one the app's AI chat already uses).
+    const p = (
+        process.env.COPILOT_PROVIDER ||
+        (process.env.GROQ_API_KEY
+            ? 'groq'
+            : process.env.ANTHROPIC_API_KEY
+              ? 'anthropic'
+              : process.env.OPENAI_API_KEY
+                ? 'openai'
+                : 'local')
+    ).toLowerCase();
     if (p === 'openai') return openAiProvider();
+    if (p === 'groq') return groqProvider();
     if (p === 'anthropic') return anthropicProvider();
     return localProvider();
+}
+
+/** Groq: OpenAI-compatible chat API (free tier). GROQ_API_KEY / COPILOT_MODEL. */
+function groqProvider() {
+    const apiKey = process.env.GROQ_API_KEY;
+    const model = process.env.COPILOT_MODEL || 'llama-3.3-70b-versatile';
+    return {
+        name: 'groq',
+        model,
+        async complete({ system, user, maxTokens = 1200 }) {
+            if (!apiKey) throw new Error('GROQ_API_KEY not set');
+            const r = await withTimeout(
+                (signal) =>
+                    fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        signal,
+                        headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+                        body: JSON.stringify({
+                            model,
+                            temperature: 0.1,
+                            max_tokens: maxTokens,
+                            messages: [
+                                { role: 'system', content: system },
+                                { role: 'user', content: user },
+                            ],
+                        }),
+                    }),
+                PROVIDER_TIMEOUT_MS,
+            );
+            if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
+            const j = await r.json();
+            return j.choices?.[0]?.message?.content?.trim() || '';
+        },
+        async *completeStream(args) {
+            yield await this.complete(args);
+        },
+    };
 }
 
 function withTimeout(promiseFactory, ms) {

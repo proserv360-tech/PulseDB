@@ -1,15 +1,18 @@
 import React from 'react';
 import { AlertTriangle, Briefcase, CalendarClock, DatabaseBackup, Server, ShieldCheck } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { ago, Badge, C, DataTable, Kpi, mb, n, Panel, Row, secs, Shell, stateColor, when } from './shared';
+import Advisor from './Advisor';
+import { ago, Badge, C, DataTable, Kpi, mb, n, Panel, Row, secs, Shell, stateColor, when, useAiAdvice } from './shared';
 
 const DAY = 86400_000;
 const age = (v: any) => (v ? Date.now() - new Date(v).getTime() : Infinity);
 
 export default function SqlServerBackupsTab() {
+    const advice = useAiAdvice('backups');
     return (
         <Shell title="Backups & Jobs" icon={DatabaseBackup} view="backups" refreshMs={null}>
-            {({ data, errors }) => {
+            {(result) => {
+                const { data, errors } = result;
                 // KPIs count user databases; the table below still lists the system ones.
                 const dbs: Row[] = (data.backups || []).filter(
                     (d: Row) => d.state_desc === 'ONLINE' && !['master', 'model', 'msdb'].includes(d.database_name),
@@ -31,6 +34,8 @@ export default function SqlServerBackupsTab() {
                             <Kpi label="SQL Agent" icon={Server} color={C.blue} value={agent ? agent.status_desc : '—'} hint={agent ? `startup: ${agent.startup_type_desc}` : 'not found (Express has no Agent)'} tone={agent && agent.status_desc !== 'Running' ? 'warning' : null} />
                             <Kpi label="Failed job runs (24h)" icon={Briefcase} color={C.red} value={errors.jobs ? '—' : n(failed)} hint={`${jobs.length} jobs`} tone={failed ? 'danger' : null} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         <Panel title="Backup status by database" icon={DatabaseBackup} color={C.green} pad={false} error={errors.backups}>
                             <DataTable

@@ -1,12 +1,15 @@
 import React from 'react';
 import { Copy, Database, Layers, Link2, ChartPie as PieIcon, Puzzle, Table2, Zap } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { Badge, C, compact, DataTable, Donut, HBars, Kpi, kb, n, Panel, pct, Row, Shell, when } from './shared';
+import Advisor from './Advisor';
+import { Badge, C, compact, DataTable, Donut, HBars, Kpi, kb, n, Panel, pct, Row, Shell, when, useAiAdvice } from './shared';
 
 export default function SqlServerStorageTab() {
+    const advice = useAiAdvice('storage');
     return (
         <Shell title="Tables & Indexes" icon={Table2} view="storage" refreshMs={null}>
-            {({ data, errors }) => {
+            {(result) => {
+                const { data, errors } = result;
                 const s: Row = data.indexSummary?.[0] || {};
                 const frag: Row[] = data.fragmentation || [];
                 const rebuild = frag.filter((f) => f.action === 'REBUILD').length;
@@ -28,6 +31,8 @@ export default function SqlServerStorageTab() {
                             <Kpi label="Missing indexes" icon={Link2} color={C.orange} value={errors.missingIndexes ? '—' : n((data.missingIndexes || []).length)} hint="suggested by the optimizer" />
                             <Kpi label="Avg fill factor" icon={PieIcon} color={C.green} value={pct(s.avg_fill_factor, 0)} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         <div className="mss-row">
                             <Panel title="Largest tables" icon={Table2} error={errors.tables}>

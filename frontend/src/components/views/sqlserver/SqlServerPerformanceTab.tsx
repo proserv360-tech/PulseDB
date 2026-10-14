@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Activity, Clock, Cpu, Gauge, Layers, ListOrdered, Lock, Search, Split, Table2 } from 'lucide-react';
+import Advisor from './Advisor';
 import {
     Badge,
     C,
@@ -18,6 +19,9 @@ import {
     TrendChart,
     WAIT_COLORS,
     when,
+    useAiAdvice,
+    AiAdviceBox,
+    TuneButton,
 } from './shared';
 
 const SORTS = [
@@ -31,17 +35,29 @@ const queryLabel = (r: Row) =>
     r.object_name ? `${r.object_name}` : String(r.query_text || '').replace(/\s+/g, ' ').trim().slice(0, 40) || '(no text)';
 
 export default function SqlServerPerformanceTab() {
+    const advice = useAiAdvice('performance');
     const [sortKey, setSortKey] = useState('total_cpu_ms');
     return (
         <Shell title="Performance & Waits" icon={Gauge} view="performance" refreshMs={15_000}>
-            {({ data, errors, live, history }) => (
-                <PerformanceBody data={data} errors={errors} live={live || {}} history={history || []} sortKey={sortKey} setSortKey={setSortKey} />
+            {(result) => (
+                <PerformanceBody
+                    result={result}
+                    advice={advice}
+                    data={result.data}
+                    errors={result.errors}
+                    live={result.live || {}}
+                    history={result.history || []}
+                    sortKey={sortKey}
+                    setSortKey={setSortKey}
+                />
             )}
         </Shell>
     );
 }
 
-function PerformanceBody({ data, errors, live: l, history, sortKey, setSortKey }: any) {
+function PerformanceBody({ result, advice, data, errors, live: l, history, sortKey, setSortKey }: any) {
+    // Separate AI box next to the query table for "Tune" on a single query.
+    const tune = useAiAdvice('performance');
     const categories: Row[] = data.waitCategories || [];
     const totalWait = categories.reduce((s, c) => s + Number(c.wait_ms), 0);
     const totalSignal = categories.reduce((s, c) => s + Number(c.signal_ms), 0);
@@ -100,6 +116,8 @@ function PerformanceBody({ data, errors, live: l, history, sortKey, setSortKey }
                 <Kpi label="Worktables" icon={Layers} color={C.purple} value={compact(l.worktablesPerSec)} unit="/s" hint="spools, sorts, hash work in tempdb" spark={sparkOf(history, 'worktablesPerSec')} />
                 <Kpi label="Lock waits" icon={Lock} color={C.orange} value={compact(l.lockWaitsPerSec)} unit="/s" spark={sparkOf(history, 'lockWaitsPerSec')} />
             </div>
+
+            <Advisor result={result} advice={advice} />
 
             <div className="mss-row">
                 <Panel title="Where time is spent waiting (since restart)" icon={Clock} error={errors.waitCategories}>
@@ -181,11 +199,34 @@ function PerformanceBody({ data, errors, live: l, history, sortKey, setSortKey }
                         fmt={sort.fmt}
                     />
                 </div>
+                <div style={{ padding: '0 16px 12px' }}>
+                    <AiAdviceBox advice={tune} />
+                </div>
                 <DataTable
                     key={sortKey}
                     rows={topQueries}
                     initialSort={{ key: sortKey, dir: 'desc' }}
                     columns={[
+                        {
+                            key: 'tune',
+                            label: '',
+                            fmt: (_, r) =>
+                                result.ai?.available ? (
+                                    <TuneButton
+                                        advice={tune}
+                                        text={r.query_text}
+                                        label={r.object_name || 'this query'}
+                                        stats={{
+                                            executions: r.execution_count,
+                                            avg_cpu_ms: r.avg_cpu_ms,
+                                            avg_duration_ms: r.avg_elapsed_ms,
+                                            avg_logical_reads: r.avg_logical_reads,
+                                            total_rows: r.total_rows,
+                                            database: r.database_name,
+                                        }}
+                                    />
+                                ) : null,
+                        },
                         { key: 'query_text', label: 'Statement', code: true },
                         { key: 'database_name', label: 'Database', fmt: (v, r) => (r.object_name ? `${v ?? ''}.${r.object_name}` : (v ?? '—')) },
                         { key: 'execution_count', label: 'Execs', num: true, fmt: compact },

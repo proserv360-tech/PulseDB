@@ -83,6 +83,19 @@ export const PULSE = {
           FROM sys.dm_io_virtual_file_stats(NULL, NULL)`,
 };
 
+// Settings the advisor reasons about (MAXDOP, memory, ad-hoc plans, CPUs/NUMA).
+const SERVER_CONFIG = `
+    SELECT (SELECT CAST(value_in_use AS int) FROM sys.configurations WHERE name = N'max degree of parallelism') AS maxdop,
+           (SELECT CAST(value_in_use AS int) FROM sys.configurations WHERE name = N'cost threshold for parallelism') AS cost_threshold,
+           (SELECT CAST(value_in_use AS int) FROM sys.configurations WHERE name = N'optimize for ad hoc workloads') AS optimize_adhoc,
+           (SELECT CAST(value_in_use AS bigint) FROM sys.configurations WHERE name = N'max server memory (MB)') AS max_server_memory_mb,
+           (SELECT cpu_count FROM sys.dm_os_sys_info) AS cpu_count,
+           (SELECT physical_memory_kb FROM sys.dm_os_sys_info) AS physical_memory_kb,
+           (SELECT COUNT(*) FROM sys.dm_os_memory_nodes WHERE memory_node_id < 64) AS numa_nodes,
+           CAST(SERVERPROPERTY('EngineEdition') AS int) AS engine_edition,
+           CAST(SERVERPROPERTY('Edition') AS nvarchar(128)) AS edition,
+           DB_NAME() AS current_database`;
+
 /* ── screens ─────────────────────────────────────────────────────────────── */
 export const QUERIES = {
     overview: {
@@ -158,6 +171,7 @@ export const QUERIES = {
     },
 
     performance: {
+        serverConfig: SERVER_CONFIG,
         waits: `
             SELECT TOP 20 wait_type, ${WAIT_CATEGORY} AS category, waiting_tasks_count, wait_time_ms, signal_wait_time_ms,
                    CAST(wait_time_ms * 1.0 / NULLIF(waiting_tasks_count, 0) AS decimal(18, 2)) AS avg_wait_ms,
@@ -412,6 +426,7 @@ export const QUERIES = {
     },
 
     memory: {
+        serverConfig: SERVER_CONFIG,
         memory: `
             SELECT pm.physical_memory_in_use_kb, pm.locked_page_allocations_kb, pm.memory_utilization_percentage,
                    pm.process_physical_memory_low, pm.process_virtual_memory_low,
@@ -449,7 +464,7 @@ export const QUERIES = {
              WHERE g.session_id <> @@SPID
              ORDER BY g.requested_memory_kb DESC`,
         tempdbFiles: `
-            SELECT f.name AS file_name, f.type_desc, ${MB('f.size')} AS size_mb,
+            SELECT f.name AS file_name, f.type_desc, f.physical_name, ${MB('f.size')} AS size_mb,
                    ${MAX_SIZE_MB('f')} AS max_size_mb, ${GROWTH('f')} AS growth
               FROM tempdb.sys.database_files f
              ORDER BY f.type, f.file_id`,
@@ -510,6 +525,10 @@ export const QUERIES = {
     },
 
     backups: {
+        settings: `
+            SELECT CAST(SERVERPROPERTY('InstanceDefaultBackupPath') AS nvarchar(512)) AS backup_path,
+                   CAST(SERVERPROPERTY('EngineEdition') AS int) AS engine_edition,
+                   CAST(SERVERPROPERTY('Edition') AS nvarchar(128)) AS edition`,
         backups: `
             SELECT d.name AS database_name, d.recovery_model_desc, d.state_desc,
                    b.last_full, b.last_diff, b.last_log,

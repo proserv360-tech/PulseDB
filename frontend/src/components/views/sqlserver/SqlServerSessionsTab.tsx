@@ -18,17 +18,22 @@ import {
     sparkOf,
     TrendChart,
     when,
+    useAiAdvice,
 } from './shared';
+import Advisor from './Advisor';
 
 export default function SqlServerSessionsTab() {
+    const advice = useAiAdvice('sessions');
     return (
         <Shell title="Sessions & Locks" icon={Users} view="sessions" refreshMs={10_000}>
-            {({ data, errors, live, history }) => <SessionsBody data={data} errors={errors} l={live || {}} history={history || []} />}
+            {(result) => (
+                <SessionsBody result={result} advice={advice} data={result.data} errors={result.errors} l={result.live || {}} history={result.history || []} />
+            )}
         </Shell>
     );
 }
 
-function SessionsBody({ data, errors, l, history }: any) {
+function SessionsBody({ result, advice, data, errors, l, history }: any) {
     const sessions: Row[] = data.sessions || [];
     const blocking: Row[] = data.blocking || [];
     const transactions: Row[] = data.transactions || [];
@@ -77,6 +82,8 @@ function SessionsBody({ data, errors, l, history }: any) {
                     tone={deadlocks.length ? 'warning' : null}
                 />
             </div>
+
+            <Advisor result={result} advice={advice} />
 
             <div className="mss-row">
                 <Panel title="Blocking chains" icon={GitBranch} color={C.orange} error={errors.blocking}>

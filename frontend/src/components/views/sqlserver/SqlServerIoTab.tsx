@@ -1,14 +1,17 @@
 import React from 'react';
 import { ArrowDownToLine, ArrowUpFromLine, Clock, FileText, HardDrive, Timer } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { Badge, C, compact, DataTable, HBars, Kpi, mb, ms, Panel, pct, Progress, Row, Shell, sparkOf, TrendChart } from './shared';
+import Advisor from './Advisor';
+import { Badge, C, compact, DataTable, HBars, Kpi, mb, ms, Panel, pct, Progress, Row, Shell, sparkOf, TrendChart, useAiAdvice } from './shared';
 
 const latencyColor = (v: any) => (Number(v) >= 50 ? THEME.danger : Number(v) >= 20 ? THEME.warning : undefined);
 
 export default function SqlServerIoTab() {
+    const advice = useAiAdvice('io');
     return (
         <Shell title="Storage & I/O" icon={HardDrive} view="io" refreshMs={15_000}>
-            {({ data, errors, live, history }) => {
+            {(result) => {
+                const { data, errors, live, history } = result;
                 const l: Row = live || {};
                 const files: Row[] = data.files || [];
                 const dataMb = files.filter((f) => f.type_desc === 'ROWS').reduce((s, f) => s + Number(f.size_mb), 0);
@@ -42,6 +45,8 @@ export default function SqlServerIoTab() {
                             <Kpi label="Log files" icon={FileText} color={C.slate} value={mb(logMb)} hint={fullestLog ? `fullest: ${fullestLog.database_name} ${fullestLog.log_used_pct}%` : undefined} />
                             <Kpi label="Checkpoint writes" icon={Timer} color={C.green} value={compact(l.checkpointPagesPerSec)} unit="pages/s" spark={sparkOf(history, 'checkpointPagesPerSec')} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         <div className="mss-row">
                             <Panel title="IOPS — live" icon={HardDrive} color={C.blue}>

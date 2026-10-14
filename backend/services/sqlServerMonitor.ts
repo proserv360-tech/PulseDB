@@ -12,6 +12,7 @@
  * points are kept in memory per connection (`history`) so the screens can chart
  * trends while any SQL Server screen is open.
  */
+import { buildRecommendations } from './sqlServerAdvisor.js';
 import { PULSE, QUERIES } from './sqlServerQueries.js';
 
 export const SQL_SERVER_VIEWS = Object.keys(QUERIES);
@@ -405,6 +406,7 @@ export async function collectSqlServerView(adapter, view, connectionId) {
         data.deadlocks = data.deadlocks.map((d) => ({ event_time: d.event_time, ...parseDeadlock(d.deadlock_xml) }));
     }
     if (view === 'security') shapeSecurity(data);
+    if (view !== 'overview') data.recommendations = buildRecommendations(view, data, pulse.live);
     if (pulseRaw.errors.counters) errors.pulse = pulseRaw.errors.counters;
 
     const result = { view, data, errors, live: pulse.live, collectedAt: new Date().toISOString() };

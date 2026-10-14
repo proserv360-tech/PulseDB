@@ -15,6 +15,8 @@ import crypto from 'node:crypto';
 import { Router } from 'express';
 import { collectSqlServerView, SQL_SERVER_VIEWS } from '../services/sqlServerMonitor.js';
 import { QUERIES } from '../services/sqlServerQueries.js';
+import { adviseSqlServer } from '../services/sqlServerAiAdvisor.js';
+import { getProvider } from '../services/copilotService.js';
 
 const MSSQL_TYPES = new Set(['mssql', 'sqlserver']);
 const IDLE_CLOSE_MS = 2 * 60_000;
@@ -85,7 +87,43 @@ export default function sqlServerRoutes(authenticate, resolveConnection, getAdap
             }
             // Every panel failing usually means the pool itself is broken — start fresh next time.
             if (Object.keys(QUERIES[view]).every((panel) => result.errors[panel])) drop(id);
+            const provider = getProvider();
+            result.ai = { available: provider.name !== 'local', provider: provider.name };
             res.json(result);
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    /**
+     * AI review of one screen, or tuning advice for one query.
+     *   POST /api/connections/:id/sqlserver/:view/ai   { focus?: { kind: 'query', text, stats } }
+     *   → { text, provider, model }
+     * Collects the screen fresh (so the advice matches what is on it now) and
+     * sends a compact, literal-masked summary to the configured AI provider.
+     */
+    router.post('/connections/:id/sqlserver/:view/ai', authenticate, async (req, res, next) => {
+        const { id, view } = req.params;
+        if (!SQL_SERVER_VIEWS.includes(view)) return res.status(404).json({ error: `unknown view "${view}"` });
+        try {
+            const connection = await resolveConnection(req, id);
+            if (!connection) return res.status(404).json({ error: 'connection not found' });
+            if (!MSSQL_TYPES.has(connection.dbType)) {
+                return res.status(400).json({ error: 'connection is not a SQL Server connection' });
+            }
+            let snapshot;
+            try {
+                snapshot = await collectSqlServerView(await adapterFor(id, connection), view, id);
+            } catch (err) {
+                drop(id);
+                return res.status(502).json({ error: err.message });
+            }
+            const focus = req.body?.focus?.kind === 'query' ? { kind: 'query', text: String(req.body.focus.text || ''), stats: req.body.focus.stats || {} } : null;
+            try {
+                res.json(await adviseSqlServer(view, snapshot, focus));
+            } catch (err) {
+                res.status(err.status || 502).json({ error: err.message, code: err.code });
+            }
         } catch (err) {
             next(err);
         }

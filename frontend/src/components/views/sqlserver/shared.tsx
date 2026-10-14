@@ -16,9 +16,9 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-import { AlertCircle, AlertTriangle, ChevronDown, ChevronUp, Info, Pause, Play, RefreshCw, XCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Check, ChevronDown, ChevronUp, Copy, Info, Lightbulb, Pause, Play, RefreshCw, Sparkles, XCircle } from 'lucide-react';
 import { THEME, useAdaptiveTheme } from '../../../utils/theme';
-import { fetchDataFresh } from '../../../utils/api';
+import { fetchDataFresh, postData } from '../../../utils/api';
 import { useConnection } from '../../../context/ConnectionContext';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -34,6 +34,7 @@ export type ViewResult = {
     live: Row | null;
     history?: Row[];
     collectedAt: string;
+    ai?: { available: boolean; provider: string };
 };
 
 // SQL Server brand-adjacent palette (readable on light and dark surfaces).
@@ -748,3 +749,154 @@ function BarLabel({ x, y, payload }: any) {
 
 /** Pull one numeric series out of the pulse history for a KPI sparkline. */
 export const sparkOf = (history: Row[] | undefined, key: string) => (history || []).slice(-40).map((p) => (isNum(p[key]) ? Number(p[key]) : null));
+
+/* ── Advisor: recommendations + AI review ───────────────────────────────── */
+export type Recommendation = {
+    id: string;
+    severity: 'high' | 'medium' | 'low';
+    category: string;
+    title: string;
+    detail?: string;
+    sql?: string;
+    caution?: string;
+};
+
+export const SEVERITY_COLOR = () => ({ high: THEME.danger, medium: THEME.warning, low: C.blue });
+
+export function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) {
+    const [done, setDone] = useState(false);
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setDone(true);
+            setTimeout(() => setDone(false), 1500);
+        } catch {
+            window.prompt('Copy the script:', text);
+        }
+    };
+    return (
+        <button className="mss-btn" style={{ padding: '3px 9px', fontSize: 11 }} onClick={copy} type="button">
+            {done ? <Check size={12} /> : <Copy size={12} />} {done ? 'Copied' : label}
+        </button>
+    );
+}
+
+export function ScriptBlock({ sql }: { sql: string }) {
+    return (
+        <div style={{ position: 'relative' }}>
+            <pre
+                style={{
+                    margin: 0, padding: '10px 12px', paddingRight: 84, borderRadius: 8, overflowX: 'auto',
+                    background: THEME.bg, border: `1px solid ${THEME.glassBorder}`, color: THEME.textMain,
+                    font: '11.5px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace', whiteSpace: 'pre',
+                }}
+            >
+                {sql}
+            </pre>
+            <div style={{ position: 'absolute', top: 6, right: 6 }}>
+                <CopyButton text={sql} />
+            </div>
+        </div>
+    );
+}
+
+/** Minimal renderer for the AI answer: **bold**, headings, and ```sql blocks with copy. */
+function AdviceText({ text }: { text: string }) {
+    const parts = String(text || '').split(/```(?:sql|tsql|SQL)?\n?([\s\S]*?)```/g);
+    const inline = (line: string, key: number) => {
+        const bits = line.split(/\*\*(.+?)\*\*/g);
+        return (
+            <span key={key}>
+                {bits.map((b, i) => (i % 2 ? <strong key={i}>{b}</strong> : <React.Fragment key={i}>{b.replace(/^#{1,4}\s*/, '')}</React.Fragment>))}
+            </span>
+        );
+    };
+    return (
+        <div style={{ display: 'grid', gap: 8, fontSize: 13, lineHeight: 1.6, color: THEME.textMain }}>
+            {parts.map((p, i) =>
+                i % 2 ? (
+                    <ScriptBlock key={i} sql={p.trim()} />
+                ) : (
+                    p.trim() && (
+                        <div key={i} style={{ whiteSpace: 'pre-wrap' }}>
+                            {p
+                                .trim()
+                                .split('\n')
+                                .map((l, j, arr) => (
+                                    <React.Fragment key={j}>
+                                        {inline(l, j)}
+                                        {j < arr.length - 1 ? '\n' : ''}
+                                    </React.Fragment>
+                                ))}
+                        </div>
+                    )
+                ),
+            )}
+        </div>
+    );
+}
+
+export function useAiAdvice(view: string) {
+    const { activeConnectionId } = useConnection();
+    const [state, setState] = useState<{ loading: boolean; text?: string; provider?: string; error?: string; title?: string }>({ loading: false });
+    const run = useCallback(
+        async (title: string, focus?: Row) => {
+            setState({ loading: true, title });
+            try {
+                const r: any = await postData(`/api/connections/${activeConnectionId}/sqlserver/${view}/ai`, focus ? { focus } : {});
+                setState({ loading: false, title, text: r.text, provider: r.provider });
+            } catch (e: any) {
+                setState({ loading: false, title, error: e.message || 'AI request failed' });
+            }
+        },
+        [activeConnectionId, view],
+    );
+    const clear = useCallback(() => setState({ loading: false }), []);
+    return { ...state, run, clear };
+}
+
+export function AiAdviceBox({ advice }: { advice: ReturnType<typeof useAiAdvice> }) {
+    if (!advice.loading && !advice.text && !advice.error) return null;
+    return (
+        <div style={{ border: `1px solid ${C.purple}55`, background: `${C.purple}0d`, borderRadius: 12, padding: 14, display: 'grid', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 13, color: THEME.textMain }}>
+                <Sparkles size={15} color={C.purple} /> {advice.title || 'AI review'}
+                <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+                    {advice.provider && <span className="mss-sub">via {advice.provider}</span>}
+                    {!advice.loading && (
+                        <button className="mss-btn" style={{ padding: '3px 9px', fontSize: 11 }} onClick={advice.clear} type="button">
+                            Close
+                        </button>
+                    )}
+                </span>
+            </div>
+            {advice.loading && (
+                <div className="mss-sub" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <RefreshCw size={13} className="mss-spin" /> Analysing the current data… this takes 5–20 seconds.
+                </div>
+            )}
+            {advice.error && <div className="mss-error">{advice.error}</div>}
+            {advice.text && <AdviceText text={advice.text} />}
+            {advice.text && (
+                <div className="mss-sub">AI suggestions can be wrong. Review every script and test it before running it; PulseDB never runs them.</div>
+            )}
+        </div>
+    );
+}
+
+/** "Tune with AI" for one query row (Performance, Query Store). */
+export function TuneButton({ advice, text, stats, label }: { advice: ReturnType<typeof useAiAdvice>; text?: string; stats: Row; label: string }) {
+    if (!text) return null;
+    return (
+        <button
+            className="mss-btn"
+            style={{ padding: '3px 8px', fontSize: 11, whiteSpace: 'nowrap', color: C.purple }}
+            disabled={advice.loading}
+            onClick={() => advice.run(`Tuning ${label}`, { kind: 'query', text, stats })}
+            type="button"
+            title="Ask AI how to make this query faster"
+        >
+            <Sparkles size={12} /> Tune
+        </button>
+    );
+}

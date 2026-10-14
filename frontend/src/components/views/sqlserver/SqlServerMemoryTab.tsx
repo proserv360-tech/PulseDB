@@ -1,6 +1,7 @@
 import React from 'react';
 import { Archive, Clock, Database, HardDrive, Layers, MemoryStick, Ticket, Users } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
+import Advisor from './Advisor';
 import {
     C,
     compact,
@@ -20,13 +21,14 @@ import {
     Shell,
     sparkOf,
     TrendChart,
-    when,
-} from './shared';
+    when, useAiAdvice } from './shared';
 
 export default function SqlServerMemoryTab() {
+    const advice = useAiAdvice('memory');
     return (
         <Shell title="Memory & TempDB" icon={MemoryStick} view="memory" refreshMs={15_000}>
-            {({ data, errors, live, history }) => {
+            {(result) => {
+                const { data, errors, live, history } = result;
                 const m: Row = data.memory?.[0] || {};
                 const l: Row = live || {};
                 const h = (history || []).map((p) => ({
@@ -78,6 +80,8 @@ export default function SqlServerMemoryTab() {
                             <Kpi label="Lazy writes" icon={Archive} color={C.orange} value={compact(l.lazyWritesPerSec)} unit="/s" hint="buffer pool flushing to free memory" spark={sparkOf(history, 'lazyWritesPerSec')} />
                             <Kpi label="Plan cache" icon={Layers} color={C.magenta} value={mb(planMb)} hint={`${mb(singleMb)} single-use plans`} tone={planMb > 0 && singleMb / planMb > 0.5 ? 'warning' : null} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         <div className="mss-row">
                             <Panel title="SQL Server memory — live" icon={MemoryStick} color={C.purple}>

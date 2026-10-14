@@ -1,12 +1,15 @@
 import React from 'react';
 import { GitBranch, Info, Layers, Network } from 'lucide-react';
 import { THEME } from '../../../utils/theme';
-import { Badge, C, DataTable, Facts, Kpi, kb, n, Panel, Row, secs, Shell, stateColor, when } from './shared';
+import Advisor from './Advisor';
+import { Badge, C, DataTable, Facts, Kpi, kb, n, Panel, Row, secs, Shell, stateColor, when, useAiAdvice } from './shared';
 
 export default function SqlServerAlwaysOnTab() {
+    const advice = useAiAdvice('alwayson');
     return (
         <Shell title="Always On & Replication" icon={GitBranch} view="alwayson" refreshMs={15_000}>
-            {({ data, errors }) => {
+            {(result) => {
+                const { data, errors } = result;
                 const st: Row = data.status?.[0] || {};
                 const groups: Row[] = data.groups || [];
                 const replicas: Row[] = data.replicas || [];
@@ -26,6 +29,8 @@ export default function SqlServerAlwaysOnTab() {
                             <Kpi label="Max redo queue" icon={Network} color={C.orange} value={kb(maxRedo)} hint="log not yet replayed on a secondary" tone={maxRedo > 100 * 1024 ? 'warning' : null} />
                             <Kpi label="Mirrored databases" icon={GitBranch} color={C.slate} value={n(st.mirrored_dbs)} />
                         </div>
+
+                        <Advisor result={result} advice={advice} />
 
                         {none ? (
                             <Panel title="No high-availability configuration" icon={Info} color={C.blue} error={errors.status}>
