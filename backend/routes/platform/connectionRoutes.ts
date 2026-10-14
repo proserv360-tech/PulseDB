@@ -1147,7 +1147,18 @@ export default function registerConnectionRoutes(app) {
 
             try {
                 const dbType = (c.dbType || 'postgresql').toLowerCase();
-                if (dbType === 'mongodb') {
+                if (c.agentAppId || !['postgresql', 'postgres', 'mysql', 'mariadb', 'mongodb'].includes(dbType)) {
+                    // Engine-adapter connections (SQL Server, Oracle…) and anything served by a
+                    // PulseDB Agent warm up through their adapter — for an agent that is a round
+                    // trip to it. The pg-pool fallback below used to dial e.g. localhost:1433
+                    // from the server for these and fail with ECONNREFUSED.
+                    const adapter = await openAdapter(c);
+                    try {
+                        if (c.agentAppId) await adapter.connect();
+                    } finally {
+                        await adapter.disconnect?.().catch(() => undefined);
+                    }
+                } else if (dbType === 'mongodb') {
                     // Warm-up MongoDB client
                     const { db } = await getMongoClient(id, req.user.id);
                     await db.command({ ping: 1 });
