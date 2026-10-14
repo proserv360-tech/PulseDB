@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<title>Connect a PC to PulseDB</title>
+<link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+  /* Layout: one readable column; the setup steps run down a numbered rail, with a chip saying WHERE each step happens. */
+  :root {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --ink: #172033;
+    --muted: #5a6478;
+    --line: #dde3ee;
+    --accent: #3b5bdb;      /* PulseDB blue */
+    --accent-soft: #e7ecfd;
+    --agent: #0f8a5f;       /* "VIA AGENT" green */
+    --agent-soft: #e2f5ec;
+    --warn: #a15c07;
+    --warn-soft: #fdf1dc;
+    --code-bg: #0f1626;
+    --code-ink: #d7e0f2;
+    --code-dim: #7d8aa6;
+    --code-ok: #5fd7a1;
+    --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-body: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1120; --surface: #121a2e; --ink: #e6ebf5; --muted: #9aa6bf; --line: #24304a;
+      --accent: #7c97ff; --accent-soft: #1b2645; --agent: #4fd29a; --agent-soft: #12302a;
+      --warn: #f2b45c; --warn-soft: #33261a; --code-bg: #070c18; --code-ink: #d7e0f2; --code-dim: #6f7c99; --code-ok: #5fd7a1;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1120; --surface: #121a2e; --ink: #e6ebf5; --muted: #9aa6bf; --line: #24304a;
+    --accent: #7c97ff; --accent-soft: #1b2645; --agent: #4fd29a; --agent-soft: #12302a;
+    --warn: #f2b45c; --warn-soft: #33261a; --code-bg: #070c18; --code-ink: #d7e0f2; --code-dim: #6f7c99; --code-ok: #5fd7a1;
+    color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--font-body); }
+  .page { max-width: 780px; margin: 0 auto; padding-inline: 20px; padding-block: 44px 72px; display: grid; gap: 40px; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(30px, 5vw, 40px); letter-spacing: -0.02em; }
+  h2 { font-size: 22px; letter-spacing: -0.01em; }
+  h3 { font-size: 17px; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+  .back { font: 600 14px/1 var(--font-body); text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .eyebrow { font: 600 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+  .lede { color: var(--muted); font-size: 18px; max-width: 62ch; }
+  header { display: grid; gap: 14px; }
+
+  /* the three places involved */
+  .flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+  .flow > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+  .flow b { font-family: var(--font-display); font-size: 15px; }
+  .flow span { color: var(--muted); font-size: 14px; }
+  .flow .tag { font: 600 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  @media (max-width: 560px) { .flow { grid-template-columns: 1fr; } }
+
+  section { display: grid; gap: 16px; }
+  .needs { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .needs li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .needs li::before { content: ""; width: 14px; height: 14px; margin-top: 6px; border: 2px solid var(--accent); border-radius: 4px; }
+
+  /* numbered rail — the order of these steps matters */
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; }
+  .step { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; position: relative; padding-bottom: 30px; }
+  .step:last-child { padding-bottom: 0; }
+  .step::before {
+    content: counter(step); width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center; font: 700 15px/1 var(--font-display);
+    background: var(--accent); color: var(--bg);
+  }
+  .step:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 42px; bottom: 6px; width: 2px; background: var(--line); }
+  .step-body { display: grid; gap: 10px; min-width: 0; padding-top: 4px; }
+  .step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .where { font: 600 11px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px; }
+  .where.yours { background: var(--accent-soft); color: var(--accent); }
+  .where.other { background: var(--agent-soft); color: var(--agent); }
+  .where.pulsedb { background: var(--warn-soft); color: var(--warn); }
+  .step ol, .step ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+  .ui { font-weight: 600; white-space: nowrap; }
+  .btn-replica { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 8px; font: 600 14px/1.6 var(--font-body);
+    background: var(--agent-soft); color: var(--agent); box-shadow: inset 0 0 0 1px var(--agent); white-space: nowrap; }
+  .badge { font: 700 10px/1 var(--font-mono); letter-spacing: 0.08em; padding: 4px 7px; border-radius: 6px; background: var(--agent-soft); color: var(--agent); white-space: nowrap; }
+
+  .note { background: var(--warn-soft); color: var(--ink); border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+  .note strong { color: var(--warn); }
+
+  .url { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .url code { background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 8px; user-select: all; }
+  .copy { font: 600 13px/1 var(--font-body); padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .copy:hover { border-color: var(--accent); }
+
+  .terminal { background: var(--code-bg); color: var(--code-ink); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font: 13.5px/1.7 var(--font-mono); white-space: pre; }
+  .terminal .dim { color: var(--code-dim); }
+  .terminal .ok { color: var(--code-ok); }
+
+  .conn-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .conn-card .ico { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font: 700 15px/1 var(--font-display); }
+  .conn-card b { display: block; font-family: var(--font-display); font-size: 15px; overflow-wrap: anywhere; }
+  .conn-card span { color: var(--muted); font-size: 13.5px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+  th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  th { font: 600 12px/1.3 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { width: 40%; }
+
+  .remove { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="topbar"><div class="eyebrow">PulseDB · SQL Server monitoring</div><a class="back" href="/">← Back to PulseDB</a></div>
+    <h1>Connect another PC to PulseDB</h1>
+    <p class="lede">Monitor the SQL Server on any Windows PC from the hosted PulseDB. A small agent runs on that PC and talks to PulseDB over outbound HTTPS only. You don't type any server details, passwords or keys.</p>
+    <div class="flow" aria-label="The three places involved">
+      <div><span class="tag">Your PC</span><b>Download the agent</b><span>One button in PulseDB</span></div>
+      <div><span class="tag">The other PC</span><b>Run setup.cmd</b><span>Finds SQL Server, starts the agent</span></div>
+      <div><span class="tag">PulseDB</span><b>Databases appear</b><span>Marked <span class="badge">VIA AGENT</span></span></div>
+    </div>
+  </header>
+
+  <section aria-labelledby="needs">
+    <h2 id="needs">Before you start</h2>
+    <ul class="needs">
+      <li><span><strong>The other PC</strong> runs Windows 10 or 11 and has SQL Server installed.</span></li>
+      <li><span>The Windows user you sign in as can open that SQL Server. If they can connect in SQL Server Management Studio without a password, this is fine.</span></li>
+      <li><span>The PC has internet access. Admin rights are not required; Windows may ask permission once if it needs to install the SQL Server driver.</span></li>
+      <li><span>You can sign in to PulseDB as an administrator.</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="steps">
+    <h2 id="steps">Setup</h2>
+    <ol class="steps">
+      <li class="step">
+        <div class="step-body">
+          <div class="step-head"><h3>Download the agent</h3><span class="where yours">On your PC</span></div>
+          <div class="url"><span>Open</span><code id="site" class="origin">https://pulsedb-o8ax.vercel.app</code><button class="copy" id="copy-url" type="button">Copy link</button></div>
+          <ol>
+            <li>Sign in, then go to <span class="ui">Connections → Manage Connections</span>.</li>
+            <li>Click <span class="btn-replica">⤓ Connect another PC</span>.</li>
+            <li><code>PulseDB-Agent.zip</code> downloads. It already contains PulseDB's address and a new agent key.</li>
+          </ol>
+          <p class="note"><strong>Keep the zip private.</strong> Its key lets a PC send data to your PulseDB. Give it only to the PC you are connecting, and download a fresh one for each PC.</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-body">
+          <div class="step-head"><h3>Copy the zip to the other PC</h3><span class="where yours">Your PC → other PC</span></div>
+          <p>Use a USB drive, email, Teams or a shared folder. Save it anywhere, for example <code>Downloads</code>.</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-body">
+          <div class="step-head"><h3>Extract it</h3><span class="where other">On the other PC</span></div>
+          <ol>
+            <li>Right-click <code>PulseDB-Agent.zip</code> → <span class="ui">Extract All…</span> → <span class="ui">Extract</span>.</li>
+            <li>Move the <code>PulseDB-Agent</code> folder somewhere permanent, such as <code>C:\PulseDB-Agent</code>. The agent runs from this folder, so don't delete it later.</li>
+          </ol>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-body">
+          <div class="step-head"><h3>Run setup.cmd</h3><span class="where other">On the other PC</span></div>
+          <ol>
+            <li>Open the <code>PulseDB-Agent</code> folder and double-click <code>setup.cmd</code>.</li>
+            <li>If Windows shows <span class="ui">Windows protected your PC</span>, click <span class="ui">More info → Run anyway</span>.</li>
+            <li>Wait 1–3 minutes the first time. Setup installs Node.js and the SQL Server ODBC driver if they are missing, finds the databases, starts the agent and makes it start at every sign-in.</li>
+          </ol>
+          <p>It finishes like this, with that PC's name and databases:</p>
+          <div class="terminal" role="img" aria-label="Example output of setup.cmd"><span class="dim">==&gt; Finding SQL Server on this PC</span>
+    OFFICE-PC: SalesDB, Inventory
+<span class="dim">==&gt; Agent key for <span class="origin">https://pulsedb-o8ax.vercel.app</span></span>
+    Existing key is valid.
+<span class="dim">==&gt; Installing autostart and starting the agent</span>
+
+<span class="ok">Done.</span> PulseDB Agent is running and registered with <span class="origin">https://pulsedb-o8ax.vercel.app</span>:
+    OFFICE-PC · SalesDB   -&gt; connection #81
+    OFFICE-PC · Inventory -&gt; connection #82</div>
+          <p>Close the window. The agent keeps running in the background.</p>
+        </div>
+      </li>
+
+      <li class="step">
+        <div class="step-body">
+          <div class="step-head"><h3>Check it in PulseDB</h3><span class="where pulsedb">In PulseDB, any PC</span></div>
+          <ol>
+            <li>Refresh PulseDB with <span class="ui">Ctrl + Shift + R</span> and open <span class="ui">Connections</span>.</li>
+            <li>Each database appears as <code>&lt;PC name&gt; · &lt;database&gt;</code>:
+              <div class="conn-card" style="margin-top:8px">
+                <div class="ico">M</div>
+                <div><b>OFFICE-PC · SalesDB</b><span>SQL Server · localhost (as seen by the agent)</span></div>
+                <span class="badge">VIA AGENT</span>
+              </div>
+            </li>
+            <li>Click <span class="ui">Test</span>. Expect <em>Connection successful via PulseDB Agent</em>.</li>
+            <li>Pick it in the connection selector at the top and open the <span class="ui">SQL Server</span> screens.</li>
+          </ol>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="network">
+    <h2 id="network">Other SQL Servers on that PC's network</h2>
+    <p>Once the agent runs on a PC, PulseDB can also reach SQL Servers that PC can see, such as another server in the same office. In PulseDB choose <span class="ui">Connections → New Connection → SQL Server</span>, enter that server's host (for example <code>SERVER01\SQLEXPRESS</code> or <code>192.168.1.20</code>) and a SQL login. PulseDB sends it through the agent automatically.</p>
+    <p>If you run agents on several PCs, use the PC's name as the host rather than <code>localhost</code>, so PulseDB knows which agent to use.</p>
+  </section>
+
+  <section aria-labelledby="trouble">
+    <h2 id="trouble">If something goes wrong</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>setup.cmd</code> closes at once or mentions Node.js</td><td>Install Node.js LTS from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>, then run <code>setup.cmd</code> again.</td></tr>
+          <tr><td><code>skipped — Login failed</code></td><td>This Windows user has no SQL Server login. Ask your DBA to add one, or add the server in PulseDB with <span class="ui">New Connection</span> and a SQL login.</td></tr>
+          <tr><td><code>No SQL Server databases found</code></td><td>SQL Server isn't installed on this PC or its service is stopped. Check <span class="ui">Services → SQL Server</span>.</td></tr>
+          <tr><td>PulseDB says the agent is <em>offline</em></td><td>The PC is off or signed out, or the agent stopped. Sign in to that PC or run <code>setup.cmd</code> again.</td></tr>
+          <tr><td><code>This agent has no valid key</code></td><td>Its key was deleted in PulseDB. Download a fresh zip (step 1) and run its <code>setup.cmd</code>.</td></tr>
+          <tr><td>You deleted some of its databases and want them back</td><td>Run <code>setup.cmd</code> again on that PC.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="remove">
+    <h2 id="remove">Removing a PC</h2>
+    <ol class="remove">
+      <li>On that PC, double-click <code>uninstall-agent.cmd</code> in the <code>PulseDB-Agent</code> folder.</li>
+      <li>In PulseDB, open <span class="ui">Observability → SDK Integration</span> and delete <code>&lt;PC name&gt; agent</code>. Its key stops working immediately.</li>
+      <li>Delete that PC's connections on the <span class="ui">Connections</span> page.</li>
+    </ol>
+  </section>
+
+  <footer>The agent only reads from SQL Server; statements that change data are refused unless an administrator turns that on in <code>agent.config.json</code>. Its log is <code>PulseDB-Agent\logs\agent.log</code>.</footer>
+</main>
+
+<script>
+  // Show this PulseDB's own address (falls back to the text above when opened as a file).
+  if (/^https?:/.test(location.protocol)) document.querySelectorAll('.origin').forEach((el) => { el.textContent = location.origin; });
+  document.getElementById('copy-url').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const text = document.getElementById('site').textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('site'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      btn.textContent = 'Press Ctrl+C';
+    }
+    setTimeout(() => { btn.textContent = 'Copy link'; }, 1800);
+  });
+</script>
+</body>
+</html>

@@ -57,7 +57,8 @@ re-registration (every 10 minutes and at sign-in) does not bring it back. Runnin
 
 Monitor the SQL Server on any other Windows PC — nothing to type: no server
 details, passwords or keys. Illustrated guide:
-**[Connect a PC to PulseDB](https://claude.ai/artifact/JxN2XyTJyyVE29gWfppWuN)**.
+**[Connect a PC to PulseDB](https://pulsedb-o8ax.vercel.app/agent-setup-guide.html)**
+(served by PulseDB at `/agent-setup-guide.html`).
 
 **Before you start** (on the other PC)
 

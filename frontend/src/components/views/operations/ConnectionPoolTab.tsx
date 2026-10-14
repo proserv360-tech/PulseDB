@@ -1702,8 +1702,8 @@ const ConnectionsTab = () => {
  * "Connect another PC": downloads a PulseDB Agent zip with a fresh key and this
  * PulseDB's address already in it. On the other PC: unzip, run setup.cmd.
  */
-/** Step-by-step guide for "Connect another PC" (also linked from agent/README.md). */
-const AGENT_GUIDE_URL = 'https://claude.ai/artifact/JxN2XyTJyyVE29gWfppWuN';
+/** Step-by-step guide for "Connect another PC", served by PulseDB itself (frontend/public). */
+const AGENT_GUIDE_URL = '/agent-setup-guide.html';
 
 function AgentGuideLink() {
     return (
@@ -1738,7 +1738,7 @@ function ConnectAnotherPcButton({ style }: { style: React.CSSProperties }) {
                     '1. Copy the zip there and extract it.\n' +
                     '2. Double-click PulseDB-Agent\\setup.cmd.\n\n' +
                     'Its databases then appear here with a VIA AGENT badge. The zip contains a key for this PulseDB — keep it private.\n\n' +
-                    `Step-by-step guide: ${AGENT_GUIDE_URL}`,
+                    `Step-by-step guide: ${window.location.origin}${AGENT_GUIDE_URL}`,
             );
         } catch (e: any) {
             window.alert(`Could not create the agent package: ${e.message}`);
