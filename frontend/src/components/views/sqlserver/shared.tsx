@@ -182,7 +182,7 @@ const Styles = () => (
         .mss-btn:hover { background:${THEME.surfaceHover}; }
         .mss-btn:disabled { opacity:.6; cursor:default; }
         .mss-spin { animation: mss-spin 1s linear infinite; }
-        .mss-kpis { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px; }
+        .mss-kpis { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; }
         .mss-kpi { position:relative; overflow:hidden; background:${THEME.surface}; border:1px solid ${THEME.glassBorder};
                    border-radius:12px; padding:14px 16px 12px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
         .mss-kpi-label { display:flex; align-items:center; gap:7px; font-size:12px; color:${THEME.textMuted}; }

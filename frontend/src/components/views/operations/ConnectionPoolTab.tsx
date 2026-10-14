@@ -1229,8 +1229,8 @@ const ConnectionsTab = () => {
                         <button
                             onClick={() => openNew()}
                             style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 20,
-                                padding: '9px 22px', borderRadius: 16, border: 'none',
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                minWidth: 230, padding: '9px 22px', borderRadius: 16, border: 'none',
                                 background: THEME.primary, color: '#fff',
                                 fontSize: 12, fontWeight: 600, cursor: 'pointer',
                                 transition: 'all 0.2s', fontFamily: FONT_UI,
@@ -1252,9 +1252,12 @@ const ConnectionsTab = () => {
                         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                             <ConnectAnotherPcButton
                                 style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 10,
-                                    padding: '9px 22px', borderRadius: 16, cursor: 'pointer',
-                                    background: THEME.success + '1F', border: `1px solid ${THEME.success}55`,
+                                    // Same box as "Add Connection Manually" above: outline drawn
+                                    // inset (no border) so both buttons are the same height.
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                    minWidth: 230, padding: '9px 22px', borderRadius: 16, cursor: 'pointer',
+                                    background: THEME.success + '1F', border: 'none',
+                                    boxShadow: `inset 0 0 0 1px ${THEME.success}55`,
                                     color: THEME.success, fontSize: 12, fontWeight: 600, fontFamily: FONT_UI,
                                 }}
                             />
