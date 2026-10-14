@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { THEME, useAdaptiveTheme, useGlobalRefresh } from '../../../utils/theme';
-import { API_BASE } from '../../../utils/api';
+import { API_BASE, postData } from '../../../utils/api';
 import { useConnection } from '../../../context/ConnectionContext';
 import { encryptConnectionFields } from '../../../utils/cryptoUtils';
 import {
     Database, Plus, Edit, Trash2, Eye, EyeOff, Check, X,
     Server, Key, User, AlertCircle, CheckCircle, Link as LinkIcon,
     RefreshCw, ChevronDown, Terminal, Lock, ChevronRight, ShieldCheck,
-    Search, MoreVertical, Copy, Zap,
+    Search, MoreVertical, Copy, Zap, Download,
 } from 'lucide-react';
 
 // ─── Database type definitions ───────────────────────────────────────────────
@@ -1301,6 +1301,7 @@ const ConnectionsTab = () => {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 22, alignItems: 'center' }}>
+                                <ConnectAnotherPcButton style={S.btn(THEME.success + '1F', THEME.success + '55', THEME.success)} />
                                 <button onClick={() => openNew()}
                                     style={S.btn(THEME.primary + '2E', THEME.primary + '66', THEME.primary)}
                                     onMouseEnter={e => e.currentTarget.style.background = THEME.primary + '4D'}
@@ -1670,5 +1671,43 @@ const ConnectionsTab = () => {
         </div>
     );
 };
+
+/**
+ * "Connect another PC": downloads a PulseDB Agent zip with a fresh key and this
+ * PulseDB's address already in it. On the other PC: unzip, run setup.cmd.
+ */
+function ConnectAnotherPcButton({ style }: { style: React.CSSProperties }) {
+    const [busy, setBusy] = useState(false);
+    const download = async () => {
+        setBusy(true);
+        try {
+            const r: any = await postData('/api/agent/package', {});
+            const bytes = Uint8Array.from(atob(r.zipBase64), (ch) => ch.charCodeAt(0));
+            const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = r.fileName || 'PulseDB-Agent.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 10_000);
+            window.alert(
+                'PulseDB-Agent.zip downloaded.\n\nOn the PC with the SQL Server:\n' +
+                    '1. Copy the zip there and extract it.\n' +
+                    '2. Double-click PulseDB-Agent\\setup.cmd.\n\n' +
+                    'Its databases then appear here with a VIA AGENT badge. The zip contains a key for this PulseDB — keep it private.',
+            );
+        } catch (e: any) {
+            window.alert(`Could not create the agent package: ${e.message}`);
+        } finally {
+            setBusy(false);
+        }
+    };
+    return (
+        <button onClick={download} disabled={busy} style={{ ...style, opacity: busy ? 0.6 : 1 }} title="Monitor SQL Server on another PC or server through the PulseDB Agent">
+            <Download size={16} /> {busy ? 'Preparing…' : 'Connect another PC'}
+        </button>
+    );
+}
 
 export default ConnectionsTab;

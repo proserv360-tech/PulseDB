@@ -94,9 +94,9 @@ function mintKey() {
     const backend = path.resolve(here, '..', 'backend');
     if (!fs.existsSync(path.join(backend, '.env')) || !fs.existsSync(path.join(backend, 'scripts', 'agent-key.ts'))) {
         fail(
-            'No agent key yet, and this PC has no PulseDB backend (.env) to create one automatically.\n' +
-                'Create one in PulseDB (Observability -> SDK Integration, platform "Custom / PulseDB Agent"),\n' +
-                'put it in agent.config.json as "agentKey", and run setup again.',
+            'This agent has no valid key (never set, or its SDK application was deleted).\n' +
+                'In PulseDB open Connections -> "Connect another PC" to download a fresh agent package,\n' +
+                'unzip it and run its setup.cmd.',
         );
     }
     let out;

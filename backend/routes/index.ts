@@ -76,6 +76,7 @@ import terraformRoutes from './terraformRoutes.js';
 import userRoutes from './userRoutes.js';
 import waitEventsRoutes from './waitEventsRoutes.js';
 import sqlServerRoutes from './sqlServerRoutes.js';
+import agentPackageRoutes from './agentPackageRoutes.js';
 import workbenchRoutes from './workbenchRoutes.js';
 
 export default function mountFeatureRoutes(app) {
@@ -186,6 +187,8 @@ export default function mountFeatureRoutes(app) {
         app.use(prefix, autoExplainRoutes(pool, authenticate, sdkKeyAuth));
         // PulseDB Agent relay: lets this server reach databases only an agent can (x-sdk-key auth).
         app.use(prefix, agentRelayRoutes(pool, sdkKeyAuth, log));
+        // "Connect another PC": downloadable agent with a fresh key (admin only).
+        app.use(prefix, agentPackageRoutes(pool, authenticate, requireRole, log));
         //    Synthetic HTTP/TCP checks — CRUD + on-demand run.
         //    BYOK / KMS admin endpoints — provision, rotate, status.
         //    Schema ERD graph for the interactive viewer.

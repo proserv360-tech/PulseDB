@@ -37,6 +37,19 @@ export default function agentRelayRoutes(pool, authenticateSdkKey, log) {
             if (!Array.isArray(targets) || targets.length === 0 || targets.length > 50) {
                 return res.status(400).json({ error: 'targets must be a non-empty array (max 50)' });
             }
+            // A downloaded agent package ("Connect another PC") is named after the
+            // PC it first registers from, so SDK Integration shows which is which.
+            const hostname = String(req.body?.agent?.hostname || '').slice(0, 80);
+            const cfg = typeof app.config === 'string' ? JSON.parse(app.config || '{}') : app.config || {};
+            if (cfg.packaged && !cfg.machine && hostname) {
+                await pool.query(
+                    `UPDATE pgmonitoringtool.sdk_applications
+                        SET name = $2, config = config || jsonb_build_object('machine', $3::text), updated_at = now()
+                      WHERE id = $1`,
+                    [app.id, `${hostname} agent`, hostname],
+                );
+                app.name = `${hostname} agent`;
+            }
             const registered = await registerAgentTargets(app, targets);
             await syncConnectionsCache();
             log('INFO', 'PulseDB Agent registered', {
