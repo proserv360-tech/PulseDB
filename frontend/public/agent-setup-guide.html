@@ -187,9 +187,9 @@
         <div class="step-body">
           <div class="step-head"><h3>Run setup.cmd</h3><span class="where other">On the other PC</span></div>
           <ol>
-            <li>Open the <code>PulseDB-Agent</code> folder and double-click <code>setup.cmd</code>.</li>
+            <li>Open the <code>PulseDB-Agent</code> folder and double-click <code>setup.cmd</code>. On a <strong>server</strong>, right-click it and choose <span class="ui">Run as administrator</span> instead: the agent then starts with Windows and keeps running when nobody is signed in.</li>
             <li>If Windows shows <span class="ui">Windows protected your PC</span>, click <span class="ui">More info → Run anyway</span>.</li>
-            <li>Wait 1–3 minutes the first time. Setup installs Node.js and the SQL Server ODBC driver if they are missing, finds the databases, starts the agent and makes it start at every sign-in.</li>
+            <li>Wait 1–3 minutes the first time. Setup installs Node.js and the SQL Server ODBC driver if they are missing, finds the databases, starts the agent and makes it start automatically.</li>
           </ol>
           <p>It finishes like this, with that PC's name and databases:</p>
           <div class="terminal" role="img" aria-label="Example output of setup.cmd"><span class="dim">==&gt; Finding SQL Server on this PC</span>
@@ -240,7 +240,7 @@
           <tr><td><code>setup.cmd</code> closes at once or mentions Node.js</td><td>Install Node.js LTS from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>, then run <code>setup.cmd</code> again.</td></tr>
           <tr><td><code>skipped — Login failed</code></td><td>This Windows user has no SQL Server login. Ask your DBA to add one, or add the server in PulseDB with <span class="ui">New Connection</span> and a SQL login.</td></tr>
           <tr><td><code>No SQL Server databases found</code></td><td>SQL Server isn't installed on this PC or its service is stopped. Check <span class="ui">Services → SQL Server</span>.</td></tr>
-          <tr><td>PulseDB says the agent is <em>offline</em></td><td>The PC is off or signed out, or the agent stopped. Sign in to that PC or run <code>setup.cmd</code> again.</td></tr>
+          <tr><td>PulseDB says the agent is <em>offline</em></td><td>The PC is off or signed out, or the agent stopped. Run <code>setup.cmd</code> again; on a server, run it as administrator so signing out does not stop the agent.</td></tr>
           <tr><td><code>This agent has no valid key</code></td><td>Its key was deleted in PulseDB. Download a fresh zip (step 1) and run its <code>setup.cmd</code>.</td></tr>
           <tr><td>You deleted some of its databases and want them back</td><td>Run <code>setup.cmd</code> again on that PC.</td></tr>
         </tbody>

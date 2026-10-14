@@ -27,15 +27,19 @@ refresh is a single round trip to the agent.
 
 ## Automatic setup (Windows) — recommended
 
-Double-click **`setup.cmd`** (no admin rights needed). It:
+Double-click **`setup.cmd`** (admin rights only needed for the always-on server mode below). It:
 
 1. finds every SQL Server instance on this PC and its databases, signing in with
    **Windows authentication** (no SQL password anywhere),
 2. gets an agent key — the key that came in the **Connect another PC** download,
    or, on a PC that also has the PulseDB backend (`..\backend\.env`), a new one it
    creates automatically,
-3. starts the agent in the background and makes it start at every sign-in
-   (Startup folder; a small supervisor restarts it if it ever exits),
+3. starts the agent in the background (a small supervisor restarts it if it ever
+   exits) and makes it start automatically:
+   - **run as administrator** (right-click → *Run as administrator*) — recommended
+     on a **server**: a scheduled task starts it with Windows, so it keeps running
+     when nobody is signed in (signing out of Remote Desktop does not stop it),
+   - otherwise: at every sign-in (Startup folder), so it runs while you are signed in.
 4. waits until PulseDB has registered the databases and lists them.
 
 Each database then appears in PulseDB → **Connections** with a **VIA AGENT** badge.
@@ -79,10 +83,11 @@ details, passwords or keys. Illustrated guide:
 3. **Extract it — on the other PC.** Right-click → **Extract All… → Extract**, then
    move the `PulseDB-Agent` folder somewhere permanent, e.g. `C:\PulseDB-Agent`
    (the agent runs from it).
-4. **Run `setup.cmd` — on the other PC.** Double-click it (if Windows shows *Windows
+4. **Run `setup.cmd` — on the other PC.** Double-click it — on a **server**, right-click
+   → **Run as administrator** so the agent keeps running when nobody is signed in (if Windows shows *Windows
    protected your PC*, click **More info → Run anyway**). In 1–3 minutes it installs
    Node.js and the ODBC driver if missing, finds the databases, starts the agent and
-   makes it start at every sign-in. It ends with:
+   makes it start automatically. It ends with:
 
    ```
    Done. PulseDB Agent is running and registered with https://pulsedb-o8ax.vercel.app:

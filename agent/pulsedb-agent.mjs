@@ -23,7 +23,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { assertReadOnly } from './readOnlyGuard.mjs';
 
-const VERSION = '1.2.3';
+const VERSION = '1.2.4';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 // ── config ──────────────────────────────────────────────────────────────────

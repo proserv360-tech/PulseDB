@@ -7,8 +7,10 @@
  *   2. makes sure agent.config.json has a working agent key — minting one
  *      through ../backend/scripts/agent-key.ts when this PC has the PulseDB
  *      backend's .env (the key goes straight into the config, never the screen)
- *   3. installs autostart for the current user (Startup folder, restarts the
- *      agent if it ever exits) and (re)starts the agent in the background
+ *   3. installs autostart (restarting the agent if it ever exits) and (re)starts
+ *      it: run as administrator, a scheduled task starts it with Windows as SYSTEM
+ *      (servers: keeps running with nobody signed in); otherwise the user's
+ *      Startup folder. --per-user / --service force either mode.
  *   4. waits until the agent has registered its databases with PulseDB
  *
  *   node setup.mjs [--url https://pulsedb.example.com] [--no-start]
@@ -163,11 +165,55 @@ function installAutostart() {
             '',
         ].join('\r\n'),
     );
-    // Hidden launcher in the user's Startup folder: runs at every sign-in, no window.
+    // Hidden launcher (no window); setup puts a copy in the Startup folder unless
+    // the agent runs as an always-on scheduled task.
     const vbs = `CreateObject("WScript.Shell").Run """${runner}""", 0, False\r\n`;
     fs.writeFileSync(path.join(here, 'start-agent-hidden.vbs'), vbs);
-    fs.writeFileSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), vbs);
     return runner;
+}
+
+const TASK_NAME = 'PulseDB Agent';
+const powershell = (script, env = {}) =>
+    execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, ...env },
+    });
+
+function isElevated() {
+    try {
+        execFileSync('net', ['session'], { stdio: 'ignore' });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Always-on mode for servers: a scheduled task starts the supervisor at boot as
+ * SYSTEM, so the agent keeps running when nobody is signed in (signing out of
+ * Remote Desktop no longer stops it). Replaces the sign-in autostart: one agent
+ * per machine.
+ */
+function installBootTask(runner) {
+    powershell(
+        `$a = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument ('/c "' + $env:PULSEDB_RUNNER + '"');
+         $t = New-ScheduledTaskTrigger -AtStartup;
+         $p = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest;
+         $s = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1);
+         Register-ScheduledTask -TaskName '${TASK_NAME}' -Action $a -Trigger $t -Principal $p -Settings $s -Force | Out-Null`,
+        { PULSEDB_RUNNER: runner },
+    );
+    fs.rmSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), { force: true });
+}
+
+/** Back to sign-in autostart: remove an earlier boot task (needs admin; harmless otherwise). */
+function removeBootTask() {
+    try {
+        powershell(`if (Get-ScheduledTask -TaskName '${TASK_NAME}' -ErrorAction SilentlyContinue) { Unregister-ScheduledTask -TaskName '${TASK_NAME}' -Confirm:$false }`);
+    } catch {
+        /* not elevated: uninstall-agent.cmd as administrator removes it */
+    }
 }
 
 function stopRunningAgents() {
@@ -252,15 +298,34 @@ if (await keyWorks(config.pulsedbUrl, config.agentKey)) console.log('    Existin
 else mintKey();
 
 step('Installing autostart and starting the agent');
+// Run as administrator -> always-on boot task (servers). Not when a database is
+// reached with this Windows account's own sign-in: the SYSTEM account would not have it.
+const elevated = isElevated();
+const usesOwnSignIn = config.targets.some((t) => t.windowsAuth === true);
+const bootTask = elevated && !process.argv.includes('--per-user') && (!usesOwnSignIn || process.argv.includes('--service'));
 const stopped = stopRunningAgents();
 if (stopped) console.log(`    Stopped ${stopped} running agent process(es).`);
-installAutostart();
-console.log(`    Autostart: ${path.join(startupFolder(), 'PulseDB Agent.vbs')}`);
+const runner = installAutostart();
+if (bootTask) {
+    try {
+        installBootTask(runner);
+    } catch (e) {
+        fail(`Could not create the "${TASK_NAME}" scheduled task: ${String(e.stderr || e.message).trim().slice(0, 400)}`);
+    }
+    console.log(`    Always on: scheduled task "${TASK_NAME}" starts the agent with Windows (no sign-in needed).`);
+} else {
+    if (elevated) removeBootTask();
+    fs.writeFileSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), fs.readFileSync(path.join(here, 'start-agent-hidden.vbs')));
+    console.log(`    Autostart: ${path.join(startupFolder(), 'PulseDB Agent.vbs')} (runs while you are signed in to Windows)`);
+    if (!elevated) console.log('    On a server: right-click setup.cmd -> "Run as administrator" to keep the agent running when nobody is signed in.');
+    else if (usesOwnSignIn) console.log('    Kept per-user: the databases above use your Windows sign-in, which a background task would not have.');
+}
 if (process.argv.includes('--no-start')) process.exit(0);
 // Running setup is the deliberate way to bring back databases deleted in PulseDB.
 fs.writeFileSync(path.join(here, 'restore-targets.flag'), new Date().toISOString());
 const since = fs.existsSync(logFile) ? fs.statSync(logFile).size : 0;
-spawn('wscript.exe', [path.join(here, 'start-agent-hidden.vbs')], { detached: true, stdio: 'ignore' }).unref();
+if (bootTask) powershell(`Start-ScheduledTask -TaskName '${TASK_NAME}'`);
+else spawn('wscript.exe', [path.join(here, 'start-agent-hidden.vbs')], { detached: true, stdio: 'ignore' }).unref();
 
 const reg = await waitForRegistration(since);
 if (reg.error) fail(`The agent started but did not register: ${reg.error}`);

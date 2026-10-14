@@ -2,7 +2,7 @@
   PulseDB Agent - remove autostart and stop the agent.
   Leaves this folder and agent.config.json in place.
   Admin rights are only needed if the agent was installed as a scheduled task
-  (install-agent.cmd); setup.cmd installs per-user and needs none.
+  (setup.cmd run as administrator, or install-agent.cmd).
 #>
 $ErrorActionPreference = 'Stop'
 $TaskName = 'PulseDB Agent'
