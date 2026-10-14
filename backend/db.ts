@@ -12,6 +12,7 @@
 // ==========================================================================
 
 import pg from 'pg';
+import { poolerConnectionString } from './core/poolerUrl.js';
 
 const { Pool } = pg;
 
@@ -36,7 +37,7 @@ function buildPoolConfig() {
     const ssl = resolveSsl();
     if (process.env.DATABASE_URL) {
         return {
-            connectionString: process.env.DATABASE_URL,
+            connectionString: poolerConnectionString(process.env.DATABASE_URL),
             ssl,
         };
     }
@@ -51,10 +52,13 @@ function buildPoolConfig() {
     };
 }
 
+// Serverless (Vercel): every instance owns its own pool, so keep it tiny and hand
+// idle sockets back quickly — see core/poolerUrl.ts and core/adminPool.ts.
+const SERVERLESS = process.env.VERCEL === '1';
 export const pool = new Pool({
     ...buildPoolConfig(),
-    max: 10,
-    idleTimeoutMillis: 30_000,
+    max: SERVERLESS ? 2 : 10,
+    idleTimeoutMillis: SERVERLESS ? 5_000 : 30_000,
     connectionTimeoutMillis: 5_000,
 });
 

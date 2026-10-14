@@ -6,6 +6,7 @@
 import { Pool } from 'pg';
 import { log } from '../services/logger.js';
 import { HAS_ADMIN_DB } from './config.js';
+import { poolerConnectionString } from './poolerUrl.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TLS HELPER — SEC-04 (audit)
@@ -87,7 +88,7 @@ export const pool = HAS_ADMIN_DB
     ? new Pool(
           process.env.DATABASE_URL
               ? {
-                    connectionString: process.env.DATABASE_URL,
+                    connectionString: poolerConnectionString(process.env.DATABASE_URL),
                     max: ADMIN_POOL_MAX,
                     // Was 10s. On a long-lived host that meant nearly every
                     // query after a quiet moment paid a fresh TCP + TLS + SCRAM
