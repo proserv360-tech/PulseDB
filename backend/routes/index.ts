@@ -75,6 +75,7 @@ import syntheticRoutes from './syntheticRoutes.js';
 import terraformRoutes from './terraformRoutes.js';
 import userRoutes from './userRoutes.js';
 import waitEventsRoutes from './waitEventsRoutes.js';
+import sqlServerRoutes from './sqlServerRoutes.js';
 import workbenchRoutes from './workbenchRoutes.js';
 
 export default function mountFeatureRoutes(app) {
@@ -284,6 +285,29 @@ export default function mountFeatureRoutes(app) {
                         region: cfg.host,
                         keyspace: cfg.database,
                         contactPoints: cfg.host ? [cfg.host] : undefined,
+                    });
+                    await adapter.connect();
+                    return adapter;
+                },
+            ),
+        );
+
+        // SQL Server monitoring screens (overview / performance / sessions / storage).
+        app.use(
+            '/api',
+            sqlServerRoutes(
+                authenticate,
+                async (req, connectionId) => resolveConnection(connectionId, req.user?.id),
+                async (connection) => {
+                    const cfg = await resolvePoolConfig(connection);
+                    const adapter = getDbAdapter(connection.dbType, {
+                        host: cfg.host,
+                        port: cfg.port,
+                        database: cfg.database,
+                        user: cfg.user,
+                        username: cfg.user,
+                        password: cfg.password,
+                        ssl: cfg.ssl,
                     });
                     await adapter.connect();
                     return adapter;

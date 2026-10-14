@@ -110,6 +110,11 @@ export const Sidebar = ({
         'Developer Tools',
         'Admin',
     ];
+    // Only the screens that work through the SQL Server adapter: its own section
+    // and, under Developer Tools, the engine console (the rest there is Postgres-only).
+    const MSSQL_SECTIONS = ['Connections', 'SQL Server', 'Developer Tools', 'Admin'];
+    const MSSQL_DEV_TOOLS = ['engine-console'];
+    const isMssql = connDbType === 'mssql' || connDbType === 'sqlserver';
     const MONGO_SECTIONS = [
         'Connections',
         'MongoDB',
@@ -125,7 +130,14 @@ export const Sidebar = ({
 
     const visibleGroups = useMemo(
         () =>
-            SECTION_GROUPS.map((g) => ({ ...g, tabs: g.tabs.filter((t) => allowedTabIds.includes(t.id)) }))
+            SECTION_GROUPS.map((g) => ({
+                ...g,
+                tabs: g.tabs.filter(
+                    (t) =>
+                        allowedTabIds.includes(t.id) &&
+                        !(isMssql && g.section === 'Developer Tools' && !MSSQL_DEV_TOOLS.includes(t.id)),
+                ),
+            }))
                 .filter((g) => g.tabs.length > 0)
                 .filter((g) => {
                     // Demo users: nothing but the Demo section.
@@ -140,9 +152,10 @@ export const Sidebar = ({
                     if (connDbType === 'postgresql') return PG_SECTIONS.includes(g.section);
                     if (connDbType === 'mysql' || connDbType === 'mariadb') return MYSQL_SECTIONS.includes(g.section);
                     if (connDbType === 'mongodb') return MONGO_SECTIONS.includes(g.section);
+                    if (isMssql) return MSSQL_SECTIONS.includes(g.section);
                     return false;
                 }),
-        [allowedTabIds, connDbType, currentUser, activeTab, isDemoUser],
+        [allowedTabIds, connDbType, isMssql, currentUser, activeTab, isDemoUser],
     );
 
     /* Build flat nav: each section becomes a { type:'section', ... } entry */

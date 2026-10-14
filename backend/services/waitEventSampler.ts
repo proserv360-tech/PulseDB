@@ -130,17 +130,19 @@ async function pollOne(connectionId, getPool) {
  * the sampler has been running against nothing since it was written while still
  * paying a control-plane round trip every tick.
  *
- * Column names differ from what the old query assumed too: the type column is
- * `connection_type`, and there is no `status` — liveness is `health_status`,
- * which is 'unknown' until the first health check, so it must not be used to
- * exclude a connection or the sampler would idle until something else probed.
+ * Column names differ from what the old query assumed too: the engine is in
+ * `db_type` (`connection_type` defaults to 'postgresql' for every row, so
+ * filtering on it polled SQL Server/MySQL connections with pg once a second),
+ * and there is no `status` — liveness is `health_status`, which is 'unknown'
+ * until the first health check, so it must not be used to exclude a connection
+ * or the sampler would idle until something else probed.
  */
 async function listActiveConnections(pool) {
     try {
         const { rows } = await pool.query(
             `SELECT id::text AS id
                FROM pgmonitoringtool.pulsedb_connections
-              WHERE COALESCE(connection_type, 'postgresql') IN ('postgresql', 'postgres')`
+              WHERE COALESCE(db_type, 'postgresql') IN ('postgresql', 'postgres')`
         );
         return rows.map(r => r.id);
     } catch (err) {

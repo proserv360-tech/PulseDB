@@ -427,6 +427,13 @@ export function buildTabConfig() {
             badge: null,
         },
 
+        // ── SQL Server ───────────────────────────────────────────────
+        { section: 'SQL Server', accent: DS.rose },
+        { id: 'mssql-overview', icon: Server, label: 'SQL Server Overview', component: _components.SqlServerOverviewTab, badge: null },
+        { id: 'mssql-performance', icon: Gauge, label: 'Performance & Waits', component: _components.SqlServerPerformanceTab, badge: null },
+        { id: 'mssql-sessions', icon: Lock, label: 'Sessions & Blocking', component: _components.SqlServerSessionsTab, badge: null },
+        { id: 'mssql-storage', icon: TableProperties, label: 'Tables & Indexes', component: _components.SqlServerStorageTab, badge: null },
+
         // ── MongoDB ──────────────────────────────────────────────────
         { section: 'MongoDB', accent: DS.emerald },
         {

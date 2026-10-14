@@ -72,6 +72,14 @@ const MySQLOverviewTab = lazyRetry(() => import('../components/views/mysql/MySQL
 const MySQLPerformanceTab = lazyRetry(() => import('../components/views/mysql/MySQLPerformanceTab'));
 const MySQLReplicationTab = lazyRetry(() => import('../components/views/mysql/MySQLReplicationTab'));
 
+// SQL Server features (one module, four screens)
+const sqlServerTab = (name) =>
+    lazyRetry(() => import('../components/views/sqlserver/SqlServerTabs').then((m) => ({ default: m[name] })));
+const SqlServerOverviewTab = sqlServerTab('SqlServerOverviewTab');
+const SqlServerPerformanceTab = sqlServerTab('SqlServerPerformanceTab');
+const SqlServerSessionsTab = sqlServerTab('SqlServerSessionsTab');
+const SqlServerStorageTab = sqlServerTab('SqlServerStorageTab');
+
 // MongoDB features
 const MongoOverviewTab = lazyRetry(() => import('../components/views/mongodb/MongoOverviewTab'));
 const MongoPerformanceTab = lazyRetry(() => import('../components/views/mongodb/MongoPerformanceTab'));
@@ -235,6 +243,10 @@ registerComponents({
     MySQLOverviewTab,
     MySQLPerformanceTab,
     MySQLReplicationTab,
+    SqlServerOverviewTab,
+    SqlServerPerformanceTab,
+    SqlServerSessionsTab,
+    SqlServerStorageTab,
     MongoOverviewTab,
     MongoPerformanceTab,
     MongoStorageTab,
@@ -276,12 +288,14 @@ export const TAB_CONFIG = buildTabConfig();
 export const TABS_ONLY = getTabsOnly(TAB_CONFIG);
 export const SECTION_GROUPS = getSectionGroups(TAB_CONFIG);
 
-// Map each Phase-5 dbType to the bespoke demo tab it should land on when
-// a connection of that type becomes active (or is newly created). Classic
-// engines (postgresql/mysql/mongodb) have their own overview screens and
-// are handled inline in the navigation effects below.
+// Map each Phase-5 dbType to the tab it should land on when a connection of
+// that type becomes active (or is newly created): SQL Server has real
+// screens, the rest land on their bespoke demo tab. Classic engines
+// (postgresql/mysql/mongodb) have their own overview screens and are handled
+// inline in the navigation effects below.
 export const PHASE5_DEMO_TABS: Record<string, string> = {
-    mssql: 'demo-mssql',
+    mssql: 'mssql-overview',
+    sqlserver: 'mssql-overview',
     oracle: 'demo-oracle',
     redis: 'demo-redis',
     elasticsearch: 'demo-elasticsearch',
