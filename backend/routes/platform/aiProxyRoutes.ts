@@ -4,6 +4,7 @@
 // Extracted from server.ts.
 
 import { authenticate } from '../../core/auth.js';
+import { groqChat } from '../../services/copilotService.js';
 import { log } from '../../services/logger.js';
 
 export default function registerAiProxyRoutes(app) {
@@ -29,25 +30,19 @@ export default function registerAiProxyRoutes(app) {
             if (system) groqMessages.push({ role: 'system', content: system });
             messages.forEach((m) => groqMessages.push({ role: m.role, content: m.content }));
 
-            const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${GROQ_API_KEY}`,
-                },
-                body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
+            // Model chosen from what this key can use (Groq retires models; see groqChat).
+            let text;
+            try {
+                ({ text } = await groqChat(GROQ_API_KEY, {
                     messages: groqMessages,
-                    max_tokens: Math.min(max_tokens || 2000, 8000),
-                }),
-            });
-            const data = await upstream.json();
-            if (!upstream.ok) {
-                return res.status(upstream.status).json({ error: data.error?.message || 'AI request failed' });
+                    maxTokens: Math.min(max_tokens || 2000, 8000),
+                    temperature: 0.7,
+                }));
+            } catch (err) {
+                return res.status(502).json({ error: err.message || 'AI request failed' });
             }
 
             // Normalise to the same shape the frontend already expects: { content: [{ text }] }
-            const text = data.choices?.[0]?.message?.content || '';
             res.json({ content: [{ text }] });
         } catch (e) {
             log('WARN', `Handler error ${req.method} ${req.path}`, { error: e.message });

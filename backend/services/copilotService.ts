@@ -54,41 +54,107 @@ export function getProvider() {
     return localProvider();
 }
 
-/** Groq: OpenAI-compatible chat API (free tier). GROQ_API_KEY / COPILOT_MODEL. */
+// ─────────────────────────────────────────────────────────────────────────────
+// Groq model selection. Groq retires models regularly (llama-3.3-70b-versatile
+// returned 404 model_not_found), so a hard-coded name breaks AI features
+// without warning. Unless COPILOT_MODEL pins one, ask Groq which chat models
+// this key can use, pick the most capable by preference, and re-pick when the
+// chosen one disappears.
+// ─────────────────────────────────────────────────────────────────────────────
+const GROQ_BASE = 'https://api.groq.com/openai/v1';
+const GROQ_PREFERENCE = [
+    /^openai\/gpt-oss-120b/i,
+    /llama-4-maverick/i,
+    /llama-3\.3-70b/i,
+    /qwen.*32b/i,
+    /llama-4-scout/i,
+    /gpt-oss/i,
+    /kimi/i,
+    /deepseek/i,
+    /llama.*70b/i,
+    /llama/i,
+];
+const NOT_CHAT = /whisper|tts|guard|embed|playai|distil|compound|prompt-guard|orpheus/i;
+let groqModelCache = null; // { model, at }
+
+/** Tests only: forget the chosen Groq model. */
+export function resetGroqModelCache() {
+    groqModelCache = null;
+}
+
+export function pickGroqModel(ids) {
+    const chat = (ids || []).filter((id) => !NOT_CHAT.test(id));
+    for (const re of GROQ_PREFERENCE) {
+        const hit = chat.find((id) => re.test(id));
+        if (hit) return hit;
+    }
+    return chat[0] || null;
+}
+
+export async function resolveGroqModel(apiKey, { refresh = false } = {}) {
+    if (process.env.COPILOT_MODEL) return process.env.COPILOT_MODEL;
+    if (!refresh && groqModelCache && Date.now() - groqModelCache.at < 6 * 3600_000) return groqModelCache.model;
+    const r = await withTimeout(
+        (signal) => fetch(`${GROQ_BASE}/models`, { signal, headers: { authorization: `Bearer ${apiKey}` } }),
+        PROVIDER_TIMEOUT_MS,
+    );
+    if (!r.ok) throw new Error(`Groq ${r.status} listing models: ${await r.text()}`);
+    const j = await r.json();
+    const model = pickGroqModel((j.data || []).filter((m) => m.active !== false).map((m) => m.id));
+    if (!model) throw new Error('Groq returned no chat models for this API key.');
+    groqModelCache = { model, at: Date.now() };
+    return model;
+}
+
+/** One chat completion against Groq, re-resolving the model once if it was retired. */
+export async function groqChat(apiKey, { messages, maxTokens = 1200, temperature = 0.1 }) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+        const model = await resolveGroqModel(apiKey, { refresh: attempt > 0 });
+        const r = await withTimeout(
+            (signal) =>
+                fetch(`${GROQ_BASE}/chat/completions`, {
+                    method: 'POST',
+                    signal,
+                    headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+                    body: JSON.stringify({ model, temperature, max_tokens: maxTokens, messages }),
+                }),
+            PROVIDER_TIMEOUT_MS,
+        );
+        if (r.ok) {
+            const j = await r.json();
+            return { text: j.choices?.[0]?.message?.content?.trim() || '', model };
+        }
+        const body = await r.text();
+        const retired = r.status === 404 || /model_not_found|decommissioned|does not exist/i.test(body);
+        if (!retired || attempt > 0 || process.env.COPILOT_MODEL) throw new Error(`Groq ${r.status}: ${body}`);
+        groqModelCache = null; // model gone: list again and retry once
+    }
+    throw new Error('Groq: no usable model');
+}
+
+/** Groq: OpenAI-compatible chat API (free tier). GROQ_API_KEY; COPILOT_MODEL optional. */
 function groqProvider() {
     const apiKey = process.env.GROQ_API_KEY;
-    const model = process.env.COPILOT_MODEL || 'llama-3.3-70b-versatile';
-    return {
+    const provider = {
         name: 'groq',
-        model,
+        model: process.env.COPILOT_MODEL || groqModelCache?.model || 'auto',
         async complete({ system, user, maxTokens = 1200 }) {
             if (!apiKey) throw new Error('GROQ_API_KEY not set');
-            const r = await withTimeout(
-                (signal) =>
-                    fetch('https://api.groq.com/openai/v1/chat/completions', {
-                        method: 'POST',
-                        signal,
-                        headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-                        body: JSON.stringify({
-                            model,
-                            temperature: 0.1,
-                            max_tokens: maxTokens,
-                            messages: [
-                                { role: 'system', content: system },
-                                { role: 'user', content: user },
-                            ],
-                        }),
-                    }),
-                PROVIDER_TIMEOUT_MS,
-            );
-            if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
-            const j = await r.json();
-            return j.choices?.[0]?.message?.content?.trim() || '';
+            const { text, model } = await groqChat(apiKey, {
+                maxTokens,
+                messages: [
+                    { role: 'system', content: system },
+                    { role: 'user', content: user },
+                ],
+            });
+            provider.model = model;
+            return text;
         },
         async *completeStream(args) {
-            yield await this.complete(args);
+            yield await provider.complete(args);
         },
     };
+    return provider;
 }
 
 function withTimeout(promiseFactory, ms) {
