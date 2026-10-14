@@ -24,7 +24,8 @@ async function ensureDriver() {
     if (oracledb !== undefined) return oracledb;
     if (!_oracledbLoading) {
         _oracledbLoading = import('oracledb').then(
-            (m) => (oracledb = m),
+            // oracledb is CommonJS; under import() its API is on `default`.
+            (m) => (oracledb = m.default ?? m),
             () => (oracledb = null),
         );
     }

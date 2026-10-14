@@ -23,12 +23,28 @@ async function ensureDriver() {
     if (mssql !== undefined) return mssql;
     if (!_mssqlLoading) {
         _mssqlLoading = import('mssql').then(
-            (m) => (mssql = m),
+            // mssql is CommonJS; under import() its API is on `default`, and the
+            // namespace has no ConnectionPool ("is not a constructor").
+            (m) => (mssql = m.default ?? m),
             () => (mssql = null),
         );
     }
     await _mssqlLoading;
     return mssql;
+}
+
+/**
+ * SQL Server addresses are often written Windows-style as HOST\INSTANCE.
+ * MSSQLSERVER is the default instance's name and listens on the port itself;
+ * any other instance is resolved by name through SQL Browser (UDP 1434), and
+ * the driver rejects a port and an instance name together.
+ */
+export function resolveSqlServerTarget(host, port) {
+    const [server, instance] = String(host || '').split('\\');
+    if (!instance || instance.toUpperCase() === 'MSSQLSERVER') {
+        return { server, port: Number(port) || 1433, instanceName: undefined };
+    }
+    return { server, port: undefined, instanceName: instance };
 }
 
 export class MSSQLAdapter extends BaseAdapter {
@@ -52,20 +68,22 @@ export class MSSQLAdapter extends BaseAdapter {
         await ensureDriver();
         this._checkDriver();
         try {
+            const target = resolveSqlServerTarget(this.config.host, this.config.port);
+            // No `authentication` key: mssql builds SQL-login auth from user and
+            // password, and Object.assign()s any `authentication` over it — the
+            // previous { type: 'default' } discarded the credentials entirely.
             this.pool = new mssql.ConnectionPool({
-                server: this.config.host,
-                port: this.config.port || 1433,
+                server: target.server,
+                ...(target.port ? { port: target.port } : {}),
                 database: this.config.database || 'master',
                 user: this.config.user,
                 password: this.config.password,
-                authentication: {
-                    type: 'default',
-                },
                 options: {
                     encrypt: this.config.ssl !== false,
                     trustServerCertificate: true,
                     connectionTimeout: 5000,
                     requestTimeout: 5000,
+                    ...(target.instanceName ? { instanceName: target.instanceName } : {}),
                 },
             });
 
