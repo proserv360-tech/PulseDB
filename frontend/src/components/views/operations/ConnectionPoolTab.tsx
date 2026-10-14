@@ -1175,13 +1175,13 @@ const ConnectionsTab = () => {
                             Add a database to start monitoring queries and performance.
                         </p>
 
-                        {/* Quick-add DB type grid — 4 columns × 3 rows for the
-                            12 supported engines. Cards are compact (icon + label
-                            stacked) so all 12 fit without scrolling. */}
+                        {/* Quick-add DB type grid — compact tiles (icon + label stacked),
+                            6 per row on desktop (2 rows for the 12 engines), wrapping to
+                            fewer columns on narrow screens. */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(4, 1fr)',
-                            gap: 12,
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(104px, 1fr))',
+                            gap: 10,
                             marginBottom: 20,
                         }}>
                             {Object.entries(DB_TYPES).map(([key, db]) => (
@@ -1190,12 +1190,12 @@ const ConnectionsTab = () => {
                                     onClick={() => { openNew(); handleDbTypeChange(key); }}
                                     style={{
                                         display: 'flex', flexDirection: 'column',
-                                        alignItems: 'center', justifyContent: 'center', gap: 6,
-                                        padding: '14px 8px', borderRadius: 14, cursor: 'pointer',
+                                        alignItems: 'center', justifyContent: 'center', gap: 5,
+                                        padding: '10px 6px', borderRadius: 12, cursor: 'pointer',
                                         background: THEME.surface, border: `1px solid ${THEME.glassBorder}`,
-                                        color: THEME.textMain, fontSize: 12, fontWeight: 600,
+                                        color: THEME.textMain, fontSize: 11.5, fontWeight: 600,
                                         transition: 'all 0.2s', fontFamily: FONT_UI,
-                                        minHeight: 76,
+                                        minHeight: 62,
                                     }}
                                     onMouseEnter={e => {
                                         e.currentTarget.style.borderColor = db.accent + '66';
@@ -1210,7 +1210,7 @@ const ConnectionsTab = () => {
                                         e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
-                                    <span style={{ fontSize: 22, lineHeight: 1 }}>{db.icon}</span>
+                                    <span style={{ fontSize: 18, lineHeight: 1 }}>{db.icon}</span>
                                     <span style={{ lineHeight: 1.2, textAlign: 'center' }}>{db.label}</span>
                                 </button>
                             ))}
