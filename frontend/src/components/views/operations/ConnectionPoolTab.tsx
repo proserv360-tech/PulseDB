@@ -1248,6 +1248,21 @@ const ConnectionsTab = () => {
                             Add Connection Manually
                         </button>
 
+                        {/* SQL Server on a PC/LAN the server cannot reach: PulseDB Agent package */}
+                        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                            <ConnectAnotherPcButton
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: 10,
+                                    padding: '9px 22px', borderRadius: 16, cursor: 'pointer',
+                                    background: THEME.success + '1F', border: `1px solid ${THEME.success}55`,
+                                    color: THEME.success, fontSize: 12, fontWeight: 600, fontFamily: FONT_UI,
+                                }}
+                            />
+                            <span style={{ fontSize: 11, color: THEME.textMuted }}>
+                                SQL Server on your PC or office network? Download the agent and run setup.cmd there.
+                            </span>
+                        </div>
+
                         {/* Feature tags */}
                         <div style={{
                             display: 'flex', gap: 20, justifyContent: 'center', marginTop: 24,
