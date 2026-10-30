@@ -39,7 +39,9 @@ Double-click **`setup.cmd`** (admin rights only needed for the always-on server 
    - **run as administrator** (right-click → *Run as administrator*) — recommended
      on a **server**: a scheduled task starts it with Windows, so it keeps running
      when nobody is signed in (signing out of Remote Desktop does not stop it),
-   - otherwise: at every sign-in (Startup folder), so it runs while you are signed in.
+   - otherwise: a scheduled task starts it whenever you sign in (no admin rights needed;
+     unlike a Startup-folder entry, Windows' startup-apps switch cannot turn it off),
+     so it runs while you are signed in.
 4. waits until PulseDB has registered the databases and lists them.
 
 Each database then appears in PulseDB → **Connections** with a **VIA AGENT** badge.

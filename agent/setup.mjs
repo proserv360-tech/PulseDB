@@ -207,6 +207,25 @@ function installBootTask(runner) {
     fs.rmSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), { force: true });
 }
 
+/**
+ * Per-user mode: a scheduled task starts the agent (hidden) when this user signs
+ * in. Needs no admin rights, and unlike a Startup-folder entry it cannot be
+ * switched off under Settings -> Apps -> Startup (Windows can do that silently).
+ * Replaces an earlier Startup-folder entry. Throws if the task cannot be made.
+ */
+function installLogonTask() {
+    powershell(
+        `$me = "$env:USERDOMAIN\\$env:USERNAME";
+         $a = New-ScheduledTaskAction -Execute 'wscript.exe' -Argument ('"' + $env:PULSEDB_LAUNCHER + '"');
+         $t = New-ScheduledTaskTrigger -AtLogOn -User $me;
+         $p = New-ScheduledTaskPrincipal -UserId $me -LogonType Interactive -RunLevel Limited;
+         $s = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero);
+         Register-ScheduledTask -TaskName '${TASK_NAME}' -Action $a -Trigger $t -Principal $p -Settings $s -Force | Out-Null`,
+        { PULSEDB_LAUNCHER: path.join(here, 'start-agent-hidden.vbs') },
+    );
+    fs.rmSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), { force: true });
+}
+
 /** Back to sign-in autostart: remove an earlier boot task (needs admin; harmless otherwise). */
 function removeBootTask() {
     try {
@@ -315,8 +334,15 @@ if (bootTask) {
     console.log(`    Always on: scheduled task "${TASK_NAME}" starts the agent with Windows (no sign-in needed).`);
 } else {
     if (elevated) removeBootTask();
-    fs.writeFileSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), fs.readFileSync(path.join(here, 'start-agent-hidden.vbs')));
-    console.log(`    Autostart: ${path.join(startupFolder(), 'PulseDB Agent.vbs')} (runs while you are signed in to Windows)`);
+    try {
+        installLogonTask();
+        console.log(`    Autostart: scheduled task "${TASK_NAME}" starts the agent when you sign in to Windows.`);
+    } catch (e) {
+        // Fallback: the Startup folder (works, but Windows' startup-apps switch can turn it off).
+        fs.writeFileSync(path.join(startupFolder(), 'PulseDB Agent.vbs'), fs.readFileSync(path.join(here, 'start-agent-hidden.vbs')));
+        console.log(`    Autostart: ${path.join(startupFolder(), 'PulseDB Agent.vbs')} (scheduled task not possible: ${String(e.stderr || e.message).trim().split('\n')[0].slice(0, 160)})`);
+        console.log('    If the agent does not start after you sign in, check Settings -> Apps -> Startup -> "PulseDB Agent" is On.');
+    }
     if (!elevated) console.log('    On a server: right-click setup.cmd -> "Run as administrator" to keep the agent running when nobody is signed in.');
     else if (usesOwnSignIn) console.log('    Kept per-user: the databases above use your Windows sign-in, which a background task would not have.');
 }

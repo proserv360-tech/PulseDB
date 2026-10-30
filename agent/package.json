@@ -1,6 +1,6 @@
 {
     "name": "pulsedb-agent",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "private": true,
     "description": "PulseDB Agent: lets a cloud PulseDB monitor databases on this machine or network (outbound HTTPS only).",
     "type": "module",

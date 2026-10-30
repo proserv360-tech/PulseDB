@@ -1,8 +1,9 @@
 <#
   PulseDB Agent - remove autostart and stop the agent.
   Leaves this folder and agent.config.json in place.
-  Admin rights are only needed if the agent was installed as a scheduled task
-  (setup.cmd run as administrator, or install-agent.cmd).
+  Admin rights are only needed if the agent runs as the always-on boot task
+  (setup.cmd run as administrator, or install-agent.cmd); the sign-in task that
+  a normal setup.cmd creates is removed without them.
 #>
 $ErrorActionPreference = 'Stop'
 $TaskName = 'PulseDB Agent'
@@ -12,13 +13,12 @@ $startup = Join-Path ([Environment]::GetFolderPath('Startup')) 'PulseDB Agent.vb
 if (Test-Path $startup) { Remove-Item $startup -Force; Write-Host "Removed autostart ($startup)." }
 
 if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
-    $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Write-Host "The '$TaskName' scheduled task exists; run this as administrator to remove it." -ForegroundColor Yellow
-    } else {
+    try {
         Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
         Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
         Write-Host "Removed scheduled task '$TaskName'."
+    } catch {
+        Write-Host "The '$TaskName' scheduled task runs at boot; run this as administrator to remove it." -ForegroundColor Yellow
     }
 }
 
