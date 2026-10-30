@@ -82,6 +82,13 @@ export async function findAgentRoute({ dbType, host, userId }) {
     return rows.find((r) => (r.machine || '').toLowerCase() === machine) || (rows.length === 1 ? rows[0] : null);
 }
 
+/** "45 seconds ago", "12 minutes ago", "3 hours ago", "15 days ago". */
+export function ago(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    const [n, unit] = s < 120 ? [s, 'second'] : s < 7200 ? [Math.round(s / 60), 'minute'] : s < 172_800 ? [Math.round(s / 3600), 'hour'] : [Math.round(s / 86_400), 'day'];
+    return `${n} ${unit}${n === 1 ? '' : 's'} ago`;
+}
+
 /**
  * Run one operation on an agent and wait for its result.
  * @returns {Promise<object>} the agent's result payload
@@ -93,9 +100,10 @@ export async function runAgentJob({ appId, target, op, payload = {}, timeoutMs =
     if (!app) throw new Error('The PulseDB Agent for this connection no longer exists.');
     const seenMs = app.last_heartbeat_at ? Date.now() - new Date(app.last_heartbeat_at).getTime() : Infinity;
     if (seenMs > OFFLINE_AFTER_MS) {
-        const when = Number.isFinite(seenMs) ? ` (last seen ${Math.round(seenMs / 1000)}s ago)` : '';
+        const when = Number.isFinite(seenMs) ? ` (last seen ${ago(seenMs)})` : '';
         throw new Error(
-            `PulseDB Agent "${app.name}" is offline${when}. Start the agent on the machine next to the database.`,
+            `PulseDB Agent "${app.name}" is offline${when}. On that machine, run setup.cmd from the agent folder ` +
+                '(on a server: right-click → Run as administrator, so it keeps running when nobody is signed in).',
         );
     }
 

@@ -23,3 +23,11 @@ test('no agent routing on self-hosted installs unless forced', async () => {
         process.env = saved;
     }
 });
+
+test('offline agent message says how long ago in plain units', async () => {
+    const { ago } = await import('../services/agentRelay.js');
+    assert.equal(ago(45_000), '45 seconds ago');
+    assert.equal(ago(10 * 60_000), '10 minutes ago');
+    assert.equal(ago(3 * 3_600_000), '3 hours ago');
+    assert.equal(ago(1_345_547_000), '16 days ago');
+});
