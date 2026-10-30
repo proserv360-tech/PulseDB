@@ -29,12 +29,18 @@ function storage(d, out) {
 
     // Missing indexes the optimizer asked for, across every database (the
     // table name is [database].[schema].[table], so the script runs anywhere).
-    for (const m of (d.missingIndexes || []).filter((x) => num(x.avg_user_impact) >= 25).slice(0, 15)) {
+    // The optimizer often suggests the same keys several times with different
+    // INCLUDE columns; keep the best-scoring one (rows come best first) — two
+    // would also get the same index name.
+    const seen = new Set();
+    for (const m of (d.missingIndexes || []).filter((x) => num(x.avg_user_impact) >= 25)) {
+        if (seen.size >= 15) break;
         const parts = String(m.table_name || '').split('.').map((p) => p.replace(/^\[|\]$/g, ''));
         const table = parts[parts.length - 1] || 'table';
         const db = m.database_name || (parts.length === 3 ? parts[0] : '');
         const keyCols = [m.equality_columns, m.inequality_columns].filter(Boolean).join(', ');
-        if (!keyCols) continue;
+        if (!keyCols || seen.has(`${m.table_name}:${keyCols}`)) continue;
+        seen.add(`${m.table_name}:${keyCols}`);
         const colNames = keyCols.replace(/[[\]\s]/g, '').split(',').slice(0, 3).join('_');
         const name = `IX_${table}_${colNames}`.slice(0, 120);
         const include = m.included_columns ? `\n    INCLUDE (${m.included_columns})` : '';

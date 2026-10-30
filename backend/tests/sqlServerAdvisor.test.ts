@@ -121,3 +121,13 @@ test('database picker: only safe database names are accepted', async () => {
     for (const ok of ['StowellSandbox', 'Sage 100 [Live]', "O'Brien Co"]) assert.equal(isSafeDatabaseName(ok), true, ok);
     for (const bad of ['', 'x;Trusted_Connection=no', 'a}b', 'a{b', 'line\nbreak', 'x'.repeat(129), null]) assert.equal(isSafeDatabaseName(bad), false, String(bad));
 });
+
+test('missing indexes: the same keys suggested with different INCLUDEs become one recommendation (best first)', () => {
+    const base = { database_name: 'A', table_name: '[A].[dbo].[Log]', equality_columns: '[LoggedAt]', user_seeks: 10, avg_user_impact: 90 };
+    const recs = buildRecommendations('storage', {
+        missingIndexes: [{ ...base, included_columns: '[Msg]' }, { ...base, included_columns: '[Msg], [Level]', avg_user_impact: 60 }],
+    });
+    const mi = recs.filter((r) => r.id.startsWith('missing-index'));
+    assert.equal(mi.length, 1);
+    assert.match(mi[0].sql, /INCLUDE \(\[Msg\]\);$/);
+});

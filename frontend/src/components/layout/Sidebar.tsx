@@ -2,7 +2,7 @@
 // Extracted from App.tsx.
 import { ChevronLeft, ChevronRight, Database, LogOut, MessageSquarePlus, User, Users } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getGroupForTab, getSectionForTab, SECTION_GROUPS } from '../../app/tabRegistry';
+import { getGroupForTab, getSectionForTab, MSSQL_ONLY_TABS, MSSQL_SECTIONS, SECTION_GROUPS } from '../../app/tabRegistry';
 import { DS } from '../../config/designTokens';
 import ByProserv360 from '../ui/ByProserv360';
 import { useConnection } from '../../context/ConnectionContext';
@@ -110,14 +110,7 @@ export const Sidebar = ({
         'Developer Tools',
         'Admin',
     ];
-    // Only the screens that work through the SQL Server adapter: its own section,
-    // the engine console (the rest of Developer Tools is Postgres-only) and SDK
-    // Integration, where PulseDB Agent keys are created.
-    const MSSQL_SECTIONS = ['Connections', 'SQL Server', 'Developer Tools', 'Observability', 'Admin'];
-    const MSSQL_ONLY_TABS: Record<string, string[]> = {
-        'Developer Tools': ['engine-console'],
-        Observability: ['sdk-dashboard'],
-    };
+    // SQL Server: only the screens that work through its adapter (MSSQL_SECTIONS).
     const isMssql = connDbType === 'mssql' || connDbType === 'sqlserver';
     const MONGO_SECTIONS = [
         'Connections',

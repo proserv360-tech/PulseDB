@@ -30,6 +30,7 @@ import {
     DatabaseSwitcherLazy,
     getSectionAccent,
     getSectionForTab,
+    isMssqlTab,
     PHASE5_DEMO_TABS,
     SECTION_GROUPS,
     TABS_ONLY,
@@ -215,11 +216,20 @@ const DashboardInner = ({ onLogout }) => {
             prevConnectionId.current !== '__initial__' && prevConnectionId.current !== activeConnection.id;
         prevConnectionId.current = activeConnection.id;
 
-        if (!connectionChanged) return; // On page load, stay on the saved tab
+        // A SQL Server connection only has the screens its sidebar shows. A saved
+        // or current tab from elsewhere (e.g. the Postgres "Overview") would render
+        // an all-zero Postgres dashboard, so leave it even on page load.
+        const isMssqlConnection = dbType === 'mssql' || dbType === 'sqlserver';
+        const mssqlTabOk = (tabId) =>
+            tabId?.startsWith('demo-') || isMssqlTab(tabId) || getSectionForTab(tabId) === 'User Management';
+
+        // On page load, stay on the saved tab
+        if (!connectionChanged && !(isMssqlConnection && !mssqlTabOk(activeTab))) return;
 
         // Only navigate if we're not already on a relevant tab for this connection
         // This avoids jarring navigation if user is already viewing a universal tab (like Alerts)
         const isRelevantTab = (tabId) => {
+            if (isMssqlConnection) return mssqlTabOk(tabId);
             // Always allow demo tabs and connections
             if (tabId?.startsWith('demo-')) return true;
             if (tabId === 'connections') return true;

@@ -323,6 +323,21 @@ export const getSectionForTab = (tabId) => {
     return null;
 };
 
+// The screens offered for a SQL Server connection: its own section, the engine
+// console (the rest of Developer Tools is Postgres-only) and SDK Integration,
+// where PulseDB Agent keys are created. The sidebar shows exactly these, and the
+// dashboard never lands a SQL Server connection anywhere else.
+export const MSSQL_SECTIONS = ['Connections', 'SQL Server', 'Developer Tools', 'Observability', 'Admin'];
+export const MSSQL_ONLY_TABS: Record<string, string[]> = {
+    'Developer Tools': ['engine-console'],
+    Observability: ['sdk-dashboard'],
+};
+export const isMssqlTab = (tabId) => {
+    const section = getSectionForTab(tabId);
+    if (!section || !MSSQL_SECTIONS.includes(section)) return false;
+    return !MSSQL_ONLY_TABS[section] || MSSQL_ONLY_TABS[section].includes(tabId);
+};
+
 export const getGroupForTab = () => null;
 
 export const getSectionAccent = (tabId) => {
